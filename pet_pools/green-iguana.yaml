@@ -1,0 +1,123 @@
+id: green-iguana
+name: Green Iguana
+species: reptile
+breed_or_category: Green Iguana
+description: ยักษ์ใหญ่ใจดีแห่งโลกสัตว์เลื้อยคลาน — Green Iguana เป็นสัตว์สุขุม สงบ ต้องการการดูแลจริงจังและพื้นที่กว้าง
+
+mbti_label: ISTJ — The Stoic Guardian
+mbti_traits:
+  - สุขุมและสงบ
+  - เป็นระเบียบ (ต้องการ routine)
+  - ไม่เรียกร้องความสนใจ
+  - อายุยืน
+mbti_description: Iguana เป็นสัตว์ที่อยู่ในโลกของตัวเอง — มันต้องการสภาพแวดล้อมที่ถูกต้อง: อุณหภูมิ แสง UVB ความชื้น เมื่อทุกอย่างพอดี มันจะสงบและสวยงาม แต่มันไม่ใช่สัตว์กอด
+
+appearance:
+  size: extra_large
+  weight_range_kg: [4, 9]
+  lifespan_years: [15, 20]
+  coat_type: scales
+
+budget:
+  initial_cost_thb: [15000, 40000]
+  monthly_cost_thb: [2000, 4000]
+  annual_medical_thb: [5000, 15000]
+  budget_tier: high
+
+time:
+  daily_active_minutes: [0, 10]
+  daily_attention_hours: 1
+  alone_tolerance_hours: 24
+  time_tier: low
+
+space:
+  minimum_sq_meters: 10
+  space_tier: house
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: true
+
+allergies:
+  allergen_level: none
+  hypoallergenic: true
+  notes: ไม่มีขน — ไม่ก่อภูมิแพ้
+
+noise:
+  noise_level: silent
+  barking_or_meowing: false
+  nocturnal_noise_risk: false
+  suitable_for_apartment: false
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: true
+  notes: CITES Appendix II — ต้องมีเอกสารรับรองแหล่งที่มาถูกกฎหมาย
+
+existing_pets:
+  dog_friendly: false
+  cat_friendly: false
+  small_pet_safe: false
+  notes: อยู่ตัวเดียวดีที่สุด
+
+travel:
+  travel_friendly: false
+  boarding_difficulty: hard
+  transport_notes: ต้องการตู้ขนส่งที่มีระบบความร้อน
+
+experience:
+  experience_level: experienced
+  notes: ต้องการความรู้เรื่องอุณหภูมิ UVB ความชื้นอย่างแม่นยำ — ไม่ใช่สัตว์เลี้ยงสำหรับมือใหม่
+
+care:
+  grooming_frequency: อาบน้ำอุ่นสัปดาห์ละครั้ง
+  grooming_complexity: medium
+  feeding_frequency_per_day: 1
+  special_diet_needs: true
+  exercise_type: ปีนป่าย ว่ายน้ำ อาบแดด
+  common_health_issues:
+    - Metabolic Bone Disease (ขาด UVB/แคลเซียม)
+    - ไตวาย
+    - การติดเชื้อในปาก
+  vet_visit_frequency: annual
+
+concerns:
+  - id: adult_size
+    title: โตใหญ่มาก
+    severity: major
+    description: Iguana ทารกตัวเล็กน่ารัก แต่โตเต็มวัยยาวถึง 1.5-2 เมตร — ต้องการกรงขนาดใหญ่เท่าตู้เสื้อผ้าหรือห้องทั้งห้อง
+  - id: setup_cost
+    title: ค่าติดตั้งตู้สูงมาก
+    severity: major
+    description: ต้องการตู้ขนาดใหญ่ ระบบ UVB คุณภาพดี ระบบความร้อน ระบบความชื้น — ค่าติดตั้งเริ่มต้นอาจสูงถึง 30,000-50,000 THB
+  - id: aggression
+    title: ก้าวร้าวช่วงผสมพันธุ์
+    severity: moderate
+    description: ตัวผู้อาจก้าวร้าวมากช่วงฤดูผสมพันธุ์ — ฟาดหาง กัด ข่วน
+
+matching:
+  trait_scores:
+    budget_match: 2
+    time_match: 9
+    space_match: 1
+    allergy_match: 10
+    noise_match: 10
+    travel_match: 2
+    existing_pets_match: 1
+    beginner_match: 1
+    child_friendly: 3
+
+agent_guidance:
+  who_is_this_pet_for: คนชอบสัตว์เลื้อยคลานจริงจัง, คนมีพื้นที่มาก, คนที่สนุกกับการสร้างสภาพแวดล้อมที่สมบูรณ์แบบ — ไม่เหมาะกับคนที่อยากได้สัตว์กอด
+  hidden_costs: ตู้ขนาดใหญ่, หลอด UVB (ต้องเปลี่ยนทุก 6 เดือน), ค่าไฟ (ความร้อน 12 ชม./วัน), exotic vet, อาหารผักสดคุณภาพดี
+  common_mistakes: เลี้ยงในตู้เล็ก, ไม่มี UVB (ตายจาก MBD), ให้อาหารผิด (โปรตีนสัตว์ทำให้ไตวาย), ไม่ทำ CITES เอกสาร
+  adoption_advice: มี Iguana จรจัดจำนวนมากที่ต้องการบ้าน — พิจารณารับเลี้ยงก่อนซื้อ
+  decision_factors: พร้อมเลี้ยงสัตว์ที่ตัวใหญ่ 1.5-2 เมตรไหม? มีพื้นที่และงบสำหรับตู้ใหญ่ไหม? พร้อมเรียนรู้เรื่อง UVB และอุณหภูมิให้แม่นยำไหม?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - Reptile Veterinarians Association
+    - CITES

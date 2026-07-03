@@ -1,0 +1,127 @@
+id: pug
+name: Pug
+species: dog
+breed_or_category: Pug
+description: ปั๊กเป็นสุนัขตัวเล็ก ขี้เล่น ติดเจ้าของขั้นสุด — หน้าตาบึ้งแต่ใจนุ่มที่สุดในโลก ต้องการความรักและการอยู่ใกล้ชิดตลอดเวลา
+
+mbti_label: ISFP — The Gentle Shadow
+mbti_traits:
+  - ติดเจ้าของมาก
+  - ขี้เล่นน่ารัก
+  - นอนเก่ง
+  - ซื่อสัตย์และอบอุ่น
+mbti_description: ปั๊กไม่ใช่สุนัขที่วิ่งเร็วหรือกระโดดสูง แต่พวกมันเป็นเจ้าแห่งการคลอเคลีย — จะตามคุณไปทุกห้อง นอนตักทั้งวัน และทำหน้าแบ๊วตลอดเวลาแม้จะเพิ่งแทะรองเท้าคุณไปหมาด ๆ
+
+appearance:
+  size: small
+  weight_range_kg: [6, 8]
+  lifespan_years: [12, 15]
+  coat_type: short, smooth
+
+budget:
+  initial_cost_thb: [15000, 40000]
+  monthly_cost_thb: [1500, 3000]
+  annual_medical_thb: [8000, 20000]
+  budget_tier: medium
+
+time:
+  daily_active_minutes: [10, 20]
+  daily_attention_hours: 4
+  alone_tolerance_hours: 3
+  time_tier: low
+
+space:
+  minimum_sq_meters: 20
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: false
+
+allergies:
+  allergen_level: medium
+  hypoallergenic: false
+  notes: ขนสั้นแต่ผลัดขนต่อเนื่อง
+
+noise:
+  noise_level: quiet
+  barking_or_meowing: false
+  nocturnal_noise_risk: false
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: true
+  notes: เข้ากับสัตว์อื่นได้ดีมาก
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: easy
+  transport_notes: ขนาดเล็กเดินทางง่าย แต่ห้ามบิน cargo — หน้าแบนเสี่ยงหายใจลำบาก
+
+experience:
+  experience_level: beginner
+  notes: เลี้ยงง่ายมากสำหรับมือใหม่ ด้วยนิสัยน่ารักและความต้องการออกกำลังกายน้อย
+
+care:
+  grooming_frequency: สัปดาห์ละครั้ง
+  grooming_complexity: medium
+  feeding_frequency_per_day: 2
+  special_diet_needs: true
+  exercise_type: เดินสั้น ๆ เล่นในบ้าน
+  common_health_issues:
+    - ระบบหายใจ (Brachycephalic syndrome)
+    - ปัญหาตา (ตาแห้ง ตาถลน)
+    - ปัญหาผิวหนังตามรอยพับ
+    - อ้วนง่าย
+  vet_visit_frequency: ทุก 6 เดือน
+
+concerns:
+  - id: breathing
+    title: ปัญหาระบบหายใจ
+    severity: major
+    description: หน้าแบนทำให้หายใจลำบาก — ห้ามออกกำลังกายหนักและต้องมีแอร์ตลอดเวลาอากาศร้อน กรนเสียงดังในขณะปกติ
+  - id: heat
+    title: ไม่ทนร้อนเลย
+    severity: major
+    description: ในอากาศร้อนของไทย ปั๊กเสี่ยงเป็นฮีทสโตรกง่ายมาก ต้องอยู่ในห้องแอร์เท่านั้นช่วงกลางวัน
+  - id: eyes
+    title: ปัญหาตา
+    severity: moderate
+    description: ตาโปนทำให้เสี่ยงต่อการบาดเจ็บ ตาแห้ง และตาถลน — ต้องระวังการเล่นแรง
+  - id: separation
+    title: ติดเจ้าของมาก
+    severity: moderate
+    description: ไม่ชอบอยู่คนเดียว — ถ้าต้องทิ้งไว้นานอาจเครียดและเห่าประท้วง
+
+matching:
+  trait_scores:
+    budget_match: 3
+    time_match: 9
+    space_match: 10
+    allergy_match: 5
+    noise_match: 10
+    travel_match: 8
+    existing_pets_match: 9
+    beginner_match: 10
+    child_friendly: 8
+
+agent_guidance:
+  who_is_this_pet_for: เหมาะกับคนอยู่คอนโด มือใหม่เลี้ยงหมา คนสูงอายุ คนที่ทำงานจากบ้าน — ใครก็ตามที่อยากได้เพื่อนนอนตักและไม่ต้องพาออกไปวิ่งไกล
+  hidden_costs: ค่าแอร์ (เปิดตลอด), ค่ารักษาตาและระบบหายใจระยะยาว, ผ้าเช็ดรอยพับผิวหนัง, ชามอาหารพิเศษสำหรับหมาหน้าแบน
+  common_mistakes: พาออกไปเดินตอนแดดแรง, ปล่อยให้อ้วน (กินเก่งมากและขย้อน), ไม่ทำความสะอาดรอยพับทำให้ผิวหนังอักเสบ
+  adoption_advice: ตรวจสุขภาพพ่อแม่พันธุ์เรื่องระบบหายใจและตา ปั๊กหลายตัวมาจากฟาร์มที่เน้นหน้าสั้นเกินจนสุขภาพเสีย — เลือกฟาร์มที่ให้ความสำคัญกับสุขภาพ
+  decision_factors: มีแอร์ตลอดเวลาหน้าร้อนไหม? รับมือค่ารักษาพยาบาลที่อาจสูงได้ไหม? ทำงานจากบ้านหรือมีคนอยู่บ้านด้วยไหม?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - American Kennel Club
+    - Pug Dog Club of America

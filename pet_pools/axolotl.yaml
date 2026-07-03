@@ -1,0 +1,123 @@
+id: axolotl
+name: Axolotl
+species: fish
+breed_or_category: Axolotl (Mexican Walking Fish)
+description: สิ่งมีชีวิตใต้ท้องน้ำหน้าตาน่ารักที่สุดในโลก — Axolotl เป็นซาลาแมนเดอร์ที่ไม่โตเต็มวัย หน้าตายิ้มตลอดเวลา ดูแลง่ายแบบเงียบ ๆ
+
+mbti_label: INFP — The Eternal Smile
+mbti_traits:
+  - ดูนิ่ง ๆ แต่มีเสน่ห์
+  - ยิ้มตลอดเวลา
+  - ไม่ซับซ้อน
+  - ว่ายน้ำช้า ๆ สบาย ๆ
+mbti_description: Axolotl คือเพื่อนที่มองแล้วใจฟู — มันว่ายน้ำช้า ๆ ยิ้มตลอด (เพราะรูปปาก) และไม่เรียกร้องอะไรนอกจากน้ำเย็นสะอาดกับอาหารอร่อย มันเป็นสัตว์เลี้ยงสำหรับคนที่ชอบความสงบ
+
+appearance:
+  size: small
+  weight_range_kg: [0.05, 0.2]
+  lifespan_years: [10, 15]
+  coat_type: smooth, soft skin
+
+budget:
+  initial_cost_thb: [5000, 15000]
+  monthly_cost_thb: [500, 1000]
+  annual_medical_thb: [1000, 3000]
+  budget_tier: low
+
+time:
+  daily_active_minutes: [0, 5]
+  daily_attention_hours: 0.5
+  alone_tolerance_hours: 168
+  time_tier: low
+
+space:
+  minimum_sq_meters: 1
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: true
+
+allergies:
+  allergen_level: none
+  hypoallergenic: true
+  notes: อยู่ในน้ำ — ไม่ก่อภูมิแพ้อย่างแน่นอน
+
+noise:
+  noise_level: silent
+  barking_or_meowing: false
+  nocturnal_noise_risk: false
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: true
+  notes: CITES Appendix II — ใกล้สูญพันธุ์ในธรรมชาติ
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: true
+  notes: อยู่ในตู้ — ไม่มีปฏิสัมพันธ์กับสัตว์อื่น
+
+travel:
+  travel_friendly: false
+  boarding_difficulty: hard
+  transport_notes: การเคลื่อนย้ายต้องระวังอุณหภูมิน้ำ
+
+experience:
+  experience_level: intermediate
+  notes: ต้องการความรู้เรื่องระบบน้ำและอุณหภูมิ — ต้องรักษาอุณหภูมิน้ำต่ำกว่า 20°C
+
+care:
+  grooming_frequency: ไม่ต้อง
+  grooming_complexity: low
+  feeding_frequency_per_day: 1
+  special_diet_needs: true
+  exercise_type: ว่ายน้ำในตู้
+  common_health_issues:
+    - ติดเชื้อรา
+    - ปัญหาเหงือก
+    - เครียดจากอุณหภูมิสูง
+  vet_visit_frequency: เฉพาะเมื่อป่วย
+
+concerns:
+  - id: water_temperature
+    title: ต้องการน้ำเย็น
+    severity: major
+    description: Axolotl ต้องการน้ำอุณหภูมิ 16-20°C — ในไทยอาจต้องใช้ Chiller (เครื่องทำน้ำเย็น) ซึ่งมีราคาสูง
+  - id: water_quality
+    title: ไวต่อคุณภาพน้ำ
+    severity: moderate
+    description: Ammonia และ Nitrite ในน้ำทำให้ป่วยและตาย — ต้อง cycling ตู้และเปลี่ยนน้ำสม่ำเสมอ
+  - id: solitary
+    title: อยู่ตัวเดียวหรือคู่ที่ขนาดพอดี
+    severity: minor
+    description: Axolotl ตัวใหญ่จะกินตัวเล็ก — ต้องแยกหรือเลี้ยงขนาดเท่ากัน
+
+matching:
+  trait_scores:
+    budget_match: 8
+    time_match: 10
+    space_match: 10
+    allergy_match: 10
+    noise_match: 10
+    travel_match: 3
+    existing_pets_match: 10
+    beginner_match: 3
+    child_friendly: 8
+
+agent_guidance:
+  who_is_this_pet_for: คนอยู่คอนโด, คนชอบสัตว์น้ำ, คนชอบสัตว์แปลกที่มีเอกลักษณ์, คนที่พร้อมลงทุนกับระบบกรองน้ำและเครื่องทำน้ำเย็น
+  hidden_costs: Chiller (เครื่องทำน้ำเย็น 5,000-15,000 THB), ระบบกรองน้ำคุณภาพดี, ค่าไฟ (Chiller + กรอง), อาหารสด (หนอนแดง ไส้เดือน)
+  common_mistakes: เลี้ยงในน้ำอุณหภูมิห้องไทย (28-32°C — Axolotl ตาย), ใช้กรวดเล็ก (กลืนแล้วอุดตัน), เลี้ยงรวมปลา (ปลากัดเหงือก)
+  adoption_advice: ต้องมีเอกสาร CITES — ซื้อจากร้านที่มีใบอนุญาตเท่านั้น
+  decision_factors: มีงบซื้อ Chiller ไหม? พร้อมดูแลระบบน้ำให้เสถียรไหม? รับได้ไหมที่เลี้ยงในตู้ ดูได้อย่างเดียว?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - CITES
+    - Axolotl Care Guide

@@ -1,0 +1,122 @@
+id: sphynx
+name: Sphynx Cat
+species: cat
+breed_or_category: Sphynx
+description: แมวไร้ขนที่ติดเจ้าของที่สุดในโลก — Sphynx ฉลาด แอคทีฟ และเรียกร้องความสนใจตลอด 24 ชั่วโมง ถ้าคุณอยู่บ้าน มันจะอยู่บนตัวคุณ
+
+mbti_label: ESFP — The Performer
+mbti_traits:
+  - ติดคนถึงขั้นคลั่ง
+  - ฉลาดและอยากรู้อยากเห็น
+  - พลังงานสูง
+  - ชอบเป็นจุดสนใจ
+mbti_description: Sphynx ไม่ใช่แมวที่อยู่นิ่ง ๆ — มันจะเป็นตัวตลกประจำบ้าน ปีนป่ายทุกที่ เรียกร้องความสนใจจากทุกคน และงอนเก่งถ้าไม่สนใจ พวกมันเป็นเพื่อนที่ต้องอยู่ด้วยตลอดเวลา
+
+appearance:
+  size: medium
+  weight_range_kg: [2.5, 5.5]
+  lifespan_years: [8, 14]
+  coat_type: hairless (fine down)
+
+budget:
+  initial_cost_thb: [30000, 80000]
+  monthly_cost_thb: [2000, 4000]
+  annual_medical_thb: [5000, 15000]
+  budget_tier: high
+
+time:
+  daily_active_minutes: [20, 40]
+  daily_attention_hours: 4
+  alone_tolerance_hours: 4
+  time_tier: medium
+
+space:
+  minimum_sq_meters: 25
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: false
+
+allergies:
+  allergen_level: high
+  hypoallergenic: false
+  notes: ถึงจะไม่มีขน แต่ผลิตน้ำมันผิวหนังมาก — เป็นตัวพาสารก่อภูมิแพ้ได้ดี
+
+noise:
+  noise_level: vocal
+  barking_or_meowing: true
+  nocturnal_noise_risk: false
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: true
+  notes: เข้ากับสัตว์อื่นได้ดี แต่ต้องการความสนใจจากคนมากกว่า
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: moderate
+  transport_notes: ต้องการเสื้อผ้ากันหนาว — ไม่มีขนป้องกันความเย็น
+
+experience:
+  experience_level: intermediate
+  notes: ต้องการการดูแลพิเศษด้านผิวหนังและอุณหภูมิ — ไม่ใช่แมวที่ปล่อยทิ้งไว้ได้
+
+care:
+  grooming_frequency: อาบน้ำสัปดาห์ละครั้ง
+  grooming_complexity: high
+  feeding_frequency_per_day: 3
+  special_diet_needs: true
+  exercise_type: ปีนป่าย เล่น interactive ของเล่นฝึกสมอง
+  common_health_issues:
+    - โรคหัวใจ (HCM)
+    - ปัญหาผิวหนัง
+    - โรคเหงือกและฟัน
+  vet_visit_frequency: annual
+
+concerns:
+  - id: skin_care
+    title: ต้องอาบน้ำประจำ
+    severity: major
+    description: ไม่มีขนดูดซับน้ำมัน — ผิวมันสะสมสิ่งสกปรก ต้องอาบน้ำสัปดาห์ละครั้ง ไม่งั้นจะเป็นสิวและผิวหนังอักเสบ
+  - id: temperature
+    title: ไวต่ออุณหภูมิมาก
+    severity: moderate
+    description: หนาวง่ายและร้อนง่าย — ต้องควบคุมอุณหภูมิห้องตลอดเวลา หน้าร้อนต้องทาครีมกันแดดสำหรับแมว
+  - id: neediness
+    title: ติดคนมาก
+    severity: moderate
+    description: ไม่เหมาะกับคนที่ไม่อยู่บ้านบ่อย — Sphynx ต้องการเพื่อนตลอดเวลา
+
+matching:
+  trait_scores:
+    budget_match: 3
+    time_match: 5
+    space_match: 9
+    allergy_match: 3
+    noise_match: 5
+    travel_match: 7
+    existing_pets_match: 9
+    beginner_match: 3
+    child_friendly: 8
+
+agent_guidance:
+  who_is_this_pet_for: คนที่ทำงานจากบ้านหรืออยู่บ้านบ่อย, คนชอบแมวขี้อ้อนแบบสุด ๆ, คนที่พร้อมดูแลผิวหนังทุกสัปดาห์, คนที่อยากได้แมวที่ไม่เหมือนใคร
+  hidden_costs: ค่าอาบน้ำและผลิตภัณฑ์ดูแลผิว, เสื้อผ้าแมว (กันหนาว กันแดด), ค่าแอร์/ฮีตเตอร์, อาหารพลังงานสูง (เผาผลาญเร็ว)
+  common_mistakes: ไม่อาบน้ำจนผิวหนังอักเสบ, ปล่อยให้ออกแดดจนผิวไหม้, ปล่อยอยู่คนเดียวทั้งวันจนเครียด
+  adoption_advice: ตรวจ HCM ในพ่อแม่พันธุ์ก่อนซื้อ Sphynx จากฟาร์มดีมีราคาสูงแต่สุขภาพดีกว่า
+  decision_factors: อยู่บ้านเกือบตลอดเวลาไหม? พร้อมอาบน้ำให้แมวทุกสัปดาห์ไหม? มีงบสำหรับค่าดูแลพิเศษไหม?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - Cat Fanciers Association
+    - Sphynx Breed Council

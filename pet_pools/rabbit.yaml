@@ -1,0 +1,121 @@
+id: rabbit
+name: Rabbit
+species: rabbit
+breed_or_category: Domestic Rabbit
+description: สัตว์อ่อนโยน ฉลาด และผูกพันกับเจ้าของได้ลึกซึ้ง — Rabbit เหมาะกับคนที่ชอบความสงบและพร้อมให้พื้นที่วิ่งเล่น
+
+mbti_label: INFP — The Gentle Soul
+mbti_traits:
+  - อ่อนโยนและน่ารัก
+  - ฉลาด จดจำเจ้าของได้
+  - ขี้เล่นในแบบของตัวเอง
+  - รักความสงบ
+mbti_description: Rabbit เป็นสัตว์ที่มีอารมณ์ลึกซึ้ง — พวกมันผูกพันกับเจ้าของ แสดงความรักด้วยการเอาหัวดันมือ และจะกระโดดดีใจเมื่อเห็นคุณ แต่มันก็ต้องการความเคารพและพื้นที่ส่วนตัว
+
+appearance:
+  size: small
+  weight_range_kg: [1, 6]
+  lifespan_years: [8, 12]
+  coat_type: varies by breed
+
+budget:
+  initial_cost_thb: [2000, 8000]
+  monthly_cost_thb: [800, 2000]
+  annual_medical_thb: [2000, 5000]
+  budget_tier: low
+
+time:
+  daily_active_minutes: [10, 30]
+  daily_attention_hours: 1
+  alone_tolerance_hours: 10
+  time_tier: low
+
+space:
+  minimum_sq_meters: 4
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: true
+
+allergies:
+  allergen_level: medium
+  hypoallergenic: false
+  notes: หญ้า Timothy Hay อาจก่อภูมิแพ้ในคนที่แพ้หญ้า
+
+noise:
+  noise_level: quiet
+  barking_or_meowing: false
+  nocturnal_noise_risk: false
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+
+existing_pets:
+  dog_friendly: false
+  cat_friendly: false
+  small_pet_safe: true
+  notes: ระวังสุนัขและแมว — Rabbit เป็นเหยื่อ
+
+travel:
+  travel_friendly: false
+  boarding_difficulty: hard
+  transport_notes: เครียดง่ายในการเดินทาง
+
+experience:
+  experience_level: intermediate
+  notes: ต้องการการดูแลอาหารเฉพาะ — หญ้าเป็นอาหารหลัก 80%
+
+care:
+  grooming_frequency: 2-3 ครั้ง/สัปดาห์ (ขนยาวทุกวัน)
+  grooming_complexity: medium
+  feeding_frequency_per_day: 2
+  special_diet_needs: true
+  exercise_type: วิ่งเล่นอิสระ ขุด กระโดด
+  common_health_issues:
+    - ปัญหาฟัน (ถ้าไม่กินหญ้าเพียงพอ)
+    - GI Stasis (ลำไส้หยุดทำงาน — อันตรายถึงชีวิต)
+    - การติดเชื้อในหู
+  vet_visit_frequency: annual
+
+concerns:
+  - id: diet
+    title: อาหารต้องเป็นหญ้า 80%
+    severity: major
+    description: ถ้ากินอาหารเม็ดเป็นหลักจะป่วย — ฟันยาว ลำไส้หยุดทำงาน ต้องมีหญ้า Timothy Hay ตลอดเวลา
+  - id: chewing
+    title: แทะทุกอย่าง
+    severity: moderate
+    description: Rabbit ต้องแทะฟันตลอด — จะแทะสายไฟ เฟอร์นิเจอร์ พรม — ต้องกันพื้นที่และให้ของแทะที่ปลอดภัย
+  - id: vet
+    title: ต้องการสัตว์แพทย์ exotic
+    severity: moderate
+    description: สัตว์แพทย์ทั่วไปมักไม่เชี่ยวชาญ Rabbit — ต้องหา exotic vet ที่เข้าใจ GI Stasis และฟัน Rabbit
+
+matching:
+  trait_scores:
+    budget_match: 8
+    time_match: 8
+    space_match: 9
+    allergy_match: 5
+    noise_match: 10
+    travel_match: 3
+    existing_pets_match: 2
+    beginner_match: 4
+    child_friendly: 5
+
+agent_guidance:
+  who_is_this_pet_for: คนอยู่คอนโด, คนชอบสัตว์อ่อนโยน, คนที่มีเวลาปล่อยออกจากกรงวิ่งเล่นทุกวัน, คนที่รับความเงียบได้ (Rabbit ไม่ส่งเสียงแต่น่ารักในแบบเงียบ ๆ)
+  hidden_costs: ค่าหญ้า Timothy Hay (ต่อเนื่องตลอดชีวิต), ค่าทำหมัน, exotic vet, อุปกรณ์กันสายไฟ, ของเล่นแทะ
+  common_mistakes: เลี้ยงในกรงเล็กตลอดเวลา, ให้อาหารเม็ดเป็นหลัก, เลี้ยงปล่อยนอกบ้าน (เสี่ยงโรคและอากาศร้อน), คิดว่าเลี้ยงง่ายเหมือนแฮมสเตอร์
+  adoption_advice: มี Rabbit จรจัดเยอะมากที่ศูนย์ช่วยเหลือ — ลองรับเลี้ยงก่อนซื้อ
+  decision_factors: พร้อมให้หญ้าตลอดเวลาไหม? กันพื้นที่ให้ Rabbit ปลอดภัยจากการแทะสายไฟได้ไหม? มี exotic vet ใกล้บ้านไหม?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - House Rabbit Society

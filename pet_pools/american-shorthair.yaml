@@ -1,0 +1,113 @@
+id: american-shorthair
+name: American Shorthair
+species: cat
+breed_or_category: American Shorthair
+description: แมวอารมณ์ดี เลี้ยงง่ายที่สุดในบรรดาแมวพันธุ์แท้ — American Shorthair ขี้เล่นแต่ไม่วุ่นวาย ติดเจ้าของแต่ไม่เรียกร้องมากเกิน
+
+mbti_label: ISTJ — The Steady Companion
+mbti_traits:
+  - อารมณ์ดี สม่ำเสมอ
+  - ขี้เล่นกำลังดี
+  - ปรับตัวเก่ง
+  - ไม่ติดคนมากเกินไป
+mbti_description: American Shorthair คือแมวที่เข้าใจง่ายที่สุด — พวกมันอารมณ์คงที่ ไม่เหวี่ยง ไม่ทำลายข้าวของ ขอแค่มีอาหารดี ๆ และที่นอนอุ่น ๆ ก็พอใจแล้ว พวกมันเป็นเพื่อนที่อยู่ด้วยแล้วสบายใจ
+
+appearance:
+  size: medium
+  weight_range_kg: [3.5, 7]
+  lifespan_years: [15, 20]
+  coat_type: short, dense
+
+budget:
+  initial_cost_thb: [8000, 25000]
+  monthly_cost_thb: [1000, 2500]
+  annual_medical_thb: [3000, 8000]
+  budget_tier: low
+
+time:
+  daily_active_minutes: [10, 20]
+  daily_attention_hours: 1
+  alone_tolerance_hours: 10
+  time_tier: low
+
+space:
+  minimum_sq_meters: 20
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: false
+
+allergies:
+  allergen_level: medium
+  hypoallergenic: false
+  notes: ขนสั้นแต่ผลัดขนปกติ
+
+noise:
+  noise_level: quiet
+  barking_or_meowing: false
+  nocturnal_noise_risk: false
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: true
+  notes: เข้ากับสัตว์อื่นได้ดี เป็นหนึ่งในแมวที่ปรับตัวเก่งที่สุด
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: easy
+  transport_notes: ขนาดกลาง เดินทางสะดวก
+
+experience:
+  experience_level: beginner
+  notes: แมวที่เหมาะกับมือใหม่ที่สุด — เลี้ยงง่าย สุขภาพดี ปรับตัวเก่ง
+
+care:
+  grooming_frequency: สัปดาห์ละครั้ง
+  grooming_complexity: low
+  feeding_frequency_per_day: 2
+  special_diet_needs: false
+  exercise_type: เล่นในบ้าน ไม้ตกแมว ของเล่นไล่ล่า
+  common_health_issues:
+    - โรคหัวใจ (HCM)
+    - ปัญหาฟัน
+  vet_visit_frequency: annual
+
+concerns:
+  - id: weight
+    title: น้ำหนักขึ้นง่ายถ้าไม่คุมอาหาร
+    severity: minor
+    description: American Shorthair บางตัวกินเก่งและขี้เกียจ — ต้องควบคุมอาหารและกระตุ้นให้เล่น
+
+matching:
+  trait_scores:
+    budget_match: 9
+    time_match: 10
+    space_match: 10
+    allergy_match: 5
+    noise_match: 10
+    travel_match: 9
+    existing_pets_match: 10
+    beginner_match: 10
+    child_friendly: 9
+
+agent_guidance:
+  who_is_this_pet_for: แมวที่เหมาะกับทุกคน — มือใหม่, คนทำงาน, ครอบครัวมีเด็ก, บ้านมีสัตว์อื่น, คนอยู่คอนโด — American Shorthair ปรับตัวได้กับทุกสถานการณ์
+  hidden_costs: ค่าอาหารคุณภาพดี (เนื่องจากกินง่าย เลือกของดีได้ไม่ต้องเปลี่ยนบ่อย), ค่าทำฟันประจำปี
+  common_mistakes: ให้อาหารมากเกินจนอ้วน, ไม่แปรงขนเพราะคิดว่าขนสั้นไม่ต้องดูแล
+  adoption_advice: American Shorthair มีทั้งสายพันธุ์แท้และแมวบ้านหน้าตาคล้ายกันมาก — แมวบ้านสุขภาพดีกว่าพันธุ์แท้หลายตัว
+  decision_factors: อยากได้แมวที่เลี้ยงง่าย, ไม่มีปัญหาพฤติกรรม, เข้ากับทุกคนในบ้าน — American Shorthair คือคำตอบ
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - Cat Fanciers Association
+    - American Shorthair Breed Council

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukluk v1 — Your Design Task</title>
+<style>
+  body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; padding: 40px; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #64748b; font-size: 14px; margin-bottom: 40px; }
+  .section { margin-bottom: 40px; border: 1px solid #334155; border-radius: 12px; overflow: hidden; }
+  .section-header { padding: 20px 24px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+  .section-header.done { background: #064e3b; }
+  .section-header.todo { background: #451a03; }
+  .section-body { padding: 24px; }
+  h2 { font-size: 20px; margin: 0; color: #f1f5f9; }
+  .badge { padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-done { background: #065f46; color: #6ee7b7; }
+  .badge-todo { background: #9a3412; color: #fdba74; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #1e293b; }
+  th { color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { font-size: 13px; color: #cbd5e1; vertical-align: top; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } body { padding: 20px; } }
+  .note { background: #1e293b; border-left: 3px solid #60a5fa; padding: 12px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 13px; color: #94a3b8; }
+  .note-green { border-left-color: #34d399; }
+  .note-amber { border-left-color: #f59e0b; }
+  .summary-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
+  .summary-card { flex: 1; min-width: 140px; border-radius: 10px; padding: 16px; text-align: center; }
+  .summary-card.done-card { background: #064e3b; border: 1px solid #065f46; }
+  .summary-card.todo-card { background: #451a03; border: 1px solid #9a3412; }
+  .summary-card .num { font-size: 32px; font-weight: 700; }
+  .done-card .num { color: #34d399; }
+  .todo-card .num { color: #fdba74; }
+  .summary-card .label { font-size: 12px; color: #64748b; margin-top: 4px; }
+  li { margin-bottom: 6px; line-height: 1.6; }
+  .prop-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; white-space: pre; overflow-x: auto; }
+  hr { border: none; border-top: 1px solid #1e293b; margin: 24px 0; }
+  code { color: #60a5fa; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<h1>&#x1f43e; Lukluk v1 — Your Design Task</h1>
+<p class="subtitle">Exactly which parts of the design are already done (AI Elements) vs. what you still need to design</p>
+
+<div class="summary-row">
+  <div class="summary-card done-card">
+    <div class="num">&#x2705; 5</div>
+    <div class="label">Done (AI Elements)</div>
+  </div>
+  <div class="summary-card todo-card">
+    <div class="num">&#x1f3a8; 6</div>
+    <div class="label">Custom components to design</div>
+  </div>
+  <div class="summary-card todo-card">
+    <div class="num">&#x1f3a8; 7</div>
+    <div class="label">Page layouts to design</div>
+  </div>
+  <div class="summary-card todo-card">
+    <div class="num">&#x1f3a8; 4</div>
+    <div class="label">Global states to design</div>
+  </div>
+</div>
+
+<!-- DONE SECTION -->
+<div style="margin-bottom:16px;">
+  <h2 style="font-size:22px;color:#34d399;">&#x2705; ALREADY DONE — Installed &amp; Wired Up</h2>
+  <p style="color:#64748b;font-size:13px;margin-top:4px;">
+    These 5 components come from Vercel AI SDK Elements, built on shadcn/ui. They're installed and wired into AgentChat + CareChat. No design work needed here.
+  </p>
+</div>
+
+<div class="section">
+  <div class="section-header done">
+    <div><span class="badge badge-done">DONE</span></div>
+    <h2>Conversation + Message + MessageResponse</h2>
+  </div>
+  <div class="section-body">
+    <div class="grid-2">
+      <div>
+        <p style="color:#34d399;font-size:14px;font-weight:600;">What you get for free:</p>
+        <ul style="font-size:13px;color:#cbd5e1;list-style:disc;padding-left:20px;">
+          <li>Auto-scrolling chat container (no manual scroll)</li>
+          <li>Empty state placeholder</li>
+          <li>Message bubbles: user right-aligned, agent left-aligned</li>
+          <li>Markdown rendering with syntax-highlighted code blocks</li>
+          <li>Dark mode support (theme applies automatically)</li>
+        </ul>
+        <div class="note note-green">
+          Replaced ~80 lines of manual useRef/inline-style chat code in both AgentChat.tsx and CareChat.tsx
+        </div>
+      </div>
+      <div>
+        <div class="prop-box">src/components/ai-elements/conversation.tsx
+src/components/ai-elements/message.tsx</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header done">
+    <div><span class="badge badge-done">DONE</span></div>
+    <h2>PromptInput + PromptInputTextarea + PromptInputSubmit</h2>
+  </div>
+  <div class="section-body">
+    <div class="prop-box">src/components/ai-elements/prompt-input.tsx</div>
+    <p style="font-size:13px;color:#cbd5e1;margin-top:8px;">Installed. Using shadcn Input+Button currently (compatible with non-streaming API). Swap to full PromptInput when streaming is ready.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header done">
+    <div><span class="badge badge-done">DONE</span></div>
+    <h2>Suggestion — Quick Reply Chips</h2>
+  </div>
+  <div class="section-body">
+    <div class="grid-2">
+      <div>
+        <p style="color:#34d399;font-size:14px;font-weight:600;">Already wired up:</p>
+        <ul style="font-size:13px;color:#cbd5e1;list-style:disc;padding-left:20px;">
+          <li><strong>Decision Agent:</strong> "Show me the costs", "What are the main concerns?", "Does this pet fit my lifestyle?", "How much time does this pet need?"</li>
+          <li><strong>Care Agent:</strong> "Track an expense", "Build a daily routine", "What food should I buy?"</li>
+        </ul>
+      </div>
+      <div>
+        <div class="prop-box">src/components/ai-elements/suggestion.tsx</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header done">
+    <div><span class="badge badge-done">INSTALLED, Not Yet Wired</span></div>
+    <h2>Tool + Confirmation — Agent Tool Call Display &amp; Accept/Reject</h2>
+  </div>
+  <div class="section-body">
+    <div class="grid-2">
+      <div>
+        <ul style="font-size:13px;color:#cbd5e1;list-style:disc;padding-left:20px;">
+          <li><strong>Tool:</strong> Inline tool call display (input-streaming, output-available, output-error states)</li>
+          <li><strong>Confirmation:</strong> Inline accept/reject prompts in chat for agent edits</li>
+        </ul>
+        <div class="note note-amber">
+          Deferred: These need the AI SDK streaming protocol. Our API returns { response: string } (non-streaming LangGraph). DraftPanel still handles accept/reject via polling.
+        </div>
+      </div>
+      <div>
+        <div class="prop-box">src/components/ai-elements/tool.tsx
+src/components/ai-elements/confirmation.tsx</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TODO SECTION -->
+<hr>
+<div style="margin-bottom:16px;margin-top:32px;">
+  <h2 style="font-size:22px;color:#fdba74;">&#x1f3a8; YOU NEED TO DESIGN — 6 Custom Components</h2>
+  <p style="color:#64748b;font-size:13px;">These are domain-specific. No AI library provides them. Each is an unstyled functional shell.</p>
+</div>
+
+<div class="section">
+  <div class="section-header todo"><div><span class="badge badge-todo">DESIGN ME</span></div><h2>1. ExpenseTable</h2></div>
+  <div class="section-body">
+    <div class="prop-box">File: src/components/workspace/ExpenseTable.tsx</div>
+    <ul style="font-size:13px;color:#cbd5e1;list-style:disc;padding-left:20px;margin-top:12px;">
+      <li>Grouped by category with subheader + total per category</li>
+      <li>Categories: Initial Setup, Monthly, Annual, Other (planning) / Food, Medical, Grooming, Supplies, Other (ownership)</li>
+      <li>THB formatted with toLocaleString()</li>
+      <li>Empty state: "No expense estimates yet. Chat with the agent."</li>
+    </ul>
+    <p style="color:#64748b;font-size:12px;">Used in: workspace (Estimated Expenses tab), owned (Actual Expenses tab)</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header todo"><div><span class="badge badge-todo">DESIGN ME</span></div><h2>2. ConcernChecklist</h2></div>
+  <div class="section-body">
+    <div class="prop-box">File: src/components/workspace/ConcernChecklist.tsx</div>
+    <ul style="font-size:13px;color:#cbd5e1;list-style:disc;padding-left:20px;margin-top:12px;">
+      <li>Colored status dots: orange (unresolved), green (resolved), gray (n/a)</li>
+      <li>Summary: "2 of 5 concerns unresolved"</li>
+      <li>Each row: dot · title · status label · note</li>
+      <li>Empty: "No concerns logged yet. The agent can help."</li>
+    </ul>
+    <p style="color:#64748b;font-size:12px;">Used in: workspace (Concern Checklist tab)</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header todo"><div><span class="badge badge-todo">DESIGN ME</span></div><h2>3. DecisionStatus</h2></div>
+  <div class="section-body">
+    <div class="prop-box">File: src/components/workspace/DecisionStatus.tsx</div>
+    <ul style="font-size:13px;color:#cbd5e1;list-style:disc;padding-left:20px;margin-top:12px;">
+      <li>Dropdown with 5 options: Exploring, Considering seriously, Ready to buy/adopt, Not a fit, Already have this pet</li>
+      <li>Could show colored badge per status</li>
+      <li>Changing status triggers agent chat API</li>
+    </ul>
+    <p style="color:#64748b;font-size:12px;">Used in: workspace (below pet header)</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header todo"><div><span class="badge badge-todo">DESIGN ME</span></div><h2>4. GuidanceGate</h2></div>
+  <div class="section-body">
+    <div class="prop-box">File: src/components/workspace/GuidanceGate.tsx</div>
+    <ul style="font-size:13px;color:#cbd5e1;list-style:disc;padding-left:20px;margin-top:12px;">
+      <li><strong>LOCKED:</strong> Gray panel, "Complete expense estimates and review your concern checklist", checklist: Expenses / Concerns</li>
+      <li><strong>UNLOCKED:</strong> Adoption tips: research breeders, health certs, visit in person, prep your home</li>
+    </ul>
+    <p style="color:#64748b;font-size:12px;">Used in: workspace (below tabs)</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header todo"><div><span class="badge badge-todo">DESIGN ME</span></div><h2>5. MatchCard (Export)</h2></div>
+  <div class="section-body">
+    <div class="prop-box">File: src/components/match-card/MatchCard.tsx</div>
+    <ul style="font-size:13px;color:#cbd5e1;list-style:disc;padding-left:20px;margin-top:12px;">
+      <li>1280×720px PNG via html2canvas</li>
+      <li>Left 40%: dark brand panel — "🐾 Lukluk" + "Your Pet Matches"</li>
+      <li>Right 60%: top 3 matches (#rank, pet name, Fit%, MBTI%)</li>
+      <li>Button + loading state</li>
+    </ul>
+    <p style="color:#64748b;font-size:12px;">Used in: result page</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header todo"><div><span class="badge badge-todo">DESIGN ME</span></div><h2>6. OwnershipForm</h2></div>
+  <div class="section-body">
+    <div class="prop-box">Inline in: src/app/workspace/[id]/page.tsx</div>
+    <ul style="font-size:13px;color:#cbd5e1;list-style:disc;padding-left:20px;margin-top:12px;">
+      <li>Pet name: text input (required)</li>
+      <li>Age/life stage: dropdown (puppy/kitten, young_adult, adult, senior)</li>
+      <li>Submit: "Switch to Ownership Mode" (disabled until name entered)</li>
+    </ul>
+    <p style="color:#64748b;font-size:12px;">Used in: workspace (bottom, only when not yet owned)</p>
+  </div>
+</div>
+
+<!-- PAGE LAYOUTS -->
+<hr>
+<div style="margin-bottom:16px;margin-top:32px;">
+  <h2 style="font-size:22px;color:#fdba74;">&#x1f3a8; YOU NEED TO DESIGN — 7 Page Layouts</h2>
+</div>
+
+<table>
+  <tr><th>#</th><th>Page</th><th>File</th><th>Key needs</th></tr>
+  <tr><td>1</td><td><strong>Landing</strong></td><td><code>src/app/page.tsx</code></td><td>Hero, "How it works" steps, pet illustrations, Google sign-in button, footer</td></tr>
+  <tr><td>2</td><td><strong>Fit Quiz</strong></td><td><code>src/app/quiz/page.tsx</code></td><td>Progress bar, answer cards (large + selected state), "All done!" finish screen</td></tr>
+  <tr><td>3</td><td><strong>Match Result</strong></td><td><code>src/app/result/[id]/page.tsx</code></td><td>Top 3 cards (#1 largest), fit% gauge, MBTI labels, subscription CTA</td></tr>
+  <tr><td>4</td><td><strong>Dashboard</strong></td><td><code>src/app/dashboard/page.tsx</code></td><td>Profile cards (icon, badge, status), skeleton loading</td></tr>
+  <tr><td>5</td><td><strong>Workspace</strong></td><td><code>src/app/workspace/[id]/page.tsx</code></td><td>Two-panel split, pet header, tab switcher, 4 sub-components</td></tr>
+  <tr><td>6</td><td><strong>Owned</strong></td><td><code>src/app/owned/[id]/page.tsx</code></td><td>Same two-panel, 3 tabs (expenses, activity, food), Care Chat</td></tr>
+  <tr><td>7</td><td><strong>Experiences</strong></td><td><code>src/app/experiences/page.tsx</code></td><td>Disclaimer, expand/collapse form, cards (badge, date, body)</td></tr>
+</table>
+
+<!-- GLOBAL STATES -->
+<hr>
+<div style="margin-bottom:16px;margin-top:32px;">
+  <h2 style="font-size:22px;color:#fdba74;">&#x1f3a8; YOU NEED TO DESIGN — 4 Global States</h2>
+  <p style="color:#64748b;font-size:13px;">Design once, use everywhere.</p>
+</div>
+
+<div class="grid-3">
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:20px;">
+    <h3 style="font-size:15px;">&#x1f504; Loading</h3>
+    <p style="font-size:13px;color:#94a3b8;">Skeleton cards, spinners, pulsing placeholders. Used: dashboard, workspace, experiences, result, agent chat.</p>
+  </div>
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:20px;">
+    <h3 style="font-size:15px;">&#x1f4ed; Empty</h3>
+    <p style="font-size:13px;color:#94a3b8;">"Nothing here yet" with call to action. Used: dashboard, workspace tabs, experiences, agent chat welcome.</p>
+  </div>
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:20px;">
+    <h3 style="font-size:15px;">&#x26a0; Error</h3>
+    <p style="font-size:13px;color:#94a3b8;">Red inline text or card with retry. Used: quiz, workspace, agent chat, experiences submit.</p>
+  </div>
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:10px;padding:20px;">
+    <h3 style="font-size:15px;">&#x1f512; Unauthorized</h3>
+    <p style="font-size:13px;color:#94a3b8;">Non-subscriber redirect, sign-in prompt, subscription CTA for 402 responses.</p>
+  </div>
+</div>
+
+<!-- INFRA -->
+<hr>
+<div style="margin-bottom:16px;margin-top:32px;">
+  <h2 style="font-size:22px;color:#34d399;">&#x2699; Infrastructure Ready</h2>
+</div>
+
+<table>
+  <tr><th>What</th><th>Where</th><th>Notes</th></tr>
+  <tr><td>shadcn/ui (17 primitives)</td><td><code>src/components/ui/</code></td><td>Button, Input, Textarea, Select, Badge, Dialog, DropdownMenu, ScrollArea, Spinner, Separator, Tooltip, Alert, Collapsible, HoverCard, Command, ButtonGroup, InputGroup</td></tr>
+  <tr><td>AI Elements (6 components)</td><td><code>src/components/ai-elements/</code></td><td>Conversation, Message, PromptInput, Suggestion, Tool, Confirmation, CodeBlock</td></tr>
+  <tr><td>CSS theme</td><td><code>src/app/globals.css</code></td><td>Full light/dark theme (background, foreground, primary, secondary, muted, accent, destructive, border, input, ring, radius)</td></tr>
+  <tr><td>cn() utility</td><td><code>src/lib/utils.ts</code></td><td>clsx + tailwind-merge</td></tr>
+  <tr><td>Tailwind v4 + animations</td><td><code>postcss.config.mjs</code></td><td>tw-animate-css for expand/collapse, fade, slide</td></tr>
+  <tr><td>Fonts</td><td><code>src/app/layout.tsx</code></td><td>Geist Sans + Geist Mono via next/font</td></tr>
+</table>
+
+<div style="margin-top:48px;padding-top:16px;border-top:1px solid #1e293b;font-size:12px;color:#475569;text-align:center;">
+  Lukluk v1 Design Task · Merged from design-guide.html + design-plan.html · shadcn/ui + AI Elements installed · AgentChat + CareChat refactored · 2026-07-03
+</div>
+
+</body>
+</html>

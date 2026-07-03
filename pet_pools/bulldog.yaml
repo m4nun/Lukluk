@@ -1,0 +1,124 @@
+id: bulldog
+name: Bulldog
+species: dog
+breed_or_category: Bulldog
+description: Laid-back, courageous, and affectionate. Bulldogs are the ultimate couch companion — low-energy, loyal, and endlessly charming despite their grumpy faces.
+
+mbti_label: ISTP — The Relaxed Guardian
+mbti_traits:
+  - Calm and steady
+  - Loyal and protective
+  - Stubborn but loving
+  - Low-energy and content
+mbti_description: Bulldogs are the introverts of the dog world. They value comfort above all else, form strong bonds with their family, and approach life at their own deliberate pace. They are stubborn but deeply affectionate.
+
+appearance:
+  size: medium
+  weight_range_kg: [18, 25]
+  lifespan_years: [8, 10]
+  coat_type: short, smooth, fine
+
+budget:
+  initial_cost_thb: [25000, 60000]
+  monthly_cost_thb: [2000, 4000]
+  annual_medical_thb: [10000, 30000]
+  budget_tier: high
+
+time:
+  daily_active_minutes: [15, 30]
+  daily_attention_hours: 2
+  alone_tolerance_hours: 6
+  time_tier: low
+
+space:
+  minimum_sq_meters: 25
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: false
+
+allergies:
+  allergen_level: medium
+  hypoallergenic: false
+  notes: Moderate shedding. Drool can be an issue for some.
+
+noise:
+  noise_level: quiet
+  barking_or_meowing: false
+  nocturnal_noise_risk: false
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+  notes:
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: true
+  notes: Generally good with other pets. Some same-sex aggression possible.
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: moderate
+  transport_notes: Brachycephalic — cannot fly in cargo. Easy to transport locally due to size.
+
+experience:
+  experience_level: beginner
+  notes: Low exercise needs make them easy for first-time owners. Stubbornness requires patience in training.
+
+care:
+  grooming_frequency: weekly
+  grooming_complexity: medium
+  feeding_frequency_per_day: 2
+  special_diet_needs: true
+  exercise_type: short walks, indoor play
+  common_health_issues:
+    - Brachycephalic syndrome (breathing issues)
+    - Hip dysplasia
+    - Skin fold infections
+    - Cherry eye
+  vet_visit_frequency: every 6 months
+
+concerns:
+  - id: health_cost
+    title: High medical costs
+    severity: major
+    description: Bulldogs are prone to numerous health issues — breathing problems, skin infections, joint issues, and eye problems. Veterinary costs can easily exceed 20,000 THB annually.
+  - id: heat_sensitivity
+    title: Cannot tolerate heat
+    severity: major
+    description: Their flat faces make Bulldogs extremely heat-sensitive. In Thailand's climate, air conditioning is essential. Outdoor time must be limited during hot hours.
+  - id: lifespan
+    title: Short lifespan
+    severity: moderate
+    description: Bulldogs typically live only 8-10 years. The emotional cost of a shorter companionship should be considered.
+
+matching:
+  trait_scores:
+    budget_match: 3
+    time_match: 9
+    space_match: 9
+    allergy_match: 5
+    noise_match: 10
+    travel_match: 6
+    existing_pets_match: 8
+    beginner_match: 8
+    child_friendly: 7
+
+agent_guidance:
+  who_is_this_pet_for: Perfect for apartment dwellers, low-energy households, and people who want a calm, loyal companion without intense exercise demands. Ideal for retirees and homebodies. Great with children (patient and sturdy).
+  hidden_costs: Pet insurance or substantial medical savings (essential), air conditioning costs, special cleaning wipes for skin folds, special bowls for flat-faced dogs.
+  common_mistakes: Not budgeting for medical costs. Exercising in heat. Overfeeding (they gain weight easily). Not cleaning skin folds regularly. Buying from irresponsible breeders.
+  adoption_advice: Find a breeder who screens for brachycephalic and joint issues. Bulldog rescues exist but dogs often have pre-existing health conditions. Expect higher-than-average lifetime medical costs regardless of source.
+  decision_factors: Can you afford potentially high medical bills? Do you have air conditioning? Are you okay with a shorter companionship (8-10 years)? Can you commit to regular skin fold cleaning?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - American Kennel Club
+    - Bulldog Club of America

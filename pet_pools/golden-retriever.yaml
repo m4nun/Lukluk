@@ -1,0 +1,128 @@
+id: golden-retriever
+name: Golden Retriever
+species: dog
+breed_or_category: Golden Retriever
+description: Friendly, devoted, and intelligent. Golden Retrievers are the classic family companion — eager to please, great with children, and endlessly enthusiastic.
+
+mbti_label: ESFJ — The Enthusiastic Companion
+mbti_traits:
+  - Outgoing and social
+  - Loyal and devoted
+  - Eager to please
+  - Playful and energetic
+mbti_description: Golden Retrievers are the extroverts of the dog world. They thrive on social interaction, bond deeply with their families, and approach life with joyful enthusiasm. They are people-pleasers who need to be part of family activities.
+
+appearance:
+  size: large
+  weight_range_kg: [25, 34]
+  lifespan_years: [10, 12]
+  coat_type: double coat, medium-length, water-repellent
+
+budget:
+  initial_cost_thb: [15000, 45000]
+  monthly_cost_thb: [3000, 6000]
+  annual_medical_thb: [5000, 15000]
+  budget_tier: high
+
+time:
+  daily_active_minutes: [45, 90]
+  daily_attention_hours: 3
+  alone_tolerance_hours: 4
+  time_tier: high
+
+space:
+  minimum_sq_meters: 40
+  space_tier: house
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: false
+
+allergies:
+  allergen_level: high
+  hypoallergenic: false
+  notes: Heavy shedding, especially seasonally. Not suitable for allergy sufferers.
+
+noise:
+  noise_level: moderate
+  barking_or_meowing: true
+  nocturnal_noise_risk: false
+  suitable_for_apartment: false
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+  notes:
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: true
+  notes: Generally excellent with other animals when socialized properly.
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: easy
+  transport_notes: Size may be an issue for small vehicles. Generally good travelers.
+
+experience:
+  experience_level: beginner
+  notes: Very forgiving of first-time owners. Eager to please makes training relatively easy.
+
+care:
+  grooming_frequency: 2-3 times per week
+  grooming_complexity: medium
+  feeding_frequency_per_day: 2
+  special_diet_needs: false
+  exercise_type: walks, fetch, swimming, running
+  common_health_issues:
+    - Hip dysplasia
+    - Elbow dysplasia
+    - Cancer (higher rate than average)
+    - Ear infections
+  vet_visit_frequency: annual, bi-annual for seniors
+
+concerns:
+  - id: shedding
+    title: Heavy shedding year-round
+    severity: moderate
+    description: Golden Retrievers shed consistently with seasonal heavy shedding. Expect fur on furniture, clothes, and floors. Not suitable for people who prefer a fur-free home.
+  - id: exercise_needs
+    title: High exercise requirements
+    severity: moderate
+    description: Need 45-90 minutes of active exercise daily. Without it, they may become destructive or anxious. A tired Golden is a happy Golden.
+  - id: separation_anxiety
+    title: Prone to separation anxiety
+    severity: minor
+    description: Being left alone for long hours can cause distress. Best suited for households where someone is home most of the day or where doggy daycare is an option.
+  - id: health_cost
+    title: Higher-than-average medical costs
+    severity: moderate
+    description: Golden Retrievers have a higher cancer rate and are prone to joint issues. Pet insurance or a medical savings fund is strongly recommended.
+
+matching:
+  trait_scores:
+    budget_match: 4
+    time_match: 3
+    space_match: 6
+    allergy_match: 2
+    noise_match: 6
+    travel_match: 7
+    existing_pets_match: 9
+    beginner_match: 10
+    child_friendly: 10
+
+agent_guidance:
+  who_is_this_pet_for: Ideal for active families, first-time dog owners, and people who want a social, affectionate companion. Great for homes with children and other pets. Best for people who have time for daily exercise and don't mind regular grooming.
+  hidden_costs: Professional grooming, pet insurance (strongly recommended due to breed health risks), replacement toys (they chew enthusiastically), doggy daycare if you work long hours.
+  common_mistakes: Underestimating the exercise needs — a bored Golden becomes destructive. Not budgeting for health issues. Letting them get overweight (they love food). Not socializing them early enough.
+  adoption_advice: Look for reputable breeders who screen for hip/elbow dysplasia and eye conditions. Many Golden Retrievers are available through rescue organizations. Always meet the parents if possible.
+  decision_factors: Can you commit to 45-90 minutes of daily exercise? Do you have budget for potential health costs? Are you okay with constant shedding? Is someone home most of the day?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - American Kennel Club
+    - Golden Retriever Club of America

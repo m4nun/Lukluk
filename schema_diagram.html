@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukluk v1 — Database Schema</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 32px;
+  }
+  h1 { font-size: 24px; margin-bottom: 8px; }
+  .subtitle { color: #94a3b8; margin-bottom: 32px; font-size: 14px; }
+
+  .diagram {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .zone {
+    flex: 1 1 300px;
+    min-width: 280px;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .zone-header {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #1e293b;
+  }
+
+  .table-card {
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 18px;
+    border: 1px solid #334155;
+    position: relative;
+  }
+  .table-card.auth-table { border-left: 3px solid #8b5cf6; }
+  .table-card.static-table { border-left: 3px solid #06b6d4; }
+  .table-card.user-table { border-left: 3px solid #10b981; }
+  .table-card.agent-table { border-left: 3px solid #f59e0b; }
+  .table-card.content-table { border-left: 3px solid #f97316; }
+  .table-card.payment-table { border-left: 3px solid #ec4899; }
+
+  .table-name {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .table-desc {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+  }
+  .table-fks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .fk-tag {
+    font-size: 10px;
+    background: #334155;
+    color: #cbd5e1;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .fk-tag.to { background: #1e3a5f; color: #60a5fa; }
+  .table-cols {
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  .col-key {
+    display: inline-block;
+    background: #475569;
+    color: #e2e8f0;
+    padding: 0 4px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    margin-right: 4px;
+  }
+  .col-special {
+    display: inline-block;
+    background: transparent;
+    color: #cbd5e1;
+    font-weight: 600;
+    font-size: 10px;
+  }
+
+  .arrows {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid #1e293b;
+    font-size: 12px;
+    color: #64748b;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .section-note {
+    font-size: 11px;
+    color: #475569;
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  @media (max-width: 900px) {
+    .diagram { flex-direction: column; }
+    .zone { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🐾 Lukluk v1 — Database Schema</h1>
+<p class="subtitle">12 tables across 6 zones · Row Level Security on all tables · Supabase PostgreSQL</p>
+
+<div class="diagram">
+
+  <!-- ZONE 1: Auth & Identity -->
+  <div class="zone">
+    <div class="zone-header">🔐 Auth &amp; Identity</div>
+
+    <div class="table-card auth-table">
+      <div class="table-name">auth.users</div>
+      <div class="table-desc">Supabase managed — email, password, session tokens</div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        email, encrypted_password, raw_user_meta_data
+      </div>
+      <div class="section-note">→ trigger creates profiles row on signup</div>
+    </div>
+
+    <div class="table-card auth-table">
+      <div class="table-name">profiles</div>
+      <div class="table-desc">App profile — extends auth.users 1:1</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ auth.users</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> <span class="col-key">FK</span> id UUID<br>
+        display_name, avatar_url, timestamps
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONE 2: Static Data (Pet Knowledge) -->
+  <div class="zone">
+    <div class="zone-header">🗂️ Static Pet Knowledge</div>
+
+    <div class="table-card static-table">
+      <div class="table-name">pet_type_profiles</div>
+      <div class="table-desc">Seeded from YAML at deploy time. Global, immutable by users.</div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id TEXT (slug)<br>
+        name, species, breed, description<br>
+        <span class="col-special">📦 mbti_label, mbti_traits</span><br>
+        <span class="col-special">💰 budget_tier, cost ranges</span><br>
+        <span class="col-special">⏱ time_tier, attention hrs</span><br>
+        <span class="col-special">🏠 space_tier, sq_meters</span><br>
+        <span class="col-special">🤧 allergen_level, hypoallergenic</span><br>
+        <span class="col-special">🔊 noise_level, vocal?</span><br>
+        <span class="col-special">⚖️ legality, permits, CITES</span><br>
+        <span class="col-special">🐕 dog/cat/small_pet friendly</span><br>
+        <span class="col-special">✈️ travel, boarding difficulty</span><br>
+        <span class="col-special">🎓 experience_level</span><br>
+        <span class="col-special">🎯 9 matching scores (1–10)</span><br>
+        <span class="col-special">🧠 agent guidance text (5 long fields)</span><br>
+        <span class="col-special">⚠️ concerns JSONB</span><br>
+        version, sources
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONE 3: User Data (Quiz → Matches → Workspaces) -->
+  <div class="zone">
+    <div class="zone-header">👤 User Data Flow</div>
+
+    <div class="table-card user-table">
+      <div class="table-name">lifestyle_profiles</div>
+      <div class="table-desc">Fit Quiz answers → saved once when user gets result</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ profiles</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> user_id<br>
+        <span class="col-special">📋 quiz_answers JSONB</span><br>
+        <span class="col-special">💬 follow_ups JSONB</span><br>
+        is_latest, completed_at
+      </div>
+    </div>
+
+    <div class="table-card user-table" style="margin-left: 8px;">
+      <div class="table-name">match_results</div>
+      <div class="table-desc">Top 3 pet matches with scores + explanations</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ profiles</span>
+        <span class="fk-tag to">→ lifestyle_profiles</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> user_id, lifestyle_profile_id<br>
+        <span class="col-special">🥇 top_matches JSONB</span>
+        <br>[rank, scores, explanation]
+      </div>
+    </div>
+
+    <div class="table-card user-table">
+      <div class="table-name">planning_pet_profiles</div>
+      <div class="table-desc">Pre-ownership workspace. One per pet type per user.</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ profiles</span>
+        <span class="fk-tag to">→ pet_type_profiles</span>
+        <span class="fk-tag to">→ match_results</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> user, pet_type, match_result<br>
+        planning_name, decision_status<br>
+        <span class="col-special">💰 estimated_expenses JSONB</span><br>
+        <span class="col-special">✅ concern_checklist JSONB</span><br>
+        has_ownership → triggers transition<br>
+        owned_pet_profile_id (nullable)
+      </div>
+    </div>
+
+    <div class="table-card user-table" style="margin-left: 8px;">
+      <div class="table-name">owned_pet_profiles</div>
+      <div class="table-desc">Post-ownership. Converted from planning profile.</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ profiles</span>
+        <span class="fk-tag to">→ planning</span>
+        <span class="fk-tag to">→ pet_type</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> user, planning, pet_type<br>
+        pet_name, age_life_stage, got_date<br>
+        weight_kg, sex, food, health_concerns<br>
+        <span class="col-special">💰 actual_expenses JSONB</span><br>
+        <span class="col-special">📅 activity_schedule JSONB</span><br>
+        <span class="col-special">🍖 food_guide JSONB</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONE 4: Agent System -->
+  <div class="zone">
+    <div class="zone-header">🤖 Agent System</div>
+
+    <div class="table-card agent-table">
+      <div class="table-name">agent_threads</div>
+      <div class="table-desc">Maps planning/owned profile → LangGraph thread_id</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ planning_pet_profiles</span>
+        <span class="fk-tag to">→ owned_pet_profiles</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> planning, owned<br>
+        <span class="col-special">🔗 thread_id TEXT UNIQUE</span><br>
+        agent_type ("decision"|"care")<br>
+        is_active
+      </div>
+      <div class="section-note">+ LangGraph's auto-created: checkpoints, checkpoint_blobs, checkpoint_writes</div>
+    </div>
+
+    <div class="table-card agent-table">
+      <div class="table-name">agent_drafts</div>
+      <div class="table-desc">Pending agent edits — user confirms/rejects before save</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ planning_pet_profiles</span>
+        <span class="fk-tag to">→ profiles</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> planning, user<br>
+        target (expenses|checklist|status)<br>
+        <span class="col-special">📝 current_value JSONB</span><br>
+        <span class="col-special">✏️ proposed_value JSONB</span><br>
+        status (pending|confirmed|rejected|stale)
+      </div>
+    </div>
+
+    <div class="table-card agent-table">
+      <div class="table-name">estimated_expenses</div>
+      <div class="table-desc">Normalized expense rows — agent tool call targets</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ planning_pet_profiles</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> planning<br>
+        category, item, amount_thb, note, sort_order
+      </div>
+    </div>
+
+    <div class="table-card agent-table">
+      <div class="table-name">concern_checklist_items</div>
+      <div class="table-desc">Normalized concern rows — agent tool call targets</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ planning_pet_profiles</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> planning<br>
+        concern_id, title, status, note, sort_order
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONE 5: Content & Community -->
+  <div class="zone">
+    <div class="zone-header">📝 Content &amp; Community</div>
+
+    <div class="table-card content-table">
+      <div class="table-name">owner_experiences</div>
+      <div class="table-desc">User-submitted anecdotes. Live immediately (v1).</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ profiles</span>
+        <span class="fk-tag to">→ pet_type_profiles</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> user, pet_type<br>
+        has_owned, ownership_duration<br>
+        title, body<br>
+        is_flagged, flag_reason
+      </div>
+      <div class="section-note">Requires active subscription to insert (RLS policy)</div>
+    </div>
+  </div>
+
+  <!-- ZONE 6: Payments -->
+  <div class="zone">
+    <div class="zone-header">💳 Payments</div>
+
+    <div class="table-card payment-table">
+      <div class="table-name">subscriptions</div>
+      <div class="table-desc">Stripe subscription tracking. Test mode only (v1).</div>
+      <div class="table-fks">
+        <span class="fk-tag to">→ profiles (UNIQUE)</span>
+      </div>
+      <div class="table-cols">
+        <span class="col-key">PK</span> id UUID<br>
+        <span class="col-key">FK</span> user_id UNIQUE<br>
+        stripe_customer_id<br>
+        stripe_subscription_id<br>
+        status (inactive|active|past_due|canceled)<br>
+        current_period_start/end
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Data Flow Diagram -->
+<div style="margin-top: 48px;">
+  <h3 style="font-size: 16px; margin-bottom: 16px; color: #94a3b8;">📊 Data Flow</h3>
+  <pre style="background: #1e293b; border-radius: 10px; padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8; overflow-x: auto; color: #cbd5e1; border: 1px solid #334155;">
+
+  <span style="color: #8b5cf6;">auth.users</span> ────trigger────▶ <span style="color: #8b5cf6;">profiles</span>
+                                     │
+                                     ▼
+  [Fit Quiz] ────▶ <span style="color: #10b981;">lifestyle_profiles</span> ────▶ <span style="color: #10b981;">match_results</span>
+       (quiz_answers + follow_ups)       (top_matches JSONB)
+                                               │
+                    ┌──────────────────────────┘
+                    ▼
+  <span style="color: #10b981;">planning_pet_profiles</span> ◄── <span style="color: #06b6d4;">pet_type_profiles</span> (YAML seed)
+       │
+       ├──▶ <span style="color: #f59e0b;">agent_threads</span> ──▶ LangGraph checkpoints (3 tables)
+       │         (thread_id)
+       │
+       ├──▶ <span style="color: #f59e0b;">agent_drafts</span>
+       │         (pending edits → confirm → write to planning or expenses/concerns)
+       │
+       ├──▶ <span style="color: #f59e0b;">estimated_expenses</span>
+       │
+       └──▶ <span style="color: #f59e0b;">concern_checklist_items</span>
+       
+                                 [User marks ownership]
+                    ┌──────────────────┘
+                    ▼
+  <span style="color: #10b981;">owned_pet_profiles</span>  ← agent_threads switches to care agent
+       │
+       └──▶ actual_expenses, activity_schedule, food_guide (all JSONB inline)
+
+  <span style="color: #f97316;">owner_experiences</span> ◄── subscriber-only insert (RLS checks <span style="color: #ec4899;">subscriptions</span>)
+  </pre>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span> Auth</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#06b6d4;"></span> Static/Seeded</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> User Data</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Agent System</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#f97316;"></span> Content</div>
+  <div class="legend-item"><span class="legend-dot" style="background:#ec4899;"></span> Payments</div>
+  <div style="margin-left: auto; font-size: 11px; color: #475569;">
+    12 tables · RLS on all · triggers: new_user, is_latest, updated_at
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukluk — Architecture Review</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; padding: 32px; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+  .badge-strong { background: #dc2626; color: white; padding: 2px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .badge-worth { background: #d97706; color: white; padding: 2px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .badge-speculative { background: #4b5563; color: #d1d5db; padding: 2px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .warning { background: #451a03; border-left: 3px solid #d97706; padding: 12px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 13px; }
+  .before-after { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .code-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.5; overflow-x: auto; white-space: pre; }
+  .arrow-down { text-align: center; font-size: 24px; color: #64748b; margin: 8px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #334155; }
+  th { color: #94a3b8; font-size: 12px; text-transform: uppercase; }
+  td { font-size: 13px; color: #cbd5e1; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; margin-right: 4px; font-weight: 600; }
+  .tag-shallow { background: #dc2626; color: white; }
+  .tag-duplicate { background: #d97706; color: white; }
+  .tag-leaky { background: #7c3aed; color: white; }
+  .tag-pure { background: #059669; color: white; }
+  .module-name { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #60a5fa; }
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  h2 { font-size: 18px; margin-bottom: 12px; color: #f1f5f9; }
+  h3 { font-size: 15px; margin-bottom: 8px; color: #e2e8f0; }
+  .subtitle { color: #64748b; font-size: 13px; margin-bottom: 32px; }
+  .recommendation { background: #1e293b; border: 2px solid #059669; border-radius: 12px; padding: 24px; }
+  .section-title { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-top: 16px; }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 4px; font-size: 13px; color: #cbd5e1; }
+  .metric { font-size: 28px; font-weight: 700; }
+  .highlight { color: #60a5fa; }
+</style>
+</head>
+<body>
+
+<h1>Lukluk — Architecture Review</h1>
+<p class="subtitle">5 deepening opportunities found across agent, matching, pipeline, and UI modules</p>
+
+<!-- C1 -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h2 style="margin:0">1. Collapse Twin Agent Factories</h2>
+    <span class="badge-strong">Strong</span>
+  </div>
+  <div>
+    <span class="tag tag-duplicate">Duplicate</span>
+    <span class="tag tag-shallow">Shallow</span>
+  </div>
+
+  <div class="section-title">Files</div>
+  <p class="module-name">src/lib/agent/graph.ts</p>
+
+  <div class="section-title">Problem</div>
+  <p><span class="module-name">createDecisionAgent</span> and <span class="module-name">createCareAgent</span> are ~90% identical — 105 lines of copy-paste that differ in only 4 lines: the system prompt string, the parameter name, and the tool arg key checked in <span class="module-name">toolNode</span>. The care agent reuses <span class="module-name">state.planningProfileId</span> to hold the owned profile ID — a semantic mismatch waiting to bite.</p>
+
+  <div class="section-title">Before / After</div>
+  <div class="before-after">
+    <div>
+      <p style="font-size:12px;color:#64748b;margin-bottom:4px">Before — two factory functions</p>
+      <div class="code-box">createDecisionAgent(profileId, repo, tools)
+  // ~60 lines of LangGraph wiring
+
+createCareAgent(profileId, repo, tools)
+  // ~60 lines of IDENTICAL wiring</div>
+    </div>
+    <div>
+      <p style="font-size:12px;color:#64748b;margin-bottom:4px">After — one factory</p>
+      <div class="code-box">createAgent({ profileId, repo, tools, systemPrompt })
+  // ~60 lines of LangGraph wiring once</div>
+    </div>
+  </div>
+
+  <div class="section-title">Benefits</div>
+  <ul>
+    <li><strong>Locality:</strong> LangGraph wiring lives in one place. If the toolNode pattern changes, it's fixed once.</li>
+    <li><strong>Leverage:</strong> Adding a third agent (e.g., Onboarding Agent) is 5 lines instead of 60.</li>
+    <li><strong>Safety:</strong> Removes the semantic mismatch where care reuses <span class="module-name">planningProfileId</span> state for owned profiles.</li>
+  </ul>
+</div>
+
+<!-- C2 -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h2 style="margin:0">2. Centralize LLM Configuration</h2>
+    <span class="badge-strong">Strong</span>
+  </div>
+  <div>
+    <span class="tag tag-duplicate">Duplicate</span>
+  </div>
+
+  <div class="section-title">Files</div>
+  <p class="module-name">src/lib/agent/graph.ts</p>
+  <p class="module-name">src/app/api/match/follow-up/route.ts</p>
+
+  <div class="section-title">Problem</div>
+  <p>Model name <span class="highlight">"deepseek/deepseek-chat"</span>, API key env var, and base URL are hardcoded in 3 places. The follow-up route uses raw <span class="module-name">fetch()</span> while the agent uses LangChain's <span class="module-name">ChatOpenAI</span> — same model, different invocation path. Changing models would require 3 edits that can drift.</p>
+
+  <div class="before-after">
+    <div>
+      <p style="font-size:12px;color:#64748b;margin-bottom:4px">Before — 3 hardcoded call sites</p>
+      <div class="code-box">// graph.ts x2
+new ChatOpenAI({ model: "deepseek/deepseek-chat", ... })
+
+// follow-up/route.ts
+fetch("openrouter/chat/completions", {
+  body: JSON.stringify({ model: "deepseek/deepseek-chat", ... })
+})</div>
+    </div>
+    <div>
+      <p style="font-size:12px;color:#64748b;margin-bottom:4px">After — single config source</p>
+      <div class="code-box">import { getChatModel, llmConfig } from "@/lib/llm/config"
+
+// graph.ts
+const model = getChatModel({ temperature: 0.7 })
+
+// follow-up/route.ts
+const result = await llmConfig.call({ messages, max_tokens: 500 })</div>
+    </div>
+  </div>
+
+  <div class="section-title">Benefits</div>
+  <ul>
+    <li><strong>Locality:</strong> Model choice lives in one file. Swap DeepSeek → GPT-4o and every call site updates automatically.</li>
+    <li><strong>Leverage:</strong> Adding retry logic, rate limiting, or cost tracking behind the LLM config module benefits all callers.</li>
+    <li><strong>Testability:</strong> Follow-up route can now be tested with a mock LLM client instead of needing a real API key.</li>
+  </ul>
+</div>
+
+<!-- C3 -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h2 style="margin:0">3. Fix DraftPlanningRepository's Supabase Leak</h2>
+    <span class="badge-strong">Strong</span>
+  </div>
+  <div>
+    <span class="tag tag-leaky">Leaky Interface</span>
+  </div>
+
+  <div class="section-title">Files</div>
+  <p class="module-name">src/lib/agent/draft-repo.ts</p>
+  <p class="module-name">src/lib/agent/repository.ts</p>
+
+  <div class="section-title">Problem</div>
+  <p><span class="module-name">DraftPlanningRepository</span> accepts a <span class="module-name">PlanningRepository</span> via its constructor but never calls the delegate's write methods — it calls <span class="module-name">getSupabaseAdmin()</span> directly to insert drafts. This means:</p>
+  <ul>
+    <li>You <strong>cannot test</strong> draft behavior with a mock repo — the mock would be ignored for writes</li>
+    <li>The class name says "I wrap any PlanningRepository" but the implementation says "I write to Supabase regardless"</li>
+    <li>Care agent drafts reuse the <span class="module-name">planning_pet_profile_id</span> column to store owned profile IDs — a semantic corruption waiting for a foreign key or join to expose it</li>
+    <li><span class="module-name">current_value</span> snapshotting is inconsistent: 4 of 6 write methods capture the before-state, 2 don't</li>
+  </ul>
+
+  <div class="warning">
+    This wrapper is a decorator that ignores its delegate for writes. It violates the substitution principle: swapping the real repo for an in-memory fake would leave drafts writing to real Supabase.
+  </div>
+
+  <div class="before-after">
+    <div>
+      <p style="font-size:12px;color:#64748b;margin-bottom:4px">Before — concrete Supabase dependency leaked</p>
+      <div class="code-box">class DraftPlanningRepository implements PlanningRepository {
+  constructor(private real: PlanningRepository) {}
+
+  async replaceExpenses(...) {
+    const supabase = getSupabaseAdmin(); // ← skips this.real
+    await supabase.from("agent_drafts").insert(...)
+  }
+}</div>
+    </div>
+    <div>
+      <p style="font-size:12px;color:#64748b;margin-bottom:4px">After — inject draftStore at the seam</p>
+      <div class="code-box">class DraftPlanningRepository {
+  constructor(
+    private real: PlanningRepository,
+    private drafts: DraftStore  // ← injectable
+  ) {}
+
+  async replaceExpenses(...) {
+    await this.drafts.create({
+      target: "estimated_expenses",
+      proposed_value: expenses,
+      current_value: await this.real.getExpenses(...)
+    })
+  }
+}</div>
+    </div>
+  </div>
+
+  <div class="section-title">Benefits</div>
+  <ul>
+    <li><strong>Testability:</strong> Inject an in-memory draft store; verify drafts are created without touching a database.</li>
+    <li><strong>Locality:</strong> Draft storage logic (Supabase table vs. Redis vs. queue) is behind a seam. Change one adapter, not 6 methods.</li>
+    <li><strong>Correctness:</strong> <span class="module-name">current_value</span> snapshots become uniform because the wrapper delegates reads to <span class="module-name">this.real</span> consistently.</li>
+  </ul>
+</div>
+
+<!-- C4 -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h2 style="margin:0">4. Extract Shared Agent Route Pattern</h2>
+    <span class="badge-worth">Worth Exploring</span>
+  </div>
+  <div>
+    <span class="tag tag-duplicate">Duplicate</span>
+  </div>
+
+  <div class="section-title">Files</div>
+  <p class="module-name">src/app/api/agent/chat/route.ts</p>
+  <p class="module-name">src/app/api/agent/care/route.ts</p>
+
+  <div class="section-title">Problem</div>
+  <p>Both agent routes share an 8-step pipeline: parse body → auth check → profile ownership verification → instantiate repo/tools/agent → invoke → extract response → return JSON. The care route is missing two features the chat route has: thread persistence and draft wrapping. This asymmetry is either a bug or undocumented.</p>
+
+  <div class="before-after">
+    <div>
+      <p style="font-size:12px;color:#64748b;margin-bottom:4px">Before — 72 + 46 lines, uneven features</p>
+      <div class="code-box">chat/route.ts:
+  ✅ Thread persistence
+  ✅ Draft wrapping
+  ✅ Returns thread_id
+
+care/route.ts:
+  ❌ No thread persistence
+  ❌ No draft wrapping
+  ❌ No thread_id</div>
+    </div>
+    <div>
+      <p style="font-size:12px;color:#64748b;margin-bottom:4px">After — shared helper, uniform features</p>
+      <div class="code-box">// routes become 15 lines each
+export POST = runAgentRoute({
+  agentType: "decision",
+  profileIdField: "planningProfileId",
+  table: "planning_pet_profiles"
+})</div>
+    </div>
+  </div>
+
+  <div class="section-title">Benefits</div>
+  <ul>
+    <li><strong>Locality:</strong> Auth + ownership + invocation lives in one helper. Bug fixes (e.g., better error handling) apply everywhere.</li>
+    <li><strong>Leverage:</strong> Care agent gets thread persistence and draft support for free when the shared helper adds them.</li>
+    <li><strong>Testability:</strong> The shared helper can be tested once with a mock agent; each route just tests its route-specific config.</li>
+  </ul>
+</div>
+
+<!-- C5 -->
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+    <h2 style="margin:0">5. Consolidate Tool Error-Handling Boilerplate</h2>
+    <span class="badge-worth">Worth Exploring</span>
+  </div>
+  <div>
+    <span class="tag tag-duplicate">Duplicate</span>
+  </div>
+
+  <div class="section-title">Files</div>
+  <p class="module-name">src/lib/agent/tools.ts</p>
+  <p class="module-name">src/lib/agent/care-tools.ts</p>
+
+  <div class="section-title">Problem</div>
+  <p>Every single agent tool (8 total across both files) wraps its implementation in identical try/catch boilerplate:</p>
+  <div class="code-box">async ({ ... }) => {
+  try {
+    await repo.someMethod(...);
+    return "Success message";
+  } catch (e) {
+    return `Error: ${e instanceof Error ? e.message : String(e)}`;
+  }
+}</div>
+  <p style="margin-top:8px">This is repeated 8 times verbatim. A <span class="module-name">safeTool(repoCallback)</span> wrapper would collapse ~48 lines of noise into 8 lines of intent.</p>
+
+  <div class="section-title">Benefits</div>
+  <ul>
+    <li><strong>Locality:</strong> Error formatting changes once. If you want to log errors, add retry logic, or change the error message format — one place.</li>
+    <li><strong>Leverage:</strong> New tools are 5 lines instead of 13. The wrapper makes the tool's domain logic the only interesting part.</li>
+  </ul>
+</div>
+
+<!-- Top Recommendation -->
+<div class="recommendation" style="margin-top: 32px;">
+  <h2 style="color: #059669;">Top Recommendation</h2>
+  <p style="font-size: 16px; margin-top: 8px;">
+    Start with <strong>#1 — Collapse Twin Agent Factories</strong>.
+  </p>
+  <p style="margin-top: 8px; color: #cbd5e1; line-height: 1.6;">
+    It's the highest-leverage change: 105 lines of copy-paste vanish, the semantic bug (planningProfileId reused for owned profiles) disappears, and adding a third agent becomes trivial. It's also the lowest-risk — no database changes, no API surface changes, pure internal refactor validated by the same 46 tests that already cover the matching and validation modules. 
+  </p>
+  <p style="margin-top: 8px; color: #cbd5e1; line-height: 1.6;">
+    After #1, tackle <strong>#3 — Fix the DraftPlanningRepository leak</strong>. The draft module is the worst architectural smell: a decorator that ignores its delegate. Fixing it makes agent tests actually testable without a database.
+  </p>
+</div>
+
+<div style="margin-top: 48px; padding-top: 16px; border-top: 1px solid #1e293b; font-size: 12px; color: #475569;">
+  Lukluk Architecture Review · 2026-07-03 · 5 candidates analyzed
+</div>
+
+</body>
+</html>

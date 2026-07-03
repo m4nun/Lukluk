@@ -1,0 +1,121 @@
+id: sugar-glider
+name: Sugar Glider
+species: small_mammal
+breed_or_category: Sugar Glider
+description: สัตว์น้อยน่ารักผู้ร่อนได้ — Sugar Glider ติดเจ้าของมาก ขี้อ้อน และชอบเกาะตัวคุณทั้งวันทั้งคืน
+
+mbti_label: ESFP — The Pocket Acrobat
+mbti_traits:
+  - ติดเจ้าของมาก
+  - ขี้เล่นและร่อนเก่ง
+  - ต้องการเพื่อน
+  - ตื่นกลางคืน
+mbti_description: Sugar Glider เป็นสัตว์สังคมตัวจ้อย — มันต้องการเพื่อน (ควรเลี้ยงคู่) และจะสร้าง bond ที่ลึกซึ้งกับเจ้าของ มันจะเกาะในกระเป๋าเสื้อคุณทั้งวันและเล่นตอนกลางคืน
+
+appearance:
+  size: small
+  weight_range_kg: [0.09, 0.16]
+  lifespan_years: [10, 15]
+  coat_type: soft, grey with dark stripe
+
+budget:
+  initial_cost_thb: [8000, 25000]
+  monthly_cost_thb: [1000, 3000]
+  annual_medical_thb: [3000, 8000]
+  budget_tier: medium
+
+time:
+  daily_active_minutes: [20, 40]
+  daily_attention_hours: 2
+  alone_tolerance_hours: 12
+  time_tier: medium
+
+space:
+  minimum_sq_meters: 4
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: true
+
+allergies:
+  allergen_level: low
+  hypoallergenic: true
+
+noise:
+  noise_level: quiet
+  barking_or_meowing: false
+  nocturnal_noise_risk: true
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+  notes: ผิดกฎหมายในบางรัฐเช่นแคลิฟอร์เนียและอลาสก้า
+
+existing_pets:
+  dog_friendly: false
+  cat_friendly: false
+  small_pet_safe: false
+  notes: ไม่ควรเลี้ยงกับสัตว์นักล่า
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: moderate
+  transport_notes: อยู่ในกระเป๋าผ้าติดตัวได้
+
+experience:
+  experience_level: intermediate
+  notes: ต้องการอาหารเฉพาะและต้องเลี้ยงอย่างน้อย 2 ตัว
+
+care:
+  grooming_frequency: ไม่ต้อง
+  grooming_complexity: low
+  feeding_frequency_per_day: 2
+  special_diet_needs: true
+  exercise_type: ร่อน ปีนป่าย กระโดด
+  common_health_issues:
+    - ขาดแคลเซียม (Metabolic Bone Disease)
+    - โรคอ้วน
+    - ปัญหาฟัน
+  vet_visit_frequency: annual
+
+concerns:
+  - id: pair_requirement
+    title: ต้องเลี้ยงอย่างน้อย 2 ตัว
+    severity: major
+    description: Sugar Glider เป็นสัตว์สังคมที่ต้องการเพื่อน — เลี้ยงตัวเดียวจะเครียดและซึมเศร้า อาจกัดตัวเองจนตาย
+  - id: nocturnal
+    title: ตื่นกลางคืน
+    severity: moderate
+    description: เล่นและส่งเสียงตอนกลางคืน — ไม่เหมาะกับคนนอนไว
+  - id: diet
+    title: อาหารซับซ้อน
+    severity: moderate
+    description: ต้องการอาหารสมดุลเฉพาะ — ผลไม้ โปรตีน แคลเซียม — ผิดส่วนนิดเดียวจะป่วย
+
+matching:
+  trait_scores:
+    budget_match: 5
+    time_match: 6
+    space_match: 9
+    allergy_match: 9
+    noise_match: 5
+    travel_match: 8
+    existing_pets_match: 2
+    beginner_match: 3
+    child_friendly: 5
+
+agent_guidance:
+  who_is_this_pet_for: คนนอนดึก, คนชอบสัตว์ที่ติดเจ้าของแบบพกพาได้, คนพร้อมเลี้ยงอย่างน้อย 2 ตัว, คนที่สนุกกับการเตรียมอาหารพิเศษ
+  hidden_costs: อาหารผลไม้สดและโปรตีนทุกวัน, กรงขนาดใหญ่, exotic vet, แคลเซียมและวิตามินเสริม
+  common_mistakes: เลี้ยงตัวเดียว, ให้อาหารไม่สมดุล (ขาดแคลเซียม), เลี้ยงในกรงเล็ก, ไม่มีเวลาผูกพันจนกลายเป็นสัตว์ป่าในบ้าน
+  adoption_advice: ควรรับจากฟาร์มที่ขึ้นทะเบียน — Sugar Glider จรจัดเยอะเพราะคนเลี้ยงไม่ไหว
+  decision_factors: เลี้ยงอย่างน้อย 2 ตัวไหวไหม? อยู่ดึกพอที่จะเล่นกับมันไหม? พร้อมทำอาหารสดทุกวันไหม?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - Sugar Glider Association

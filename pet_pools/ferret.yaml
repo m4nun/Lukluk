@@ -1,0 +1,126 @@
+id: ferret
+name: Ferret
+species: small_mammal
+breed_or_category: Ferret
+description: สัตว์พลังสูง ซนระดับเทพ — Ferret เป็นนักสำรวจตัวน้อยที่ไม่เคยหยุดนิ่ง ฉลาดและขี้เล่นจนคุณต้องขำ
+
+mbti_label: ENTP — The Mischief Maker
+mbti_traits:
+  - พลังงานสูง ซนไม่หยุด
+  - ฉลาดและขี้สงสัย
+  - ขี้เล่น ตลก
+  - ชอบซ่อนของ
+mbti_description: Ferret คือเด็กอนุบาลในร่างสัตว์ — พวกมันวิ่ง กระโดด มุด และขโมยของไปซ่อนตลอดเวลา ถ้าคุณทำกุญแจหาย ให้ถาม Ferret ก่อนเลย
+
+appearance:
+  size: small
+  weight_range_kg: [0.7, 2]
+  lifespan_years: [6, 10]
+  coat_type: short, soft
+
+budget:
+  initial_cost_thb: [5000, 15000]
+  monthly_cost_thb: [1000, 2500]
+  annual_medical_thb: [5000, 15000]
+  budget_tier: medium
+
+time:
+  daily_active_minutes: [30, 60]
+  daily_attention_hours: 2
+  alone_tolerance_hours: 8
+  time_tier: medium
+
+space:
+  minimum_sq_meters: 10
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: true
+
+allergies:
+  allergen_level: medium
+  hypoallergenic: false
+  notes: มีกลิ่นเฉพาะตัว (musk)
+
+noise:
+  noise_level: quiet
+  barking_or_meowing: false
+  nocturnal_noise_risk: false
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+  notes: ผิดกฎหมายในบางรัฐของอเมริกาและนิวซีแลนด์
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: false
+  notes: อาจเล่นแรงกับสัตว์เล็กกว่า
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: moderate
+  transport_notes: เดินทางในกรงเล็กได้
+
+experience:
+  experience_level: intermediate
+  notes: ต้องกันพื้นที่ให้ปลอดภัย — Ferret มุดได้ทุกที่ และจะขโมยของไปซ่อน
+
+care:
+  grooming_frequency: อาบน้ำน้อยครั้ง
+  grooming_complexity: low
+  feeding_frequency_per_day: 2
+  special_diet_needs: true
+  exercise_type: วิ่งเล่นอิสระ อุโมงค์ ของเล่นซ่อนขนม
+  common_health_issues:
+    - โรคต่อมหมวกไต
+    - Insulinoma (น้ำตาลต่ำ)
+    - ลำไส้อุดตัน (กินของแปลก)
+  vet_visit_frequency: annual
+
+concerns:
+  - id: ferret_proofing
+    title: ต้องกันพื้นที่ให้ปลอดภัย
+    severity: major
+    description: Ferret มุดเข้าไปได้ทุกที่ — ใต้โซฟา ในตู้ ในท่อ — ต้องกันพื้นที่เล่นให้มิดชิดและปลอดภัย
+  - id: odor
+    title: มีกลิ่นตัว
+    severity: minor
+    description: มีกลิ่น musk ตามธรรมชาติ — คนที่ไวต่อกลิ่นควรลองดมก่อนตัดสินใจ
+  - id: stealing
+    title: ขโมยของเก่ง
+    severity: minor
+    description: จะเก็บของเล็ก ๆ ไปซ่อน — ถ้าคุณหากุญแจ กระเป๋าสตางค์ หรือถุงเท้าไม่เจอ Ferret คือผู้ต้องสงสัยอันดับหนึ่ง
+  - id: health
+    title: ปัญหาสุขภาพเฉพาะทาง
+    severity: moderate
+    description: Ferret มีแนวโน้มเป็นโรคต่อมหมวกไตและน้ำตาลต่ำ — ต้องมีสัตว์แพทย์ที่เชี่ยวชาญ exotic pets
+
+matching:
+  trait_scores:
+    budget_match: 5
+    time_match: 5
+    space_match: 9
+    allergy_match: 5
+    noise_match: 10
+    travel_match: 8
+    existing_pets_match: 6
+    beginner_match: 4
+    child_friendly: 6
+
+agent_guidance:
+  who_is_this_pet_for: คนขี้เล่น ชอบความบันเทิง, คนมีเวลาปล่อยออกจากกรงเล่นทุกวัน, คนที่อยู่บ้านหรือคอนโด — Ferret ไม่ต้องการพื้นที่ใหญ่มากแต่ต้องการเวลาเล่น
+  hidden_costs: ค่าทำหมันและต่อมกลิ่น, ค่าอาหารโปรตีนสูงคุณภาพดี, ค่าหาสัตว์แพทย์ exotic, เปลี่ยนของเล่นบ่อย
+  common_mistakes: ปล่อยเดินทั่วบ้านโดยไม่กันพื้นที่, ให้อาหารแมวแทนอาหาร Ferret, ไม่ออกกำลังกายเพียงพอ, ไม่ทำหมัน (ตัวเมียเสี่ยง anemia ร้ายแรงถ้าไม่ผสม)
+  adoption_advice: Ferret จากฟาร์มดีสุขภาพดีกว่าจากร้านขายสัตว์ทั่วไป
+  decision_factors: มีเวลาให้วิ่งเล่นนอกกรงทุกวันไหม? กันพื้นที่บ้านให้ปลอดภัยได้ไหม? มีสัตว์แพทย์ exotic ใกล้บ้านไหม?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - American Ferret Association

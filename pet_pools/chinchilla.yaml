@@ -1,0 +1,121 @@
+id: chinchilla
+name: Chinchilla
+species: small_mammal
+breed_or_category: Chinchilla
+description: สัตว์ขนนุ่มระดับตำนาน — Chinchilla เป็นสัตว์สะอาด ฉลาด และน่ารัก ขี้ตกใจนิดหน่อยแต่ถ้าคุ้นแล้วจะน่ารักมาก
+
+mbti_label: INFJ — The Gentle Observer
+mbti_traits:
+  - สะอาด เป็นระเบียบ
+  - ระวังตัวสูง
+  - น่ารักเมื่อไว้ใจ
+  - ชอบความสงบ
+mbti_description: Chinchilla เป็นสัตว์ที่ละเอียดอ่อน — พวกมันชอบสภาพแวดล้อมที่สงบและสะอาด ไม่ชอบเสียงดังหรือการเคลื่อนไหวที่รวดเร็ว เมื่อไว้ใจเจ้าของแล้วจะน่ารักและขี้เล่น
+
+appearance:
+  size: small
+  weight_range_kg: [0.4, 0.6]
+  lifespan_years: [10, 20]
+  coat_type: dense, impossibly soft fur
+
+budget:
+  initial_cost_thb: [3000, 8000]
+  monthly_cost_thb: [500, 1500]
+  annual_medical_thb: [2000, 5000]
+  budget_tier: low
+
+time:
+  daily_active_minutes: [5, 15]
+  daily_attention_hours: 1
+  alone_tolerance_hours: 12
+  time_tier: low
+
+space:
+  minimum_sq_meters: 2
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: true
+
+allergies:
+  allergen_level: low
+  hypoallergenic: true
+  notes: ขนหนาแน่นมากจนตัวไรฝุ่นอยู่ยาก — เป็นสัตว์ที่แพ้น้อยที่สุดชนิดหนึ่ง
+
+noise:
+  noise_level: quiet
+  barking_or_meowing: false
+  nocturnal_noise_risk: true
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+
+existing_pets:
+  dog_friendly: false
+  cat_friendly: false
+  small_pet_safe: false
+  notes: ตกใจง่าย — ไม่ควรอยู่กับสัตว์นักล่า
+
+travel:
+  travel_friendly: false
+  boarding_difficulty: hard
+  transport_notes: เครียดง่ายในการเดินทาง
+
+experience:
+  experience_level: intermediate
+  notes: ต้องการการดูแลพิเศษเรื่องอุณหภูมิและอ่างทรายอาบ
+
+care:
+  grooming_frequency: ไม่ต้อง — อาบทรายอย่างเดียว
+  grooming_complexity: low
+  feeding_frequency_per_day: 1
+  special_diet_needs: true
+  exercise_type: วิ่งในวงล้อ ปีนป่ายในกรง
+  common_health_issues:
+    - โรคฟัน (ต้องแทะไม้ตลอด)
+    - ลมแดด (ความร้อน)
+    - ปัญหาทางเดินอาหาร
+  vet_visit_frequency: annual
+
+concerns:
+  - id: heat_sensitivity
+    title: ไม่ทนร้อน
+    severity: major
+    description: Chinchilla ต้องอยู่ที่อุณหภูมิต่ำกว่า 25°C — ในไทยต้องมีแอร์ตลอดเวลา ถ้าร้อนเกินจะเป็นลมแดดและตายได้
+  - id: dust_bath
+    title: ต้องมีอ่างอาบทราย
+    severity: moderate
+    description: อาบน้ำไม่ได้ — ต้องอาบด้วยทรายพิเศษเท่านั้น ไม่งั้นขนจะชื้นและเป็นเชื้อรา
+  - id: nocturnal
+    title: ตื่นกลางคืน
+    severity: minor
+    description: เป็นสัตว์ nocturnal — วิ่งวงล้อตอนกลางคืน อาจรบกวนการนอน
+
+matching:
+  trait_scores:
+    budget_match: 9
+    time_match: 10
+    space_match: 10
+    allergy_match: 10
+    noise_match: 5
+    travel_match: 3
+    existing_pets_match: 2
+    beginner_match: 4
+    child_friendly: 3
+
+agent_guidance:
+  who_is_this_pet_for: คนอยู่คอนโดมีแอร์, คนชอบสัตว์ขนนุ่มฟู, คนที่อยากได้สัตว์เลี้ยงที่สะอาดและไม่ต้องอาบน้ำ, คนที่อยู่บ้านตอนกลางคืน
+  hidden_costs: ค่าแอร์ (เปิดตลอด), ทรายอาบพิเศษ, ของเล่นแทะที่ต้องเปลี่ยนบ่อย, ค่ารักษาฟัน
+  common_mistakes: อาบน้ำ (ห้ามเด็ดขาด), เลี้ยงในห้องไม่มีแอร์, ไม่ให้ของแทะฟันจนฟันยาวเกิน, จับแรง (กระดูกเปราะบาง)
+  adoption_advice: อายุยืน 15-20 ปี — เตรียมใจว่าเป็นความรับผิดชอบระยะยาว
+  decision_factors: มีแอร์ตลอดเวลาไหม? รับเสียงวงล้อตอนกลางคืนได้ไหม? พร้อมดูแล 15 ปีขึ้นไปไหม?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - Chinchilla Breeders Association

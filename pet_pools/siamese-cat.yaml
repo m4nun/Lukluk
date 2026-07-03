@@ -1,0 +1,123 @@
+id: siamese-cat
+name: Siamese Cat
+species: cat
+breed_or_category: Siamese
+description: Elegant, vocal, and intensely social. Siamese cats form deep bonds with their humans and demand to be part of every conversation.
+
+mbti_label: ENFJ — The Charismatic Companion
+mbti_traits:
+  - Vocal and communicative
+  - Highly social
+  - Intelligent and curious
+  - Demanding of attention
+mbti_description: Siamese cats are the extroverts of the feline world. They talk constantly, follow you everywhere, and treat your home as their stage. They need companionship and mental stimulation — a lonely Siamese is a loud, unhappy Siamese.
+
+appearance:
+  size: medium
+  weight_range_kg: [3, 5]
+  lifespan_years: [12, 20]
+  coat_type: short, fine, color-point
+
+budget:
+  initial_cost_thb: [5000, 20000]
+  monthly_cost_thb: [1500, 3000]
+  annual_medical_thb: [3000, 8000]
+  budget_tier: medium
+
+time:
+  daily_active_minutes: [20, 40]
+  daily_attention_hours: 3
+  alone_tolerance_hours: 6
+  time_tier: medium
+
+space:
+  minimum_sq_meters: 25
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: false
+
+allergies:
+  allergen_level: medium
+  hypoallergenic: false
+  notes: Produce Fel d 1 allergen like most cats. Not hypoallergenic.
+
+noise:
+  noise_level: very_vocal
+  barking_or_meowing: true
+  nocturnal_noise_risk: true
+  suitable_for_apartment: false
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+  notes:
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: false
+  notes: May see small pets as prey. Good with dogs and other cats when introduced properly.
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: moderate
+  transport_notes: Small size makes transport easy. May vocalize during travel.
+
+experience:
+  experience_level: intermediate
+  notes: Their intelligence and vocal nature can be challenging. Need an owner who appreciates a talkative, demanding companion.
+
+care:
+  grooming_frequency: weekly
+  grooming_complexity: low
+  feeding_frequency_per_day: 2
+  special_diet_needs: false
+  exercise_type: interactive play, climbing, puzzle toys
+  common_health_issues:
+    - Dental disease
+    - Eye problems (crossed eyes, nystagmus)
+    - Respiratory issues
+  vet_visit_frequency: annual
+
+concerns:
+  - id: vocalization
+    title: Extremely vocal
+    severity: major
+    description: Siamese cats are famous for their loud, persistent meowing. They will talk to you constantly. Not suitable for noise-sensitive households or apartments with thin walls.
+  - id: attention_needs
+    title: High attention demands
+    severity: moderate
+    description: Siamese cats need significant daily interaction. They follow you everywhere and may become destructive or depressed if ignored. Consider two cats if you work long hours.
+  - id: nocturnal
+    title: May be active at night
+    severity: minor
+    description: Siamese cats can be nocturnal vocalizers. Evening play sessions help but may not eliminate nighttime activity.
+
+matching:
+  trait_scores:
+    budget_match: 7
+    time_match: 6
+    space_match: 9
+    allergy_match: 5
+    noise_match: 2
+    travel_match: 8
+    existing_pets_match: 7
+    beginner_match: 5
+    child_friendly: 7
+
+agent_guidance:
+  who_is_this_pet_for: Perfect for people who want an interactive, talkative companion. Ideal for homes where someone is around often — retirees, work-from-home professionals, or families with older children. Great for cat lovers who want a "dog-like" cat.
+  hidden_costs: Cat trees and climbing furniture (they need vertical space), puzzle toys for mental stimulation, potential dental care costs, a second cat as companion if you're away often.
+  common_mistakes: Getting a Siamese when you want a quiet, independent cat. Leaving them alone for long hours. Not providing enough vertical space and enrichment. Underestimating their intelligence — they learn to open doors and cabinets.
+  adoption_advice: Many Siamese cats and mixes are in rescue. Purebred Siamese from breeders should have health screening for eye and dental issues. The traditional "apple-head" Siamese tends to be quieter than the modern "wedge-head" type.
+  decision_factors: Can you handle constant vocalization? Is someone home most of the day? Do you have patience for a demanding, intelligent companion? Are your walls thick enough for apartment living?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - Cat Fanciers Association
+    - Siamese Cat Society

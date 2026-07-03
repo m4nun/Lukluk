@@ -1,0 +1,122 @@
+id: hedgehog
+name: Hedgehog
+species: small_mammal
+breed_or_category: African Pygmy Hedgehog
+description: สัตว์เงียบ ๆ หนามนิ่ม — Hedgehog เป็นเพื่อนเล็ก ๆ ที่ชอบอยู่คนเดียว แต่ถ้าคุ้นแล้วจะน่ารักและขี้เล่นมาก
+
+mbti_label: INTP — The Quiet Explorer
+mbti_traits:
+  - ชอบอยู่คนเดียว
+  - นิสัยเฉพาะตัว
+  - ขี้สงสัยตอนกลางคืน
+  - ไว้ใจยากแต่ไว้ใจแล้วรักเลย
+mbti_description: Hedgehog เป็น introvert ตัวจริง — มันต้องการเวลาในการไว้ใจเจ้าของ เมื่อไว้ใจแล้วมันจะคลายหนามและให้คุณจับได้ แต่มันก็ยังต้องการเวลาส่วนตัวอยู่ดี
+
+appearance:
+  size: small
+  weight_range_kg: [0.25, 0.5]
+  lifespan_years: [4, 6]
+  coat_type: quills (spines)
+
+budget:
+  initial_cost_thb: [3000, 8000]
+  monthly_cost_thb: [500, 1500]
+  annual_medical_thb: [3000, 8000]
+  budget_tier: low
+
+time:
+  daily_active_minutes: [10, 20]
+  daily_attention_hours: 1
+  alone_tolerance_hours: 23
+  time_tier: low
+
+space:
+  minimum_sq_meters: 1
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: true
+
+allergies:
+  allergen_level: low
+  hypoallergenic: true
+  notes: ไม่มีขน — คนแพ้สัตว์เลี้ยงส่วนใหญ่ไม่แพ้ Hedgehog
+
+noise:
+  noise_level: silent
+  barking_or_meowing: false
+  nocturnal_noise_risk: true
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+  notes: ผิดกฎหมายในบางรัฐของอเมริกาและแคลิฟอร์เนีย
+
+existing_pets:
+  dog_friendly: false
+  cat_friendly: false
+  small_pet_safe: false
+  notes: อยู่ตัวเดียวดีที่สุด
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: easy
+  transport_notes: ในกรงพกพาที่อบอุ่น
+
+experience:
+  experience_level: beginner
+  notes: เลี้ยงง่ายมาก — อาหารสำเร็จรูป วงล้อวิ่ง และบ้านอุ่น ๆ ก็พอ
+
+care:
+  grooming_frequency: ไม่ต้อง
+  grooming_complexity: low
+  feeding_frequency_per_day: 1
+  special_diet_needs: true
+  exercise_type: วงล้อวิ่ง, เดินสำรวจ
+  common_health_issues:
+    - Wobbly Hedgehog Syndrome (WHS)
+    - ไรผิวหนัง
+    - อ้วน
+  vet_visit_frequency: annual
+
+concerns:
+  - id: temperature
+    title: ต้องการความอบอุ่น
+    severity: moderate
+    description: Hedgehog ต้องการอุณหภูมิ 24-27°C — ถ้าหนาวเกินจะจำศีล (ซึ่งอันตรายในสัตว์เลี้ยง)
+  - id: lifespan
+    title: อายุสั้น
+    severity: minor
+    description: อายุเฉลี่ย 4-6 ปี — เป็นสัตว์ที่อายุสั้นที่สุดในบรรดาสัตว์เลี้ยงยอดนิยม
+  - id: solitary
+    title: ต้องเลี้ยงตัวเดียว
+    severity: minor
+    description: Hedgehog เป็นสัตว์สันโดษ — เลี้ยงรวมกันจะกัดกัน
+
+matching:
+  trait_scores:
+    budget_match: 10
+    time_match: 10
+    space_match: 10
+    allergy_match: 10
+    noise_match: 10
+    travel_match: 9
+    existing_pets_match: 2
+    beginner_match: 9
+    child_friendly: 4
+
+agent_guidance:
+  who_is_this_pet_for: คนอยู่คอนโดขนาดเล็ก, คนทำงานกลางวัน, คนที่ชอบสัตว์ที่ดูแลตัวเองได้, คนแพ้ขนสัตว์, introvert ที่อยากได้เพื่อน introvert เหมือนกัน
+  hidden_costs: แผ่นให้ความร้อนหรือโคมไฟ, วงล้อวิ่ง (ต้องเปลี่ยนเมื่อสึก), exotic vet
+  common_mistakes: คาดหวังว่ามันจะน่ากอดเหมือนหมาแมว — Hedgehog ไม่ใช่สัตว์กอด, เลี้ยงในห้องเย็นโดยไม่มีที่ให้ความอบอุ่น
+  adoption_advice: Hedgehog จากฟาร์มที่จดทะเบียนสุขภาพดีกว่า — ตรวจ WHS ในสายเลือด
+  decision_factors: รับได้ไหมที่เลี้ยงได้ 4-6 ปี? ต้องการสัตว์ที่ดูแลตัวเองได้ ไม่ต้องเล่นด้วยตลอดเวลา? อยู่คอนโดหรือห้องเล็ก?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - Hedgehog Welfare Society

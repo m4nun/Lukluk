@@ -1,0 +1,122 @@
+id: welsh-corgi
+name: Welsh Corgi (Pembroke)
+species: dog
+breed_or_category: Pembroke Welsh Corgi
+description: ขาสั้นแต่พลังงานล้น! Welsh Corgi เป็นสุนัขฉลาด แข็งแรง และชอบกิจกรรม — ตัวเล็กแต่ใจใหญ่
+
+mbti_label: ENTP — The Clever Charmer
+mbti_traits:
+  - ฉลาดและเรียนรู้เร็ว
+  - พลังงานสูง ชอบกิจกรรม
+  - ดื้อเงียบ ๆ แต่ขี้อ้อน
+  - ตื่นตัวตลอดเวลา
+mbti_description: Corgi เป็นสุนัขที่ฉลาดแบบเจ้าเล่ห์ — เรียนรู้คำสั่งได้เร็วแต่ก็รู้วิธีดื้อแบบน่ารัก พวกมันต้องการการกระตุ้นทางสมองตลอดเวลา ไม่งั้นจะเบื่อและหาทางสร้างความบันเทิงเอง (ซึ่งมักจะหมายถึงการแทะขาโต๊ะ)
+
+appearance:
+  size: small
+  weight_range_kg: [10, 14]
+  lifespan_years: [12, 15]
+  coat_type: double coat, medium-length
+
+budget:
+  initial_cost_thb: [15000, 40000]
+  monthly_cost_thb: [2000, 4000]
+  annual_medical_thb: [5000, 12000]
+  budget_tier: medium
+
+time:
+  daily_active_minutes: [30, 60]
+  daily_attention_hours: 2
+  alone_tolerance_hours: 5
+  time_tier: medium
+
+space:
+  minimum_sq_meters: 25
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: false
+
+allergies:
+  allergen_level: medium
+  hypoallergenic: false
+  notes: ผลัดขนปานกลางถึงมากตามฤดูกาล
+
+noise:
+  noise_level: moderate
+  barking_or_meowing: true
+  nocturnal_noise_risk: false
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: true
+  notes: เข้ากับสัตว์อื่นได้ดีถ้าฝึกตั้งแต่เด็ก
+
+travel:
+  travel_friendly: true
+  boarding_difficulty: easy
+  transport_notes: ขนาดเล็กพกพาสะดวก
+
+experience:
+  experience_level: intermediate
+  notes: เหมาะกับคนที่มีประสบการณ์บ้าง เพราะต้องการการกระตุ้นทางสมองและร่างกาย — ถ้าเบื่อจะดื้อและทำลายข้าวของ
+
+care:
+  grooming_frequency: 2-3 ครั้ง/สัปดาห์
+  grooming_complexity: medium
+  feeding_frequency_per_day: 2
+  special_diet_needs: true
+  exercise_type: เดิน วิ่งเล่น ฝึกคำสั่ง puzzle toy
+  common_health_issues:
+    - ข้อสะโพกเสื่อม
+    - ปัญหากระดูกสันหลัง (IVDD)
+    - อ้วนง่าย
+  vet_visit_frequency: annual
+
+concerns:
+  - id: weight_gain
+    title: อ้วนง่ายมาก
+    severity: moderate
+    description: Corgi มีแนวโน้มอ้วนง่ายเพราะขาสั้นและชอบกิน ต้องควบคุมอาหารและออกกำลังกายสม่ำเสมอ ไม่งั้นจะเกิดปัญหาข้อและหลังตามมา
+  - id: herding_instinct
+    title: สัญชาตญาณต้อนสัตว์
+    severity: minor
+    description: อาจวิ่งต้อนเด็กหรือสัตว์อื่นในบ้าน ต้องฝึกตั้งแต่เด็ก
+  - id: shedding
+    title: ผลัดขนมาก
+    severity: moderate
+    description: ขน两层ผลัดตลอดปีและหนักในช่วงผลัดขน
+
+matching:
+  trait_scores:
+    budget_match: 7
+    time_match: 5
+    space_match: 8
+    allergy_match: 4
+    noise_match: 6
+    travel_match: 9
+    existing_pets_match: 8
+    beginner_match: 5
+    child_friendly: 8
+
+agent_guidance:
+  who_is_this_pet_for: เหมาะกับคนที่มีเวลาออกกำลังกายวันละ 30-60 นาที ชอบฝึกสอนและเล่น puzzle กับสุนัข อยู่คอนโดหรือบ้านก็ได้ถ้ามีเวลาพาเดินเล่น
+  hidden_costs: ค่าควบคุมน้ำหนัก (อาหารพิเศษ), ค่าดูแลข้อและหลังระยะยาว, ของเล่น puzzle เปลี่ยนบ่อยเพราะเบื่อง่าย
+  common_mistakes: ให้อาหารมากเกินไปเพราะหมา"น่าสงสาร", ไม่กระตุ้นสมองเพียงพอทำให้เกิดพฤติกรรมทำลายข้าวของ, ไม่ฝึกตั้งแต่เด็กทำให้สัญชาตญาณต้อนสัตว์แรงเกิน
+  adoption_advice: เลือกฟาร์มที่ตรวจสุขภาพข้อสะโพกและกระดูกสันหลังพ่อแม่พันธุ์ Corgi มี 2 สายพันธุ์คือ Pembroke (หางสั้น) และ Cardigan (หางยาว)
+  decision_factors: มีเวลาเดินเล่นทุกวันไหม? ควบคุมอาหารให้ได้ไหม (อ้วนง่าย)? มีเวลาฝึกสอนและเล่น puzzle ไหม?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - American Kennel Club
+    - Pembroke Welsh Corgi Club of America

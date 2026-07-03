@@ -1,0 +1,125 @@
+id: fennec-fox
+name: Fennec Fox
+species: other
+breed_or_category: Fennec Fox
+description: สัตว์เลี้ยงแปลกสุดคิ้วท์ — Fennec Fox เป็นสุนัขจิ้งจอกทะเลทรายตัวเล็ก หูใหญ่ พลังงานสูง และฉลาดมาก
+
+mbti_label: ENTP — The Desert Trickster
+mbti_traits:
+  - ฉลาดและขี้สงสัย
+  - พลังงานสูง ซุกซน
+  - ขุดเก่ง ชอบสำรวจ
+  - ตื่นตัวตลอดเวลา
+mbti_description: Fennec Fox คือสายลมทะเลทรายในบ้านคุณ — พวกมันวิ่งเร็ว ขุดดินเร็ว และฉลาดพอที่จะเปิดล็อคกรงได้ มันไม่ใช่สัตว์เลี้ยงทั่วไป แต่เป็นเพื่อนผจญภัยที่ต้องการเจ้าของที่เข้าใจธรรมชาติของมัน
+
+appearance:
+  size: small
+  weight_range_kg: [0.7, 1.6]
+  lifespan_years: [10, 14]
+  coat_type: thick, cream-colored
+
+budget:
+  initial_cost_thb: [50000, 150000]
+  monthly_cost_thb: [3000, 6000]
+  annual_medical_thb: [5000, 15000]
+  budget_tier: very_high
+
+time:
+  daily_active_minutes: [60, 120]
+  daily_attention_hours: 3
+  alone_tolerance_hours: 4
+  time_tier: high
+
+space:
+  minimum_sq_meters: 30
+  space_tier: house
+  outdoor_required: true
+  indoor_only_ok: false
+  cage_or_enclosure_ok: true
+
+allergies:
+  allergen_level: medium
+  hypoallergenic: false
+
+noise:
+  noise_level: vocal
+  barking_or_meowing: true
+  nocturnal_noise_risk: true
+  suitable_for_apartment: false
+
+legality:
+  restricted_in_thailand: true
+  restricted_regions:
+    - หลายประเทศต้องมีใบอนุญาต
+  requires_permit: true
+  cites_protected: false
+  notes: ต้องตรวจสอบกฎหมายท้องถิ่นก่อนเลี้ยง
+
+existing_pets:
+  dog_friendly: false
+  cat_friendly: false
+  small_pet_safe: false
+  notes: สัญชาตญาณนักล่า — ไม่ควรเลี้ยงกับสัตว์เล็ก
+
+travel:
+  travel_friendly: false
+  boarding_difficulty: hard
+  transport_notes: ต้องมีใบอนุญาตเดินทาง
+
+experience:
+  experience_level: experienced
+  notes: ไม่ใช่สัตว์เลี้ยงสำหรับมือใหม่ — ต้องการความรู้และประสบการณ์เฉพาะทาง
+
+care:
+  grooming_frequency: แปรงขนสัปดาห์ละครั้ง
+  grooming_complexity: medium
+  feeding_frequency_per_day: 2
+  special_diet_needs: true
+  exercise_type: วิ่ง ขุด ปีนป่าย
+  common_health_issues:
+    - โรคหัวใจ
+    - โรคลำไส้
+  vet_visit_frequency: ทุก 6 เดือน
+
+concerns:
+  - id: legality
+    title: ผิดกฎหมายในบางพื้นที่
+    severity: major
+    description: Fennec Fox ต้องมีใบอนุญาตในหลายประเทศและบางพื้นที่ห้ามเลี้ยงเด็ดขาด — ตรวจสอบกฎหมายก่อน
+  - id: enclosure
+    title: ต้องการกรงใหญ่และแน่นหนา
+    severity: major
+    description: Fennec Fox ขุดเก่งและปีนเก่ง — กรงต้องฝังลึก ปิดมิดชิด และแข็งแรง ไม่งั้นหนีแน่
+  - id: noise
+    title: เสียงดัง
+    severity: moderate
+    description: มีเสียงร้องหลายแบบทั้งเห่า หอน กรี๊ด — ไม่เหมาะกับคนชอบความเงียบ
+  - id: exotic_vet
+    title: ต้องการสัตว์แพทย์เฉพาะทาง
+    severity: major
+    description: หายากมากในไทย — ต้องหาสัตว์แพทย์ที่เชี่ยวชาญ exotic animals ก่อนตัดสินใจเลี้ยง
+
+matching:
+  trait_scores:
+    budget_match: 1
+    time_match: 2
+    space_match: 2
+    allergy_match: 4
+    noise_match: 1
+    travel_match: 2
+    existing_pets_match: 1
+    beginner_match: 1
+    child_friendly: 3
+
+agent_guidance:
+  who_is_this_pet_for: คนมีประสบการณ์เลี้ยง exotic สูง, บ้านมีพื้นที่ในร่มและกลางแจ้ง, คนที่พร้อมใช้เวลาและเงินมหาศาล — ไม่เหมาะกับคนทั่วไป
+  hidden_costs: ค่าใบอนุญาต, ค่ากรงขนาดใหญ่คุณภาพดี, exotic vet (แพงและหายาก), ค่าอาหารสด, ค่าดัดแปลงบ้าน
+  common_mistakes: คิดว่าเลี้ยงง่ายเพราะตัวเล็ก, เลี้ยงในกรงเล็กหรือคอนโด, ไม่ศึกษากฎหมายก่อนซื้อ, ใช้สัตว์แพทย์ทั่วไป
+  adoption_advice: ควรรับจากศูนย์ช่วยเหลือ exotic ที่ถูกกฎหมายเท่านั้น — ห้ามซื้อจากตลาดมืดหรือ smuggler
+  decision_factors: ตรวจสอบกฎหมายในพื้นที่แล้วหรือยัง? หา exotic vet ได้ไหม? มีพื้นที่และเวลาเพียงพอหรือไม่? พร้อมรับผิดชอบ 10-14 ปีไหม? — Lukluk แนะนำให้พิจารณาสัตว์เลี้ยงอื่นที่เหมาะกับชีวิตคุณมากกว่า
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - Exotic Animal Veterinarians Association

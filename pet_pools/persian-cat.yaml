@@ -1,0 +1,124 @@
+id: persian-cat
+name: Persian Cat
+species: cat
+breed_or_category: Persian
+description: Calm, dignified, and luxurious. Persian cats are the aristocracy of the cat world — quiet, gentle, and perfectly content lounging in sunbeams.
+
+mbti_label: ISFP — The Gentle Artist
+mbti_traits:
+  - Quiet and gentle
+  - Affectionate on their terms
+  - Predictable and routine-loving
+  - Calm and dignified
+mbti_description: Persian cats are the introverts who prefer peaceful environments and gentle attention. They are not demanding but appreciate quiet companionship. They thrive on routine and predictable, calm households.
+
+appearance:
+  size: medium
+  weight_range_kg: [3, 5.5]
+  lifespan_years: [12, 17]
+  coat_type: long, thick, silky
+
+budget:
+  initial_cost_thb: [10000, 35000]
+  monthly_cost_thb: [2000, 4000]
+  annual_medical_thb: [5000, 12000]
+  budget_tier: medium
+
+time:
+  daily_active_minutes: [10, 20]
+  daily_attention_hours: 1
+  alone_tolerance_hours: 8
+  time_tier: low
+
+space:
+  minimum_sq_meters: 20
+  space_tier: apartment
+  outdoor_required: false
+  indoor_only_ok: true
+  cage_or_enclosure_ok: false
+
+allergies:
+  allergen_level: medium
+  hypoallergenic: false
+  notes: Long coat traps dander. Regular grooming helps but does not eliminate allergens.
+
+noise:
+  noise_level: quiet
+  barking_or_meowing: false
+  nocturnal_noise_risk: false
+  suitable_for_apartment: true
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+  notes:
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: true
+  small_pet_safe: true
+  notes: Peaceful with other calm pets. May be overwhelmed by energetic animals.
+
+travel:
+  travel_friendly: false
+  boarding_difficulty: hard
+  transport_notes: Stress easily during travel. Their flat face makes air travel risky.
+
+experience:
+  experience_level: intermediate
+  notes: Daily grooming commitment and potential eye/breathing issues make them better for owners with some experience.
+
+care:
+  grooming_frequency: daily
+  grooming_complexity: high
+  feeding_frequency_per_day: 2
+  special_diet_needs: true
+  exercise_type: gentle play, laser pointer, scratching posts
+  common_health_issues:
+    - Brachycephalic syndrome
+    - Polycystic kidney disease
+    - Eye discharge and tear staining
+    - Dental disease
+  vet_visit_frequency: every 6 months
+
+concerns:
+  - id: grooming
+    title: Daily grooming required
+    severity: major
+    description: Their long coat mats easily without daily brushing. Professional grooming every 4-6 weeks is recommended. Matted fur causes skin problems and pain.
+  - id: health_eyes
+    title: Eye and breathing issues
+    severity: moderate
+    description: Flat-faced (brachycephalic) Persians are prone to eye discharge, tear staining, and breathing difficulties. Daily eye cleaning is necessary.
+  - id: kidney_disease
+    title: Risk of kidney disease
+    severity: moderate
+    description: Persians have a genetic predisposition to polycystic kidney disease (PKD). Reputable breeders screen for this. Annual blood work is recommended.
+
+matching:
+  trait_scores:
+    budget_match: 6
+    time_match: 8
+    space_match: 10
+    allergy_match: 4
+    noise_match: 10
+    travel_match: 4
+    existing_pets_match: 8
+    beginner_match: 4
+    child_friendly: 6
+
+agent_guidance:
+  who_is_this_pet_for: Ideal for calm households, apartment dwellers, and people who want a low-energy, quiet companion. Perfect for people who enjoy grooming rituals and have time for daily coat care. Great for retirees and quiet professionals.
+  hidden_costs: Professional grooming every 4-6 weeks, special eye cleaning products, air conditioning (they overheat easily), elevated food bowls for flat-faced cats.
+  common_mistakes: Underestimating the daily grooming commitment. Not screening breeders for PKD. Assuming all cats are low-maintenance — Persians require significant daily care.
+  adoption_advice: Many Persian cats are in breed-specific rescue. Insist on PKD screening from breeders. Look for "doll-face" Persians if you're concerned about extreme brachycephalic features.
+  decision_factors: Can you commit to daily brushing? Are you willing to clean eyes daily? Do you have budget for professional grooming? Can you keep your home cool?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - Cat Fanciers Association
+    - Persian Breed Council

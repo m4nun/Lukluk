@@ -1,0 +1,126 @@
+id: siberian-husky
+name: Siberian Husky
+species: dog
+breed_or_category: Siberian Husky
+description: สุนัขพลังงานสูงระดับตำนาน — Husky เป็นนักวิ่ง นักขุด และนักแหกบ้านมืออาชีพ ฉลาดมากแต่ดื้อพอ ๆ กัน
+
+mbti_label: ENFP — The Free Spirit
+mbti_traits:
+  - พลังงานสูงมาก
+  - รักอิสระ ดื้อเงียบ
+  - เป็นมิตรกับทุกคน
+  - ฉลาดแต่ไม่เชื่อฟังง่าย
+mbti_description: Husky คือสายลมในร่างหมา — พวกมันเกิดมาเพื่อวิ่ง สำรวจ และไม่ยอมถูกขังในกรอบ พวกมันรักมนุษย์ทุกคน (แย่ตรงที่เป็นโจรก็รัก) และมีพลังเหลือล้นที่ต้องปลดปล่อยทุกวัน
+
+appearance:
+  size: medium
+  weight_range_kg: [16, 27]
+  lifespan_years: [12, 14]
+  coat_type: double coat, thick
+
+budget:
+  initial_cost_thb: [15000, 40000]
+  monthly_cost_thb: [3000, 5000]
+  annual_medical_thb: [5000, 10000]
+  budget_tier: high
+
+time:
+  daily_active_minutes: [60, 120]
+  daily_attention_hours: 2
+  alone_tolerance_hours: 4
+  time_tier: high
+
+space:
+  minimum_sq_meters: 50
+  space_tier: house
+  outdoor_required: true
+  indoor_only_ok: false
+  cage_or_enclosure_ok: false
+
+allergies:
+  allergen_level: high
+  hypoallergenic: false
+  notes: ผลัดขนมากเป็นประวัติการณ์ ปีละ 2 ครั้งหนักมาก ("blowing coat")
+
+noise:
+  noise_level: vocal
+  barking_or_meowing: true
+  nocturnal_noise_risk: true
+  suitable_for_apartment: false
+
+legality:
+  restricted_in_thailand: false
+  restricted_regions: []
+  requires_permit: false
+  cites_protected: false
+
+existing_pets:
+  dog_friendly: true
+  cat_friendly: false
+  small_pet_safe: false
+  notes: สัญชาตญาณล่าสัตว์สูง — ไม่ควรไว้ใจกับแมวหรือสัตว์เล็ก
+
+travel:
+  travel_friendly: false
+  boarding_difficulty: hard
+  transport_notes: เป็นนักหนี — ต้องระวังเป็นพิเศษเวลาพาไปที่ใหม่
+
+experience:
+  experience_level: experienced
+  notes: ไม่เหมาะกับมือใหม่เด็ดขาด — Husky ต้องการเจ้าของที่มีประสบการณ์ อดทน และเข้าใจว่าพวกมันเกิดมาเพื่อวิ่งและแหกคอก
+
+care:
+  grooming_frequency: 2-3 ครั้ง/สัปดาห์ (ทุกวันช่วงผลัดขน)
+  grooming_complexity: high
+  feeding_frequency_per_day: 2
+  special_diet_needs: false
+  exercise_type: วิ่งระยะไกล ปั่นจักรยานคู่ sledding
+  common_health_issues:
+    - ข้อสะโพกเสื่อม
+    - ปัญหาตา (ต้อกระจก)
+    - ภาวะขาดสังกะสี (Zinc deficiency)
+  vet_visit_frequency: annual
+
+concerns:
+  - id: escaping
+    title: นักแหกบ้านมืออาชีพ
+    severity: major
+    description: Husky เป็นนักปีนรั้ว ขุดดิน และเปิดประตูระดับอัจฉริยะ ต้องการรั้วสูง ฝังลึก และล็อคที่มันเปิดไม่ได้ ไม่งั้นเตรียมตามหาหมาทั่วหมู่บ้าน
+  - id: energy
+    title: พลังงานมหาศาล
+    severity: major
+    description: ต้องการวิ่งอย่างน้อย 1-2 ชั่วโมง/วัน ถ้าไม่ได้ระบายพลังงานจะขุดบ้าน ขย้ำข้าวของ และหอนประท้วง
+  - id: shedding
+    title: ผลัดขนหนักมาก
+    severity: moderate
+    description: ผลัดขนตลอดปี และจะมีช่วง "blowing coat" ปีละ 2 ครั้งที่ขนร่วงเป็นก้อน — เตรียมเครื่องดูดฝุ่นเกรดอุตสาหกรรม
+  - id: heat
+    title: ไม่ทนร้อน
+    severity: major
+    description: เป็นหมาหนาว — ในอากาศร้อนของไทยต้องมีแอร์และร่มเงาตลอด
+
+matching:
+  trait_scores:
+    budget_match: 5
+    time_match: 2
+    space_match: 3
+    allergy_match: 2
+    noise_match: 3
+    travel_match: 2
+    existing_pets_match: 3
+    beginner_match: 1
+    child_friendly: 7
+
+agent_guidance:
+  who_is_this_pet_for: เหมาะกับนักวิ่งหรือนักปั่นจักรยานที่ต้องการเพื่อนซ้อม บ้านมีสนามใหญ่และรั้วสูงแน่นหนา คนมีประสบการณ์เลี้ยงสุนัข — ไม่เหมาะกับมือใหม่ คนอยู่คอนโด หรือคนไม่ค่อยอยู่บ้าน
+  hidden_costs: ค่าซ่อมรั้ว, ค่าซื้อเครื่องดูดฝุ่นดี ๆ, ค่าแอร์ (ต้องเปิดทั้งวันในหน้าร้อน), ค่าตามหาหมาตอนแหกบ้าน
+  common_mistakes: เลี้ยงในคอนโด, ไว้ใจให้อยู่บ้านคนเดียว, ไม่ออกกำลังกายเพียงพอแล้วสงสัยว่าทำไมบ้านพัง, ใช้รั้วเตี้ย
+  adoption_advice: รับจากศูนย์ช่วยเหลือ Husky ที่มีเยอะเพราะคนเลี้ยงไม่ไหวเยอะมาก ตรวจสุขภาพตาและข้อสะโพก
+  decision_factors: มีเวลาวิ่ง 1-2 ชั่วโมงทุกวันไหม? บ้านมีรั้วสูงเกิน 2 เมตรไหม? รับมือกับการผลัดขนระดับ disaster ได้ไหม? เตรียมใจว่ามันจะแหกบ้านอย่างน้อย 1 ครั้ง?
+
+meta:
+  version: "1.0.0"
+  last_updated: "2026-07-03"
+  sources:
+    - American Kennel Club
+    - Siberian Husky Club of America
