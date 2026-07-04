@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { FIXED_QUESTIONS } from "@/lib/quiz/questions";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle, PiggyBank, Clock, Home, Siren, Plane, Volume2, PawPrint, GraduationCap, Baby, Check, X, Minus } from "lucide-react";
 
 const TOTAL = FIXED_QUESTIONS.length;
 const MAX_FOLLOW_UPS = 5;
 
 const QUESTION_ICONS = [
-  "💰", "⏰", "🏠", "🤧", "✈️",
-  "🔊", "🐾", "🎓", "👶",
+  PiggyBank, Clock, Home, Siren, Plane,
+  Volume2, PawPrint, GraduationCap, Baby,
 ];
 
 export default function QuizPage() {
@@ -48,6 +48,8 @@ export default function QuizPage() {
     setGeneratingFollowUp(true);
     setError("");
 
+    let hasFollowUp = false;
+
     try {
       const res = await fetch("/api/match/follow-up", {
         method: "POST",
@@ -62,22 +64,18 @@ export default function QuizPage() {
           setFollowUpAnswers(new Array(data.followUpQuestions.length).fill(""));
           setShowFollowUp(true);
           setFinished(false);
-          return;
-        }
-
-        if (data.matches?.length) {
-          router.push(`/result/${data.matchResultId || "latest"}`);
-          return;
+          hasFollowUp = true;
         }
       }
     } catch {
       // follow-up failed, proceed to match
-    } finally {
-      setGeneratingFollowUp(false);
     }
 
-    // If no follow-ups, go straight to match
-    handleSubmit();
+    setGeneratingFollowUp(false);
+
+    if (!hasFollowUp) {
+      handleSubmit();
+    }
   }
 
   async function handleSubmit() {
@@ -96,7 +94,9 @@ export default function QuizPage() {
       });
       if (!res.ok) throw new Error("Match failed");
       const data = await res.json();
-      router.push(`/result/${data.matchResultId}`);
+      sessionStorage.setItem("lukluk_matches", JSON.stringify(data.matches));
+      sessionStorage.setItem("lukluk_match_id", data.matchResultId || "latest");
+      router.push(`/result/${data.matchResultId || "latest"}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
       setLoading(false);
@@ -114,7 +114,6 @@ export default function QuizPage() {
     }
   }
 
-  // Follow-up question screen
   if (showFollowUp && followUpStep < followUpQuestions.length) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
@@ -142,8 +141,10 @@ export default function QuizPage() {
         </div>
 
         <div className="mx-auto flex w-full max-w-[640px] flex-1 flex-col items-center px-6 pt-16 pb-16">
-          <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-full bg-warning/10 text-2xl">
-            💡
+          <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-full bg-warning/10">
+            <svg className="h-6 w-6 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
           </div>
 
           <h2 className="max-w-[520px] text-center text-2xl font-bold leading-snug tracking-tight">
@@ -159,21 +160,21 @@ export default function QuizPage() {
               onClick={() => handleFollowUpAnswer("Yes")}
               className="flex items-center gap-4 rounded-2xl border-2 border-transparent bg-card px-6 py-5 text-left text-[15px] font-medium transition-all duration-300 shadow-sm hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-success text-xl">✓</span>
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-success"><Check className="h-5 w-5" /></span>
               <span>Yes</span>
             </button>
             <button
               onClick={() => handleFollowUpAnswer("No")}
               className="flex items-center gap-4 rounded-2xl border-2 border-transparent bg-card px-6 py-5 text-left text-[15px] font-medium transition-all duration-300 shadow-sm hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive text-xl">✗</span>
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive"><X className="h-5 w-5" /></span>
               <span>No</span>
             </button>
             <button
               onClick={() => handleFollowUpAnswer("Not sure")}
               className="flex items-center gap-4 rounded-2xl border-2 border-transparent bg-card px-6 py-5 text-left text-[15px] font-medium transition-all duration-300 shadow-sm hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground text-xl">~</span>
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"><Minus className="h-5 w-5" /></span>
               <span>Not sure</span>
             </button>
             <button
@@ -194,7 +195,6 @@ export default function QuizPage() {
     );
   }
 
-  // Finish screen (no follow-ups generated)
   if (finished) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
@@ -222,7 +222,7 @@ export default function QuizPage() {
               <div className="animate-scale-in mb-6">
                 <CheckCircle className="h-24 w-24 text-success" style={{ fillOpacity: 0.1 }} />
               </div>
-              <h2 className="text-2xl font-bold">All done! 🎉</h2>
+              <h2 className="text-2xl font-bold">All done!</h2>
               <p className="mt-2 max-w-sm text-muted-foreground">
                 You've answered all {TOTAL} questions. Let's find the pet types that truly fit your life.
               </p>
@@ -258,7 +258,6 @@ export default function QuizPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-[640px] items-center justify-between px-6">
           <button
@@ -282,7 +281,6 @@ export default function QuizPage() {
         </div>
       </nav>
 
-      {/* Progress bar */}
       <div className="mx-auto w-full max-w-[640px] px-6 pt-4">
         <div className="flex items-center justify-between mb-2.5">
           <span className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
@@ -300,10 +298,12 @@ export default function QuizPage() {
         </div>
       </div>
 
-      {/* Question */}
       <div className="mx-auto flex w-full max-w-[640px] flex-1 flex-col items-center px-6 pt-12 pb-16">
-        <div className="mb-10 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
-          {QUESTION_ICONS[step % QUESTION_ICONS.length]}
+        <div className="mb-10 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+          {(() => {
+            const Icon = QUESTION_ICONS[step % QUESTION_ICONS.length];
+            return <Icon className="h-6 w-6 text-primary" />;
+          })()}
         </div>
 
         <h2 className="max-w-[520px] text-center text-[clamp(24px,4vw,32px)] font-bold leading-snug tracking-tight">

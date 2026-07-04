@@ -15,7 +15,7 @@ const statuses = [
   { value: "considering", label: "🤔 Considering seriously" },
   { value: "ready_to_buy", label: "✅ Ready to buy/adopt" },
   { value: "not_a_fit", label: "❌ Not a fit" },
-  { value: "already_have", label: "🏠 Already have this pet" },
+  { value: "already_have", label: "Already have this pet" },
 ] as const;
 
 type DecisionStatusValue = (typeof statuses)[number]["value"];

@@ -114,7 +114,7 @@ export default function ExperiencesPage() {
       <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-[800px] items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-            🐾 Lukluk
+            <Image src="/assets/logo.png" alt="Lukluk" width={32} height={32} /> Lukluk
           </Link>
           <div className="flex items-center gap-6">
             <Link

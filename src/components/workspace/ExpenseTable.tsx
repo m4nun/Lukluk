@@ -2,6 +2,7 @@
 
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
+import { CircleDollarSign } from "lucide-react";
 
 interface ExpenseItem {
   category: string;
@@ -41,7 +42,7 @@ export default function ExpenseTable({
   if (expenses.length === 0) {
     return (
       <EmptyState
-        icon="💰"
+        icon={<CircleDollarSign className="h-8 w-8" />}
         title="No expense estimates yet"
         description="Chat with the Decision Agent to get started with cost estimates."
         variant="gray"

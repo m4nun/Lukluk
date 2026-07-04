@@ -8,7 +8,7 @@ import AgentChat from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, PawPrint, AlertTriangle, Calendar, Utensils } from "lucide-react";
 
 interface OwnedData {
   id: string;
@@ -35,13 +35,6 @@ const DAY_ORDER = [
   "Saturday",
   "Sunday",
 ];
-
-const PET_EMOJIS: Record<string, string> = {
-  Dog: "🐕",
-  Cat: "🐈",
-  Rabbit: "🐇",
-  Hamster: "🐹",
-};
 
 function ageLabel(stage: string) {
   switch (stage) {
@@ -107,7 +100,9 @@ export default function OwnedPage() {
   if (error || !data) {
     return (
       <div className="flex h-screen flex-col items-center justify-center px-6">
-        <div className="mb-4 text-5xl">⚠️</div>
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+          <AlertTriangle className="h-8 w-8 text-destructive" />
+        </div>
         <h2 className="text-xl font-bold">Profile not found</h2>
         <p className="mt-2 text-muted-foreground">
           {error || "This pet profile may have been removed."}
@@ -122,7 +117,6 @@ export default function OwnedPage() {
     );
   }
 
-  const emoji = PET_EMOJIS[data.pet_type_profiles.species] || "🐾";
   const tabs = [
     { key: "expenses" as const, label: "Actual Expenses" },
     { key: "activity" as const, label: "Activity Schedule" },
@@ -135,7 +129,8 @@ export default function OwnedPage() {
       <nav className="flex h-[52px] shrink-0 items-center border-b border-border bg-card px-5">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-1.5 font-bold text-base">
-            🐾 Lukluk
+            <Image src="/assets/logo.png" alt="Lukluk" width={20} height={20} />
+            Lukluk
           </Link>
           <span className="block h-5 w-px bg-border" />
           <Link
@@ -147,12 +142,12 @@ export default function OwnedPage() {
           </Link>
         </div>
         <div className="mx-auto flex items-center gap-2">
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full overflow-hidden bg-success/10 text-sm">
-            {emoji}
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full overflow-hidden bg-success/10">
+            <PawPrint className="h-3.5 w-3.5 text-success" />
           </div>
           <span className="text-sm font-semibold">{data.pet_name}</span>
           <span className="inline-flex items-center gap-1 rounded-full border border-success/20 bg-success/5 px-2.5 py-0.5 text-[11px] font-semibold text-success">
-            ✓ Owned
+            Owned
           </span>
         </div>
         <div className="w-[100px]" />
@@ -164,8 +159,8 @@ export default function OwnedPage() {
         <div className="flex-1 overflow-y-auto border-r border-border p-6">
           {/* Header */}
           <div className="flex items-center gap-3.5 mb-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-success/20 bg-success/5 text-xl">
-              {emoji}
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-success/20 bg-success/5">
+              <PawPrint className="h-5 w-5 text-success" />
             </div>
             <div>
               <h1 className="text-xl font-bold">{data.pet_name}</h1>
@@ -204,7 +199,7 @@ export default function OwnedPage() {
             <div>
               {data.activity_schedule.length === 0 ? (
                 <EmptyState
-                  icon="📅"
+                  icon={<Calendar className="h-8 w-8" />}
                   title="No schedule yet"
                   description="The Care Agent can help build a daily routine for your pet."
                   variant="accent"
@@ -245,7 +240,7 @@ export default function OwnedPage() {
             <div>
               {!data.food_guide.brand ? (
                 <EmptyState
-                  icon="🍽️"
+                  icon={<Utensils className="h-8 w-8" />}
                   title="No food guide yet"
                   description="Chat with the Care Agent for personalized feeding recommendations."
                   variant="accent"

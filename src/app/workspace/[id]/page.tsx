@@ -13,7 +13,7 @@ import GuidanceGate from "@/components/workspace/GuidanceGate";
 import OwnershipForm from "@/components/workspace/OwnershipForm";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { ErrorAlert } from "@/components/layout/ErrorAlert";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertTriangle, PawPrint } from "lucide-react";
 
 interface WorkspaceData {
   id: string;
@@ -40,21 +40,6 @@ interface WorkspaceData {
   };
   has_ownership: boolean;
 }
-
-const PET_EMOJIS: Record<string, string> = {
-  Dog: "🐕",
-  Cat: "🐈",
-  Rabbit: "🐇",
-  Hamster: "🐹",
-  Gerbil: "🐭",
-  Chinchilla: "🐿️",
-  Ferret: "🦡",
-  Hedgehog: "🦔",
-  "Sugar Glider": "🦘",
-  "Fennec Fox": "🦊",
-  "Green Iguana": "🦎",
-  Axolotl: "🐟",
-};
 
 export default function WorkspacePage() {
   const params = useParams<{ id: string }>();
@@ -164,7 +149,9 @@ export default function WorkspacePage() {
   if (error || !data) {
     return (
       <div className="flex h-screen flex-col items-center justify-center px-6">
-        <div className="mb-4 text-5xl">⚠️</div>
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+          <AlertTriangle className="h-8 w-8 text-destructive" />
+        </div>
         <h2 className="text-xl font-bold">Workspace not found</h2>
         <p className="mt-2 max-w-sm text-center text-muted-foreground">
           {error || "This workspace may have been deleted."}
@@ -191,9 +178,7 @@ export default function WorkspacePage() {
           Dashboard
         </Link>
         <div className="mx-auto flex items-center gap-2">
-          <span className="text-lg">
-            {PET_EMOJIS[data.pet_type_profiles.species] || "🐾"}
-          </span>
+          <PawPrint className="h-5 w-5 text-muted-foreground" />
           <span className="text-sm font-semibold">
             {data.planning_name || data.pet_type_profiles.name}
           </span>
@@ -211,8 +196,8 @@ export default function WorkspacePage() {
           {/* Header */}
           <div className="px-6 pt-5">
             <div className="flex items-center gap-3 mb-1">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-primary/5 text-2xl">
-                {PET_EMOJIS[data.pet_type_profiles.species] || "🐾"}
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-primary/5">
+                <PawPrint className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h1 className="text-lg font-bold">

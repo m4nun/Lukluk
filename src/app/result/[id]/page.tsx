@@ -3,10 +3,11 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import MatchCard from "@/components/match-card/MatchCard";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { ErrorAlert } from "@/components/layout/ErrorAlert";
-import { ArrowLeft, RefreshCw, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, RefreshCw, Check, Loader2, Shield, Brain } from "lucide-react";
 
 interface MatchEntry {
   pet_type_profile_id: string;
@@ -41,6 +42,16 @@ const PET_LOGOS: Record<string, string> = {
   "rabbit": "/assets/PetLogo/rabbit/1.png",
 };
 
+function loadFromSession(): MatchEntry[] | null {
+  try {
+    const raw = sessionStorage.getItem("lukluk_matches");
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 export default function ResultPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -52,19 +63,32 @@ export default function ResultPage() {
   async function load() {
     setLoading(true);
     setError("");
+
+    // Try session storage first (guest flow)
+    const sessionMatches = loadFromSession();
+    if (sessionMatches && sessionMatches.length > 0) {
+      setMatches(sessionMatches);
+      setLoading(false);
+      return;
+    }
+
+    // Try API (authenticated flow)
     try {
       const res = await fetch(`/api/match/${params.id}`);
       if (res.ok) {
         const data = await res.json();
-        setMatches(data.top_matches || []);
-      } else {
-        setError("Could not load matches. The result may have been removed.");
+        if (data.top_matches?.length) {
+          setMatches(data.top_matches);
+          setLoading(false);
+          return;
+        }
       }
     } catch {
-      setError("Could not connect. Check your internet and try again.");
-    } finally {
-      setLoading(false);
+      // API unavailable
     }
+
+    setError("Could not load matches. The result may have expired.");
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -96,13 +120,19 @@ export default function ResultPage() {
     return "text-muted-foreground";
   }
 
+  function fitBarColor(score: number) {
+    if (score >= 80) return "bg-success";
+    if (score >= 60) return "bg-warning";
+    return "bg-muted-foreground";
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[800px] items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
-            🐾 Lukluk
+          <Link href="/" className="flex items-center gap-2.5 text-xl font-bold tracking-tight group">
+            <Image src="/assets/logo.png" alt="Lukluk" width={32} height={32} className="transition-transform duration-300 group-hover:rotate-[-3deg] group-hover:scale-105" />
+            Lukluk
           </Link>
           <Link
             href="/quiz"
@@ -126,7 +156,7 @@ export default function ResultPage() {
           {matches.length > 0 && <MatchCard matches={matches} />}
         </div>
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
           <div className="mt-8 space-y-5">
             {[1, 2, 3].map((i) => (
@@ -143,12 +173,10 @@ export default function ResultPage() {
           </div>
         )}
 
-        {/* Error State */}
+        {/* Error */}
         {error && !loading && (
           <div className="mt-12 flex flex-col items-center text-center">
-            <div className="mb-4 text-5xl">⚠️</div>
-            <h2 className="text-xl font-bold">Could not load matches</h2>
-            <p className="mt-2 text-muted-foreground">{error}</p>
+            <ErrorAlert>{error}</ErrorAlert>
             <button
               onClick={load}
               className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold transition-all hover:border-foreground/20 hover:-translate-y-px"
@@ -172,12 +200,12 @@ export default function ResultPage() {
                 }`}
                 style={{ animationDelay: `${i * 100}ms` }}
               >
-                {/* Rank badge */}
+                {/* Rank badge with pet image */}
                 <div
                   className={`flex shrink-0 items-center justify-center overflow-hidden rounded-xl ${
                     m.rank === 1
-                      ? "h-16 w-16 bg-primary text-xl text-primary-foreground shadow-lg shadow-primary/25"
-                      : "h-14 w-14 bg-primary/10 text-lg text-primary"
+                      ? "h-16 w-16 shadow-lg shadow-primary/25"
+                      : "h-14 w-14"
                   } font-bold`}
                 >
                   {PET_LOGOS[m.pet_type_profile_id] ? (
@@ -187,42 +215,53 @@ export default function ResultPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    `#${m.rank}`
+                    <span className={m.rank === 1 ? "bg-primary text-primary-foreground w-full h-full flex items-center justify-center text-xl" : "bg-primary/10 text-primary w-full h-full flex items-center justify-center text-lg"}>
+                      #{m.rank}
+                    </span>
                   )}
                 </div>
 
                 {/* Match info */}
                 <div className="flex-1 min-w-0">
-                  <h3
-                    className={`font-bold tracking-tight ${
-                      m.rank === 1 ? "text-2xl" : "text-xl"
-                    }`}
-                  >
-                    {m.pet_name || m.pet_type_profile_id}
-                  </h3>
+                  <div className="flex items-center gap-3">
+                    <h3
+                      className={`font-bold tracking-tight ${
+                        m.rank === 1 ? "text-2xl" : "text-xl"
+                      }`}
+                    >
+                      {m.pet_name || m.pet_type_profile_id}
+                    </h3>
+                    {m.rank === 1 && (
+                      <span className="inline-flex rounded-full bg-primary/10 px-3 py-0.5 text-[11px] font-bold uppercase tracking-widest text-primary">
+                        Best Match
+                      </span>
+                    )}
+                  </div>
                   {m.species && (
                     <span className="text-sm text-muted-foreground">{m.species}</span>
                   )}
 
                   {/* Score bars */}
-                  <div className="mt-4 flex flex-wrap gap-5">
-                    <div className="min-w-[140px]">
-                      <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        <span>Fit</span>
+                  <div className="mt-4 flex flex-wrap gap-6">
+                    <div className="min-w-[160px]">
+                      <div className="mb-1.5 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        <Shield className="h-3.5 w-3.5" />
+                        Fit
                         <span className={fitColor(m.responsible_fit_score)}>
                           {m.responsible_fit_score}%
                         </span>
                       </div>
                       <div className="h-2 rounded-full bg-border overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-success transition-all duration-700"
+                          className={`h-full rounded-full ${fitBarColor(m.responsible_fit_score)} transition-all duration-700`}
                           style={{ width: `${m.responsible_fit_score}%` }}
                         />
                       </div>
                     </div>
-                    <div className="min-w-[140px]">
-                      <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                        <span>MBTI</span>
+                    <div className="min-w-[160px]">
+                      <div className="mb-1.5 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        <Brain className="h-3.5 w-3.5" />
+                        MBTI
                         <span>{m.mbti_match_score}%</span>
                       </div>
                       <div className="h-2 rounded-full bg-border overflow-hidden">
@@ -249,10 +288,12 @@ export default function ResultPage() {
           </div>
         )}
 
-        {/* Empty state */}
+        {/* Empty state — no matches, no error */}
         {!loading && !error && matches.length === 0 && (
           <div className="mt-12 flex flex-col items-center text-center">
-            <div className="mb-4 text-5xl">📋</div>
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <Shield className="h-8 w-8 text-muted-foreground" />
+            </div>
             <h2 className="text-xl font-bold">Take the quiz first</h2>
             <p className="mt-2 text-muted-foreground">
               You need to complete the Fit Quiz before viewing your matches.
@@ -303,7 +344,7 @@ export default function ResultPage() {
       </div>
 
       <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-        © 2026 Lukluk. All rights reserved.
+        &copy; 2026 Lukluk. All rights reserved.
       </footer>
     </div>
   );

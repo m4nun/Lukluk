@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Clock, Home, PiggyBank, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Clock, Home, PiggyBank, AlertTriangle, PawPrint } from "lucide-react";
 
 const PET_LOGOS: Record<string, string> = {
   "golden-retriever": "/assets/PetLogo/golden-retriever/1.png",
@@ -23,22 +23,6 @@ const PET_LOGOS: Record<string, string> = {
   "gerbil": "/assets/PetLogo/gerbil/1.png",
   "sugar-glider": "/assets/PetLogo/sugar-glider/1.png",
   "rabbit": "/assets/PetLogo/rabbit/1.png",
-};
-
-const SPECIES_EMOJI: Record<string, string> = {
-  dog: "🐕",
-  cat: "🐈",
-  rabbit: "🐰",
-  hamster: "🐹",
-  gerbil: "🐭",
-  chinchilla: "🐿️",
-  ferret: "🦡",
-  hedgehog: "🦔",
-  "small_mammal": "🐾",
-  reptile: "🦎",
-  fish: "🐟",
-  bird: "🐦",
-  other: "🐾",
 };
 
 const BUDGET_LABELS: Record<string, string> = {
@@ -187,7 +171,6 @@ export default async function PetDetailPage({
 
   const profile = { ...pet, experiences: experiences || [] } as PetProfile;
   const logoSrc = PET_LOGOS[slug];
-  const emoji = SPECIES_EMOJI[profile.species] || "🐾";
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -215,7 +198,7 @@ export default async function PetDetailPage({
             {logoSrc ? (
               <Image src={logoSrc} alt={profile.name} width={80} height={80} className="object-cover" />
             ) : (
-              <span className="text-3xl">{emoji}</span>
+              <PawPrint className="h-10 w-10 text-muted-foreground" />
             )}
           </div>
           <div>

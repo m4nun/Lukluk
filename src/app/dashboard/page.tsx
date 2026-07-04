@@ -7,7 +7,7 @@ import Image from "next/image";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { ErrorAlert } from "@/components/layout/ErrorAlert";
-import { ChevronRight, RefreshCw } from "lucide-react";
+import { ChevronRight, RefreshCw, PawPrint, Home } from "lucide-react";
 
 interface PlanningProfile {
   id: string;
@@ -148,7 +148,7 @@ export default function DashboardPage() {
         {!loading && !error && profiles.length === 0 && (
           <div className="mt-8">
             <EmptyState
-              icon="🐾"
+              icon={<PawPrint className="h-8 w-8" />}
               title="No workspaces yet"
               description="Take the Fit Quiz to discover your top pet matches, then create a workspace to explore them in depth."
               ctaLabel="Take the Quiz"
@@ -179,7 +179,7 @@ export default function DashboardPage() {
                     {logoSrc ? (
                       <Image src={logoSrc} alt="" width={52} height={52} className="object-cover" />
                     ) : (
-                      <span className="text-2xl">🐾</span>
+                      <PawPrint className="h-6 w-6 text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -196,7 +196,9 @@ export default function DashboardPage() {
                           : statusBadgeStyles[prof.decision_status] || "bg-muted text-muted-foreground"
                       }`}
                     >
-                      {prof.has_ownership ? "🏠 Owned" : statusLabels[prof.decision_status] || prof.decision_status}
+                      {prof.has_ownership ? (
+                        <><Home className="h-3 w-3 inline" /> Owned</>
+                      ) : statusLabels[prof.decision_status] || prof.decision_status}
                     </span>
                   </div>
                   <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />

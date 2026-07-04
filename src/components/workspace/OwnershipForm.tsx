@@ -47,7 +47,7 @@ export default function OwnershipForm({
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <h3 className="text-base font-semibold">
-        🏠 Already have {petTypeName ? `a ${petTypeName}` : "this pet"}?
+        Already have {petTypeName ? `a ${petTypeName}` : "this pet"}?
       </h3>
       <p className="mt-1 text-sm text-muted-foreground">
         Switch to Ownership Mode to track expenses, activities, and get care

@@ -14,36 +14,43 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) {
-    return Response.json({ error: "Not authenticated" }, { status: 401 });
-  }
 
-  // Save lifestyle profile
-  const { data: profile } = await supabase
-    .from("lifestyle_profiles")
-    .insert({
-      user_id: userData.user.id,
-      quiz_answers: answers,
-      follow_ups: followUpAnswers || [],
-    })
-    .select("id")
-    .single();
-
-  // Fetch profiles then match (engine is pure)
+  // Fetch profiles — engine is pure, works for everyone
   const { data: profiles } = await supabase.from("pet_type_profiles").select("*");
   const matches = runMatch((profiles || []) as PetTypeProfile[], lifestyle);
 
-  // Save result
-  const { data: result } = await supabase
-    .from("match_results")
-    .insert({
-      user_id: userData.user.id,
-      lifestyle_profile_id: profile!.id,
-      top_matches: matches,
-    })
-    .select("id")
-    .single();
+  // Try to save for authenticated users
+  let matchResultId: string | null = null;
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user) {
+      const { data: profile } = await supabase
+        .from("lifestyle_profiles")
+        .insert({
+          user_id: userData.user.id,
+          quiz_answers: answers,
+          follow_ups: followUpAnswers || [],
+        })
+        .select("id")
+        .single();
 
-  return Response.json({ matchResultId: result!.id, matches });
+      if (profile) {
+        const { data: result } = await supabase
+          .from("match_results")
+          .insert({
+            user_id: userData.user.id,
+            lifestyle_profile_id: profile.id,
+            top_matches: matches,
+          })
+          .select("id")
+          .single();
+
+        matchResultId = result?.id ?? null;
+      }
+    }
+  } catch {
+    // Guest user — matches still returned for display
+  }
+
+  return Response.json({ matchResultId, matches });
 }

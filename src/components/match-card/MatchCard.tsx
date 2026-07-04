@@ -88,14 +88,19 @@ export default function MatchCard({ matches, userName }: MatchCardProps) {
           <div>
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
                 fontSize: 22,
                 fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
               }}
             >
-              🐾 Lukluk
+              <img
+                src="/assets/logo.png"
+                alt="Lukluk"
+                style={{ width: 24, height: 24 }}
+              />
+              Lukluk
             </div>
             <div
               style={{

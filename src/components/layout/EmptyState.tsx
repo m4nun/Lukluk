@@ -1,9 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
 
 interface EmptyStateProps {
-  icon?: string;
+  icon?: ReactNode;
   title: string;
   description: string;
   ctaLabel?: string;

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AppNav } from "@/components/layout/AppNav";
+import { ClipboardList, BarChart3, MessageSquare, Shield, Brain, Camera } from "lucide-react";
 
 export default function Home() {
   return (
@@ -15,7 +16,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-[1200px] items-center gap-16 px-6 md:grid-cols-2">
           <div className="animate-fade-in-up">
             <span className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-2 text-[13px] font-semibold text-primary backdrop-blur-sm tracking-wide">
-              🐾 Responsible Pet Matching
+              <Image src="/assets/logo.png" alt="" width={18} height={18} className="inline-block" /> Responsible Pet Matching
             </span>
             <h1 className="text-[clamp(36px,5vw,64px)] font-bold leading-[1.08] tracking-[-0.03em]">
               Find the pet that truly fits your{" "}
@@ -136,13 +137,13 @@ export default function Home() {
           </p>
           <div className="mt-16 grid gap-10 md:grid-cols-3">
             {[
-              { step: "1", title: "Take the Quiz", desc: "Answer 8 lifestyle questions about budget, time, space, and more. It takes 5 minutes.", icon: "📋" },
-              { step: "2", title: "See Your Matches", desc: "Get your top 3 responsible pet matches scored across 8 dimensions with explanations.", icon: "📊" },
-              { step: "3", title: "Chat with Agents", desc: "Talk to AI agents that help you estimate costs, review concerns, and decide confidently.", icon: "💬" },
+              { step: "1", title: "Take the Quiz", desc: "Answer 8 lifestyle questions about budget, time, space, and more. It takes 5 minutes.", Icon: ClipboardList },
+              { step: "2", title: "See Your Matches", desc: "Get your top 3 responsible pet matches scored across 8 dimensions with explanations.", Icon: BarChart3 },
+              { step: "3", title: "Chat with Agents", desc: "Talk to AI agents that help you estimate costs, review concerns, and decide confidently.", Icon: MessageSquare },
             ].map((s) => (
               <div key={s.step} className="group relative rounded-xl border border-border bg-background p-7 transition-all hover:shadow-lg hover:-translate-y-1">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-2xl">
-                  {s.icon}
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <s.Icon className="h-6 w-6 text-primary" />
                 </div>
                 <span className="text-xs font-bold uppercase tracking-widest text-primary/60">Step {s.step}</span>
                 <h3 className="mt-2 text-xl font-bold">{s.title}</h3>
@@ -218,14 +219,14 @@ export default function Home() {
           </h2>
           <div className="mt-16 grid gap-8 md:grid-cols-2">
             {[
-              { icon: "🛡️", iconColor: "text-success", iconBg: "bg-success/5", title: "Responsible Fit Scoring", desc: "Weighted dimensions covering budget, time, space, allergies, noise, travel, and compatibility with existing pets." },
-              { icon: "🧠", iconColor: "text-purple-500", iconBg: "bg-purple-500/5", title: "Personality Matching", desc: "MBTI-style personality mapping to find pets whose temperament aligns with your character." },
-              { icon: "💬", iconColor: "text-blue-500", iconBg: "bg-blue-500/5", title: "AI Decision Agent", desc: "Chat with an agent that helps estimate costs, flag concerns, and guide your adoption decision." },
-              { icon: "📸", iconColor: "text-warning", iconBg: "bg-warning/5", title: "Shareable Match Card", desc: "Export a beautiful match card to share your top pets with friends and family." },
+              { Icon: Shield, iconColor: "text-success", iconBg: "bg-success/5", title: "Responsible Fit Scoring", desc: "Weighted dimensions covering budget, time, space, allergies, noise, travel, and compatibility with existing pets." },
+              { Icon: Brain, iconColor: "text-purple-500", iconBg: "bg-purple-500/5", title: "Personality Matching", desc: "MBTI-style personality mapping to find pets whose temperament aligns with your character." },
+              { Icon: MessageSquare, iconColor: "text-blue-500", iconBg: "bg-blue-500/5", title: "AI Decision Agent", desc: "Chat with an agent that helps estimate costs, flag concerns, and guide your adoption decision." },
+              { Icon: Camera, iconColor: "text-warning", iconBg: "bg-warning/5", title: "Shareable Match Card", desc: "Export a beautiful match card to share your top pets with friends and family." },
             ].map((f) => (
               <div key={f.title} className="flex gap-5 rounded-xl border border-border bg-background p-6 transition-colors hover:border-primary/20">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${f.iconBg} text-2xl`}>
-                  {f.icon}
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${f.iconBg}`}>
+                  <f.Icon className={`h-6 w-6 ${f.iconColor}`} />
                 </div>
                 <div>
                   <h3 className="font-bold">{f.title}</h3>
