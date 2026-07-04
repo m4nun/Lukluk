@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { ErrorAlert } from "@/components/layout/ErrorAlert";

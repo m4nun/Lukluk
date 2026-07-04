@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import AgentChat from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
