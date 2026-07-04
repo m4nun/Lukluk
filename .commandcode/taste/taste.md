@@ -46,6 +46,8 @@ See [agent/taste.md](agent/taste.md)
 
 # design
 - Design work (UI components, page layouts, global states) is handled by the user — do not design or style UI. Focus on engineering tasks only. Confidence: 0.85
+- Design handoff: user provides completed designs in the @design directory and assets in @public/assets, then says to wire everything up end-to-end. Confidence: 0.70
+- The design/ folder contains ONLY HTML/styling design files. For project context like SQL schemas, config, or code, look in the main project root or sub-projects — never pull engineering artifacts from design/. Confidence: 0.75
 
 # project-artifacts
 - Keep handoff/context files in the project directory (e.g., HANDOFF.md, CONTEXT.md), not in temporary locations like %TEMP%. Confidence: 0.65
