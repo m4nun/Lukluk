@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { requireSubscriber } from "@/lib/stripe/guard";
+import { isSubscriber } from "@/lib/stripe/guard";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -8,9 +8,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const auth = await requireSubscriber();
-  if (!auth.authorized) {
-    return Response.json({ error: auth.error }, { status: 402 });
+  const subscriber = await isSubscriber();
+  if (!subscriber && process.env.STRIPE_SECRET_KEY) {
+    return Response.json({ error: "Subscription required" }, { status: 402 });
   }
 
   const body = await request.json();
