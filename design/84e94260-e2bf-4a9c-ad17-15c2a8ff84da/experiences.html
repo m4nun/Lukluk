@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukluk — Owner Experiences</title>
+
+<style>
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --fg: #1a1a2e;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --accent-light: #fff7ed;
+  --success: #22c55e;
+  --success-light: #f0fdf4;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --max-w: 800px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); color: var(--fg); background: var(--bg); line-height: 1.6; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(250,250,250,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.nav-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+.nav-logo svg { width: 24px; height: 24px; }
+.nav-links { display: flex; align-items: center; gap: 24px; }
+.nav-links a { font-size: 14px; font-weight: 500; color: var(--muted); transition: color 0.15s; }
+.nav-links a:hover, .nav-links a.active { color: var(--fg); }
+
+/* HEADER */
+.exp-header { padding: 40px 0 0; }
+.exp-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 12px; }
+.exp-header h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 800; letter-spacing: -0.03em; }
+.btn-outline { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--fg); background: var(--surface); transition: border-color 0.15s; }
+.btn-outline:hover { border-color: #cbd5e1; }
+.btn-outline.active { background: var(--fg); color: #fff; border-color: var(--fg); }
+.disclaimer { font-size: 13px; color: var(--muted); padding: 12px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin: 16px 0; display: flex; align-items: center; gap: 8px; }
+.disclaimer svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--warning); }
+
+/* FORM */
+.exp-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 32px; display: none; }
+.exp-form.visible { display: block; }
+.exp-form h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 13px; font-weight: 600; }
+.form-group input, .form-group textarea, .form-group select { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font); transition: border-color 0.15s; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+.form-group textarea { resize: vertical; min-height: 100px; }
+.form-actions { display: flex; gap: 12px; margin-top: 16px; }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--accent); color: #fff; border-radius: 999px; font-size: 14px; font-weight: 600; transition: background 0.15s; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: 1px solid var(--border); border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--fg); transition: border-color 0.15s; }
+.btn-secondary:hover { border-color: #cbd5e1; }
+
+/* EXPERIENCE CARDS */
+.exp-feed { display: flex; flex-direction: column; gap: 16px; padding-bottom: 64px; }
+.exp-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; transition: box-shadow 0.2s; }
+.exp-card:hover { box-shadow: var(--shadow-md); }
+.exp-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.exp-card h3 { font-size: 16px; font-weight: 600; }
+.exp-card-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--accent-light); color: var(--accent); border: 1px solid #fed7aa; }
+.exp-card p { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+.exp-card-footer { display: flex; align-items: center; justify-content: space-between; }
+.exp-card-date { font-size: 12px; color: var(--muted); }
+.exp-card-author { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.exp-card-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; }
+.exp-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.exp-card-pet { width: 40px; height: 40px; border-radius: var(--radius); background: var(--accent-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border: 1px solid var(--border); }
+.exp-card-pet img { width: 100%; height: 100%; object-fit: cover; }
+
+/* SKELETON */
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.skeleton { animation: pulse 2s ease-in-out infinite; background: var(--border); border-radius: var(--radius-sm); }
+.skeleton-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; }
+.skeleton-line { height: 14px; margin-bottom: 8px; border-radius: 4px; }
+.skeleton-badge { width: 80px; height: 20px; border-radius: 999px; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 64px 24px; }
+.empty-state svg { width: 48px; height: 48px; color: var(--border); margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.empty-state p { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
+
+/* FOOTER */
+.footer { padding: 32px 0; border-top: 1px solid var(--border); }
+.footer-copy { text-align: center; font-size: 12px; color: var(--muted); }
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">
+      <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="2"/><path d="M9 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z" fill="currentColor"/><circle cx="14" cy="17" r="2" fill="currentColor"/></svg>
+      Lukluk
+    </a>
+    <div class="nav-links">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/experiences" class="active">Experiences</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="exp-header">
+    <div class="exp-header-top">
+      <h1>Owner Experiences</h1>
+      <button class="btn-outline" id="toggleForm" onclick="toggleForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Share Your Experience
+      </button>
+    </div>
+    <div class="disclaimer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      These are anecdotal experiences from self-declared owners — not expert advice.
+    </div>
+  </div>
+
+  <!-- SUBMISSION FORM -->
+  <div class="exp-form" id="expForm">
+    <h3>Share Your Experience</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Pet Type</label>
+        <input type="text" placeholder="e.g., golden-retriever">
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" placeholder="Brief title for your experience">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group full">
+        <label>Your Experience</label>
+        <textarea placeholder="Share what you've learned from owning this pet type..."></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Ownership Duration</label>
+        <input type="text" placeholder="e.g., 2 years">
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;margin-top:20px;">
+          <input type="checkbox" style="width:16px;height:16px;accent-color:var(--accent);">
+          I currently own or have owned this pet
+        </label>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="submitExp()">Submit Experience</button>
+      <button class="btn-secondary" onclick="toggleForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- FEED -->
+  <div class="exp-feed" id="expFeed">
+    <div class="exp-card">
+      <div class="exp-card-top">
+        <div class="exp-card-pet"><img src="public/assets/PetLogo/golden-retriever/1.png" alt="Golden Retriever"></div>
+        <h3>Golden Retriever — worth every vacuum session</h3>
+        <span class="exp-card-badge">3 years</span>
+      </div>
+      <p>Had my Golden for 3 years now. Yes, the shedding is real — invest in a good robot vacuum. But the loyalty and companionsance is unmatched. Monthly costs run about 5,000–6,000 THB including food, grooming, and insurance. Grooming every 6 weeks is non-negotiable.</p>
+      <div class="exp-card-footer">
+        <span class="exp-card-date">2 weeks ago</span>
+        <div class="exp-card-author">
+          <div class="exp-card-avatar">👤</div>
+          <span>Priya S.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-card">
+      <div class="exp-card-top">
+        <div class="exp-card-pet"><img src="public/assets/PetLogo/siamese-cat/1.png" alt="Siamese Cat"></div>
+        <h3>Siamese Cat — not your average lap cat</h3>
+        <span class="exp-card-badge">2 years</span>
+      </div>
+      <p>Siamese cats are vocal and demand attention. If you want a quiet, independent cat, look elsewhere. But if you want a cat that actually interacts with you, they're perfect. My Mochi follows me room to room. Monthly cost around 3,500 THB. Food allergies can be an issue — mine is allergic to fish.</p>
+      <div class="exp-card-footer">
+        <span class="exp-card-date">1 month ago</span>
+        <div class="exp-card-author">
+          <div class="exp-card-avatar">👤</div>
+          <span>James T.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-card">
+      <div class="exp-card-top">
+        <div class="exp-card-pet"><img src="public/assets/PetLogo/chinchilla/1.png" alt="Chinchilla"></div>
+        <h3>Chinchilla — perfect for quiet apartments</h3>
+        <span class="exp-card-badge">1.5 years</span>
+      </div>
+      <p>If you live in a small apartment and want a quiet pet, chinchillas are amazing. They're active at dawn/dusk so they fit a 9–5 schedule well. Dust baths are fun to watch. The main cost is timothy hay and vet care — exotic vets aren't cheap. Budget about 2,500–3,000 THB/month.</p>
+      <div class="exp-card-footer">
+        <span class="exp-card-date">3 weeks ago</span>
+        <div class="exp-card-author">
+          <div class="exp-card-avatar">👤</div>
+          <span>Nisa K.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-card">
+      <div class="exp-card-top">
+        <div class="exp-card-pet"><img src="public/assets/PetLogo/welsh-corgi/1.png" alt="Welsh Corgi"></div>
+        <h3>Welsh Corgi — small dog, big personality</h3>
+        <span class="exp-card-badge">4 years</span>
+      </div>
+      <p>Corgis are smart, stubborn, and hilarious. They think they're big dogs. The herding instinct is real — mine tries to herd kids at the park. Back problems are a genuine concern, so no stairs and no jumping on furniture. Grooming is more than you'd expect. Worth it if you have the time.</p>
+      <div class="exp-card-footer">
+        <span class="exp-card-date">5 days ago</span>
+        <div class="exp-card-author">
+          <div class="exp-card-avatar">👤</div>
+          <span>Somchai P.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-copy">&copy; 2026 Lukluk. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+let formOpen = false;
+function toggleForm() {
+  formOpen = !formOpen;
+  document.getElementById('expForm').classList.toggle('visible', formOpen);
+  const btn = document.getElementById('toggleForm');
+  btn.innerHTML = formOpen 
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Share Your Experience';
+  btn.classList.toggle('active', formOpen);
+}
+
+function submitExp() {
+  alert('Experience submitted! (POST /api/experiences)');
+  toggleForm();
+}
+</script>
+</body>
+</html>

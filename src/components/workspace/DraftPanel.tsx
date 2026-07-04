@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { AgentDraft } from "@/lib/types";
+import { Check, X, Loader2 } from "lucide-react";
 
 export default function DraftPanel({ planningProfileId }: { planningProfileId: string }) {
   const [drafts, setDrafts] = useState<AgentDraft[]>([]);
@@ -41,36 +42,48 @@ export default function DraftPanel({ planningProfileId }: { planningProfileId: s
 
   if (drafts.length === 0) return null;
 
+  function draftLabel(target: string) {
+    switch (target) {
+      case "estimated_expenses": return "Expense update";
+      case "concern_checklist": return "Concern update";
+      case "decision_status": return "Status change";
+      default: return "Update";
+    }
+  }
+
   return (
-    <div style={{ padding: 12, borderTop: "1px solid #eee", background: "#fffbeb" }}>
-      <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
+    <div className="border-t border-warning/30 bg-warning/5 px-3 py-3">
+      <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+        <span className="h-2 w-2 rounded-full bg-warning" />
         Agent Proposals ({drafts.length})
       </div>
-      {drafts.map((draft) => (
-        <div key={draft.id} style={{ marginBottom: 8, padding: 8, border: "1px solid #e5e5e5", borderRadius: 6, background: "white" }}>
-          <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
-            {draft.target === "estimated_expenses" && "Expense update"}
-            {draft.target === "concern_checklist" && "Concern update"}
-            {draft.target === "decision_status" && "Status change"}
+      <div className="space-y-2">
+        {drafts.map((draft) => (
+          <div key={draft.id} className="rounded-lg border border-border bg-card p-3">
+            <div className="mb-2 text-xs text-muted-foreground">
+              {draftLabel(draft.target)}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleAction(draft.id, "confirm")}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 rounded-full bg-success px-3 py-1.5 text-xs font-semibold text-success-foreground transition-all hover:opacity-90 disabled:opacity-50"
+              >
+                <Check className="h-3 w-3" />
+                Accept
+              </button>
+              <button
+                onClick={() => handleAction(draft.id, "reject")}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold transition-all hover:border-foreground/20 disabled:opacity-50"
+              >
+                <X className="h-3 w-3" />
+                Reject
+              </button>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              onClick={() => handleAction(draft.id, "confirm")}
-              disabled={loading}
-              style={{ padding: "4px 12px", fontSize: 13 }}
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => handleAction(draft.id, "reject")}
-              disabled={loading}
-              style={{ padding: "4px 12px", fontSize: 13 }}
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

@@ -2,28 +2,218 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center min-h-screen bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-col items-center gap-10 text-center px-6 py-20 max-w-lg">
-        <h1 className="text-4xl font-bold tracking-tight text-black dark:text-zinc-50">
-          🐾 Lukluk
-        </h1>
-        <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Find the pet that truly fits your life — not just your heart.
-          Take the Fit Quiz and discover your top 3 responsible matches.
-        </p>
-        <Link
-          href="/auth/google"
-          className="flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-medium text-zinc-900 shadow ring-1 ring-zinc-200 hover:bg-zinc-50 transition-colors"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Sign in with Google
-        </Link>
-      </main>
+    <div className="flex flex-col min-h-screen">
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-6">
+          <Link href="/" className="flex items-center gap-2.5 text-xl font-bold tracking-tight">
+            🐾 Lukluk
+          </Link>
+          <div className="flex items-center gap-9">
+            <Link href="/experiences" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Experiences
+            </Link>
+            <Link
+              href="/auth/google"
+              className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition-all hover:bg-foreground/85 hover:-translate-y-px hover:shadow-md"
+            >
+              Start Quiz
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background">
+        <div className="mx-auto grid max-w-[1200px] items-center gap-16 px-6 py-24 md:grid-cols-2 md:py-32">
+          <div className="animate-fade-in-up">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-3.5 py-2 text-xs font-semibold text-primary backdrop-blur-sm">
+              🐾 Responsible Pet Matching
+            </span>
+            <h1 className="mt-7 text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl">
+              Find the pet that truly fits your{" "}
+              <span className="bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
+                life
+              </span>
+            </h1>
+            <p className="mt-6 max-w-[480px] text-lg text-muted-foreground leading-relaxed">
+              Take the Fit Quiz and discover your top 3 responsible matches.
+              Stop guessing, start matching — backed by real care data and
+              agent-powered guidance.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <Link
+                href="/auth/google"
+                className="inline-flex items-center gap-2.5 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:-translate-y-px hover:shadow-xl hover:shadow-primary/35"
+              >
+                Take the Fit Quiz
+              </Link>
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center gap-2.5 rounded-full border border-border bg-card px-7 py-3.5 text-base font-semibold transition-all hover:border-foreground/20 hover:-translate-y-px hover:shadow-md"
+              >
+                Learn More
+              </a>
+            </div>
+          </div>
+
+          {/* device mockup */}
+          <div className="hidden md:flex justify-center">
+            <div className="w-[420px] rounded-2xl overflow-hidden border border-border bg-card/50 backdrop-blur-sm shadow-xl">
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/20 border-b border-border">
+                <span className="h-2.5 w-2.5 rounded-full bg-destructive" />
+                <span className="h-2.5 w-2.5 rounded-full bg-warning" />
+                <span className="h-2.5 w-2.5 rounded-full bg-success" />
+                <span className="ml-2 h-6 flex-1 rounded-md bg-background/80 px-2.5 text-[11px] text-muted-foreground leading-6">
+                  lukluk.app
+                </span>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-lg border-2 border-primary/20">
+                    🐕
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold">Golden Retriever</h4>
+                    <span className="text-xs text-muted-foreground">Canis familiaris · ENFP</span>
+                  </div>
+                  <span className="ml-auto rounded-full bg-success/10 px-2 py-0.5 text-[9px] font-semibold text-success">Top Match</span>
+                </div>
+                <div className="space-y-2.5">
+                  {[
+                    { name: "Golden Retriever", fit: 92, img: "🦮" },
+                    { name: "Siamese Cat", fit: 85, img: "🐱" },
+                    { name: "Bulldog", fit: 78, img: "🐶" },
+                  ].map((p, i) => (
+                    <div
+                      key={p.name}
+                      className="flex items-center gap-3 rounded-lg bg-background/80 px-3 py-2.5 border border-border/50"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/5 text-lg">
+                        {p.img}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="text-xs font-semibold truncate">{p.name}</h5>
+                        <div className="mt-1 h-1 rounded-full bg-border overflow-hidden">
+                          <div className="h-full rounded-full bg-success" style={{ width: `${p.fit}%` }} />
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold tabular-nums">{p.fit}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof */}
+      <section className="border-b border-border bg-gradient-to-b from-primary/5 to-background">
+        <div className="mx-auto flex max-w-[1200px] items-center justify-center gap-14 flex-wrap px-6 py-16">
+          {[
+            { num: "19", label: "Pet Types Profiled" },
+            { num: "8+", label: "Matching Dimensions" },
+            { num: "5 min", label: "Quiz Completion" },
+            { num: "Agent", label: "Powered Guidance" },
+          ].map((s) => (
+            <div key={s.label} className="text-center">
+              <div className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                {s.num}
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="border-b border-border bg-card py-24">
+        <div className="mx-auto max-w-[1200px] px-6">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary">
+            How It Works
+          </span>
+          <h2 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
+            Find your match in{" "}
+            <span className="text-primary">three steps</span>
+          </h2>
+          <p className="mt-5 max-w-[580px] text-lg text-muted-foreground leading-relaxed">
+            No sign-up barriers. Take the quiz, see your top matches, and chat with an AI agent to decide responsibly.
+          </p>
+          <div className="mt-16 grid gap-10 md:grid-cols-3">
+            {[
+              { step: "1", title: "Take the Quiz", desc: "Answer 8 lifestyle questions about budget, time, space, and more. It takes 5 minutes.", icon: "📋" },
+              { step: "2", title: "See Your Matches", desc: "Get your top 3 responsible pet matches scored across 8 dimensions with explanations.", icon: "📊" },
+              { step: "3", title: "Chat with Agents", desc: "Talk to AI agents that help you estimate costs, review concerns, and decide confidently.", icon: "💬" },
+            ].map((s) => (
+              <div key={s.step} className="group relative rounded-xl border border-border bg-background p-7 transition-all hover:shadow-lg hover:-translate-y-1">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-2xl">
+                  {s.icon}
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-primary/60">Step {s.step}</span>
+                <h3 className="mt-2 text-xl font-bold">{s.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="bg-background py-24">
+        <div className="mx-auto max-w-[1200px] px-6">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary">
+            Features
+          </span>
+          <h2 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
+            Everything you need to choose{" "}
+            <span className="text-primary">responsibly</span>
+          </h2>
+          <div className="mt-16 grid gap-8 md:grid-cols-2">
+            {[
+              { icon: "🛡️", color: "text-success", bg: "bg-success/5", title: "Responsible Fit Scoring", desc: "Weighted dimensions covering budget, time, space, allergies, noise, travel, and compatibility with existing pets." },
+              { icon: "🧠", color: "text-purple-500", bg: "bg-purple-500/5", title: "Personality Matching", desc: "MBTI-style personality mapping to find pets whose temperament aligns with your character." },
+              { icon: "💬", color: "text-blue-500", bg: "bg-blue-500/5", title: "AI Decision Agent", desc: "Chat with an agent that helps estimate costs, flag concerns, and guide your adoption decision." },
+              { icon: "📸", color: "text-warning", bg: "bg-warning/5", title: "Shareable Match Card", desc: "Export a beautiful match card to share your top pets with friends and family." },
+            ].map((f) => (
+              <div key={f.title} className="flex gap-5 rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/20">
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${f.bg} text-2xl`}>
+                  {f.icon}
+                </div>
+                <div>
+                  <h3 className="font-bold">{f.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-background py-24">
+        <div className="mx-auto max-w-[1200px] px-6">
+          <div className="mx-auto max-w-xl rounded-2xl border border-border bg-card p-10 text-center shadow-lg">
+            <h2 className="text-2xl font-bold">Ready to find your match?</h2>
+            <p className="mt-3 text-muted-foreground">
+              Take the Fit Quiz and get your top 3 responsible pet matches in 5 minutes.
+            </p>
+            <Link
+              href="/auth/google"
+              className="mt-6 inline-flex items-center gap-2.5 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:-translate-y-px"
+            >
+              Start the Fit Quiz
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
+        <div className="mx-auto max-w-[1200px] px-6">
+          <p>© 2026 Lukluk. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }

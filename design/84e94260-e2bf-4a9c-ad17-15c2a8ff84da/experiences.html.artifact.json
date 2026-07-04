@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "experiences.html",
+  "entry": "experiences.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-07-03T17:31:39.021Z",
+  "updatedAt": "2026-07-03T17:31:39.021Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

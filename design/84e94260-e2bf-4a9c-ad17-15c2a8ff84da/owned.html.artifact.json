@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "owned.html",
+  "entry": "owned.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-07-03T17:31:36.733Z",
+  "updatedAt": "2026-07-03T17:31:36.733Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

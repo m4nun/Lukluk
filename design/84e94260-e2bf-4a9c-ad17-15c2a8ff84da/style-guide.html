@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukluk — Style Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --fg: #1a1a2e;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --accent-light: #fff7ed;
+  --success: #22c55e;
+  --success-light: #f0fdf4;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --max-w: 1200px;
+  --sidebar-w: 220px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); color: var(--fg); background: var(--bg); line-height: 1.6; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(250,250,250,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+.nav-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
+.nav-logo svg { width: 28px; height: 28px; }
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a { font-size: 14px; font-weight: 500; color: var(--muted); transition: color 0.15s; }
+.nav-links a:hover { color: var(--fg); }
+.nav-links a.active { color: var(--fg); font-weight: 600; }
+.nav-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--fg); color: #fff; border-radius: 999px; font-size: 14px; font-weight: 600; transition: background 0.15s; }
+.nav-cta:hover { background: #2d2d4a; }
+
+/* LAYOUT */
+.layout { display: flex; min-height: calc(100vh - 64px); }
+.sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); padding: 32px 0; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+.sidebar-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0 20px; margin-bottom: 12px; }
+.sidebar-link { display: block; padding: 8px 20px; font-size: 14px; color: var(--muted); transition: all 0.15s; border-left: 2px solid transparent; }
+.sidebar-link:hover { color: var(--fg); background: rgba(0,0,0,0.02); }
+.sidebar-link.active { color: var(--accent); font-weight: 600; border-left-color: var(--accent); background: var(--accent-light); }
+.main { flex: 1; padding: 40px 48px 80px; max-width: calc(100% - var(--sidebar-w)); }
+
+/* PAGE HEADER */
+.page-header { margin-bottom: 48px; }
+.page-header .tag { display: inline-flex; padding: 3px 10px; background: var(--accent-light); color: var(--accent); border-radius: 999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+.page-header h1 { font-size: clamp(24px, 4vw, 36px); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
+.page-header p { font-size: 15px; color: var(--muted); max-width: 560px; }
+
+/* SECTION */
+.showcase-section { margin-bottom: 56px; scroll-margin-top: 80px; }
+.showcase-section h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+.showcase-section .desc { font-size: 14px; color: var(--muted); margin-bottom: 16px; max-width: 560px; line-height: 1.6; }
+.showcase-divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+/* COMPONENT BOX */
+.component-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px; }
+.component-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+
+/* TABS */
+.tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+.tab-btn { padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; cursor: pointer; background: none; border-top: none; border-left: none; border-right: none; }
+.tab-btn:hover { color: var(--fg); }
+.tab-btn.active { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* 1. LOADING STATE */
+.skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton-page { max-width: 400px; }
+.skeleton-title { height: 24px; width: 60%; margin-bottom: 12px; }
+.skeleton-text { height: 14px; width: 100%; margin-bottom: 8px; }
+.skeleton-text.short { width: 70%; }
+.skeleton-btn { height: 40px; width: 120px; border-radius: 999px; margin-top: 16px; }
+.skeleton-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.skeleton-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-card-lines { display: flex; flex-direction: column; gap: 8px; }
+
+.skeleton-table { max-width: 500px; }
+.skeleton-table-row { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.skeleton-table-row:last-child { border-bottom: none; }
+.skeleton-table-cell { height: 14px; border-radius: 4px; }
+.skeleton-table-cell.w1 { flex: 2; }
+.skeleton-table-cell.w2 { flex: 1; }
+.skeleton-table-cell.w3 { flex: 1; }
+
+.spinner { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.spinner-icon { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.typing-indicator { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; border-bottom-left-radius: 4px; }
+.typing-dots { display: flex; gap: 4px; }
+.typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typing 1.4s infinite ease-in-out; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+.typing-label { font-size: 12px; color: var(--muted); margin-left: 4px; }
+
+/* 2. EMPTY STATE */
+.empty-state { text-align: center; padding: 48px 24px; }
+.empty-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 28px; }
+.empty-icon.accent { background: var(--accent-light); }
+.empty-icon.gray { background: #f1f5f9; }
+.empty-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.empty-desc { font-size: 14px; color: var(--muted); max-width: 360px; margin: 0 auto 20px; line-height: 1.5; }
+.empty-cta { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--accent); color: #fff; border-radius: 999px; font-size: 14px; font-weight: 600; transition: background 0.15s; }
+.empty-cta:hover { background: var(--accent-hover); }
+.empty-cta-outline { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: 1px solid var(--border); color: var(--fg); border-radius: 999px; font-size: 14px; font-weight: 500; transition: border-color 0.15s; }
+.empty-cta-outline:hover { border-color: #cbd5e1; }
+.welcome-illustration { font-size: 56px; margin-bottom: 20px; }
+
+/* 3. ERROR STATE */
+.alert-inline { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: var(--radius); border: 1px solid; font-size: 14px; line-height: 1.5; }
+.alert-inline svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+.alert-danger { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+.alert-warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+.alert-success { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+.alert-title { font-weight: 600; margin-bottom: 2px; }
+.alert-body { font-size: 13px; }
+.alert-close { margin-left: auto; padding: 2px; color: inherit; opacity: 0.6; }
+.alert-close:hover { opacity: 1; }
+
+.full-error { text-align: center; padding: 64px 24px; max-width: 420px; margin: 0 auto; }
+.full-error-code { font-size: 64px; font-weight: 800; color: var(--danger); letter-spacing: -0.04em; line-height: 1; margin-bottom: 16px; }
+.full-error-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.full-error-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+
+.toast-preview { display: flex; flex-direction: column; gap: 10px; max-width: 380px; }
+.toast { display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); font-size: 13px; }
+.toast-icon { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+.toast-body { flex: 1; }
+.toast-title { font-weight: 600; margin-bottom: 2px; }
+.toast-msg { color: var(--muted); font-size: 12px; }
+.toast-dismiss { padding: 2px; color: var(--muted); }
+
+/* 4. UNAUTHORIZED */
+.auth-prompt { text-align: center; padding: 48px 24px; max-width: 400px; margin: 0 auto; }
+.auth-prompt-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--fg); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+.auth-prompt-icon svg { color: #fff; width: 24px; height: 24px; }
+.auth-prompt h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.auth-prompt p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+.auth-google-btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; font-size: 14px; font-weight: 600; transition: box-shadow 0.15s, border-color 0.15s; }
+.auth-google-btn:hover { box-shadow: var(--shadow-md); border-color: #cbd5e1; }
+.auth-google-btn svg { width: 18px; height: 18px; }
+
+.redirect-preview { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; text-align: center; max-width: 400px; }
+.redirect-preview h4 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.redirect-preview p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.redirect-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #fef3c7; border: 1px solid #fde68a; border-radius: var(--radius-sm); font-size: 13px; color: #92400e; margin-bottom: 16px; }
+.redirect-bar svg { width: 16px; height: 16px; flex-shrink: 0; }
+.redirect-timer { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.cta-card { background: linear-gradient(135deg, #1a1a2e 0%, #2d2d4a 100%); color: #fff; border-radius: var(--radius-lg); padding: 40px; max-width: 480px; }
+.cta-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.cta-card > p { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 24px; }
+.cta-card ul { list-style: none; margin-bottom: 28px; }
+.cta-card li { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 14px; color: rgba(255,255,255,0.85); }
+.cta-card li svg { width: 16px; height: 16px; color: var(--success); flex-shrink: 0; }
+.cta-card .btn-cta { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: var(--accent); color: #fff; border-radius: 999px; font-size: 14px; font-weight: 600; transition: background 0.15s; border: none; cursor: pointer; }
+.cta-card .btn-cta:hover { background: var(--accent-hover); }
+
+/* DESIGN TOKENS */
+.token-section { margin-bottom: 40px; }
+.token-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.01em; }
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.swatch { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+.swatch-color { height: 72px; }
+.swatch-info { padding: 10px 12px; background: var(--surface); }
+.swatch-name { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+.swatch-hex { font-size: 12px; color: var(--muted); font-family: 'SF Mono', 'Fira Code', monospace; }
+
+.type-scale { display: flex; flex-direction: column; gap: 4px; }
+.type-row { display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.type-row:last-child { border-bottom: none; }
+.type-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; min-width: 100px; flex-shrink: 0; }
+.type-specimen { color: var(--fg); }
+.type-meta { font-size: 11px; color: var(--muted); margin-left: auto; flex-shrink: 0; }
+
+.spacing-grid { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.spacing-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.spacing-bar { background: var(--accent); border-radius: 4px; }
+.spacing-label { font-size: 11px; color: var(--muted); font-family: 'SF Mono', 'Fira Code', monospace; }
+
+.radius-grid { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+.radius-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.radius-box { background: var(--accent-light); border: 2px solid var(--accent); width: 64px; height: 64px; }
+.radius-label { font-size: 11px; color: var(--muted); font-family: 'SF Mono', 'Fira Code', monospace; }
+
+.shadow-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+.shadow-item { background: var(--surface); border-radius: var(--radius); padding: 20px; text-align: center; }
+.shadow-box { width: 48px; height: 48px; background: var(--surface); border-radius: var(--radius-sm); margin: 0 auto 12px; }
+.shadow-label { font-size: 11px; color: var(--muted); font-family: 'SF Mono', 'Fira Code', monospace; }
+
+.component-tokens { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.component-token { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.component-token-dot { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; }
+.component-token-info { flex: 1; }
+.component-token-name { font-size: 12px; font-weight: 600; }
+.component-token-val { font-size: 11px; color: var(--muted); font-family: 'SF Mono', 'Fira Code', monospace; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { max-width: 100%; padding: 24px 20px 60px; }
+  .nav-links { display: none; }
+  .swatch-grid { grid-template-columns: repeat(2, 1fr); }
+  .spacing-grid { gap: 8px; }
+}
+@media (min-width: 769px) and (max-width: 1440px) {
+  .main { padding: 32px 32px 60px; }
+}
+@media (min-width: 1441px) {
+  .main { padding: 40px 48px 80px; }
+}
+
+.footer { padding: 32px 48px; border-top: 1px solid var(--border); text-align: center; font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="2"/><path d="M9 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z" fill="currentColor"/><circle cx="14" cy="17" r="2" fill="currentColor"/></svg>
+      Lukluk
+    </a>
+    <div class="nav-links">
+      <a href="components.html">Components</a>
+      <a href="/" class="active">Style Guide</a>
+      <a href="/experiences">Experiences</a>
+    </div>
+    <a href="/" class="nav-cta">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-title">Global States</div>
+    <a href="#loading" class="sidebar-link active">Loading</a>
+    <a href="#empty" class="sidebar-link">Empty</a>
+    <a href="#error" class="sidebar-link">Error</a>
+    <a href="#unauthorized" class="sidebar-link">Unauthorized</a>
+    <div class="sidebar-title" style="margin-top:24px;">Reference</div>
+    <a href="#tokens" class="sidebar-link">Design Tokens</a>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <span class="tag">Global States + Design Tokens</span>
+      <h1>Style Guide</h1>
+      <p>Global UI states (loading, empty, error, unauthorized) and the full design token reference for the Lukluk design system.</p>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 1. LOADING STATE -->
+    <!-- ============================================ -->
+    <div class="showcase-section" id="loading">
+      <h2>Loading State</h2>
+      <p class="desc">Skeleton variants for progressive content loading. Includes page skeleton, table skeleton, inline spinner, and chat typing indicator.</p>
+
+      <div class="tab-bar" data-tab-group="loading">
+        <button class="tab-btn active" data-tab="loading-page">Page Skeleton</button>
+        <button class="tab-btn" data-tab="loading-table">Table Skeleton</button>
+        <button class="tab-btn" data-tab="loading-spinner">Inline Spinner</button>
+        <button class="tab-btn" data-tab="loading-typing">Chat Typing</button>
+      </div>
+
+      <div class="tab-panel active" id="loading-page">
+        <div class="component-box">
+          <div class="component-label">Page Skeleton — Card Layout</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
+            <div class="skeleton-card" style="flex:1;min-width:200px;">
+              <div class="skeleton-card-header">
+                <div class="skeleton skeleton-avatar"></div>
+                <div style="flex:1"><div class="skeleton skeleton-text" style="width:60%"></div><div class="skeleton skeleton-text short" style="margin-top:6px"></div></div>
+              </div>
+              <div class="skeleton-card-lines">
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text short"></div>
+              </div>
+              <div class="skeleton skeleton-btn"></div>
+            </div>
+            <div class="skeleton-card" style="flex:1;min-width:200px;">
+              <div class="skeleton-card-header">
+                <div class="skeleton skeleton-avatar"></div>
+                <div style="flex:1"><div class="skeleton skeleton-text" style="width:55%"></div><div class="skeleton skeleton-text short" style="margin-top:6px"></div></div>
+              </div>
+              <div class="skeleton-card-lines">
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text short"></div>
+              </div>
+              <div class="skeleton skeleton-btn"></div>
+            </div>
+          </div>
+        </div>
+        <div class="component-box" style="margin-top:12px;">
+          <div class="component-label">Page Skeleton — Content Block</div>
+          <div class="skeleton-page">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text short"></div>
+            <div class="skeleton skeleton-btn"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="loading-table">
+        <div class="component-box">
+          <div class="component-label">Table Skeleton — Rows</div>
+          <div class="skeleton-table">
+            <div class="skeleton-table-row">
+              <div class="skeleton skeleton-table-cell w1"></div>
+              <div class="skeleton skeleton-table-cell w2"></div>
+              <div class="skeleton skeleton-table-cell w3"></div>
+            </div>
+            <div class="skeleton-table-row">
+              <div class="skeleton skeleton-table-cell w1"></div>
+              <div class="skeleton skeleton-table-cell w2"></div>
+              <div class="skeleton skeleton-table-cell w3"></div>
+            </div>
+            <div class="skeleton-table-row">
+              <div class="skeleton skeleton-table-cell w1"></div>
+              <div class="skeleton skeleton-table-cell w2"></div>
+              <div class="skeleton skeleton-table-cell w3"></div>
+            </div>
+            <div class="skeleton-table-row">
+              <div class="skeleton skeleton-table-cell w1"></div>
+              <div class="skeleton skeleton-table-cell w2"></div>
+              <div class="skeleton skeleton-table-cell w3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="loading-spinner">
+        <div class="component-box">
+          <div class="component-label">Inline Spinner — Button & Text</div>
+          <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+            <button style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:var(--accent);color:#fff;border-radius:999px;font-size:14px;font-weight:600;" disabled>
+              <div class="spinner-icon" style="border-top-color:#fff;border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></div>
+              Loading...
+            </button>
+            <div class="spinner">
+              <div class="spinner-icon"></div>
+              Fetching match results...
+            </div>
+            <div class="spinner" style="color:var(--muted)">
+              <div class="spinner-icon" style="width:14px;height:14px;border-width:1.5px;"></div>
+              Saving...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="loading-typing">
+        <div class="component-box">
+          <div class="component-label">Chat Typing Indicator</div>
+          <div style="max-width:360px;">
+            <div class="typing-indicator">
+              <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+              </div>
+              <span class="typing-label">Lukluk is thinking...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="showcase-divider">
+
+    <!-- ============================================ -->
+    <!-- 2. EMPTY STATE -->
+    <!-- ============================================ -->
+    <div class="showcase-section" id="empty">
+      <h2>Empty State</h2>
+      <p class="desc">Variants for when there's no content to display: empty with CTA, empty with agent link, welcome screen, and no search results.</p>
+
+      <div class="tab-bar" data-tab-group="empty">
+        <button class="tab-btn active" data-tab="empty-cta">Empty with CTA</button>
+        <button class="tab-btn" data-tab="empty-agent">Agent Link</button>
+        <button class="tab-btn" data-tab="empty-welcome">Welcome Screen</button>
+        <button class="tab-btn" data-tab="empty-results">No Results</button>
+      </div>
+
+      <div class="tab-panel active" id="empty-cta">
+        <div class="component-box">
+          <div class="component-label">Empty — No Data Yet</div>
+          <div class="empty-state">
+            <div class="empty-icon accent">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="empty-title">No expenses tracked yet</div>
+            <div class="empty-desc">Start by chatting with your Decision Agent to get personalized cost estimates for your pet type.</div>
+            <button class="empty-cta">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Open Chat
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="empty-agent">
+        <div class="component-box">
+          <div class="component-label">Empty — Agent Link</div>
+          <div class="empty-state">
+            <div class="empty-icon gray">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <div class="empty-title">No concern data</div>
+            <div class="empty-desc">Concerns are identified by the AI agent during your chat conversation.</div>
+            <a href="#" class="empty-cta-outline">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              Go to Chat with Agent
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="empty-welcome">
+        <div class="component-box">
+          <div class="component-label">Welcome Screen — First Visit</div>
+          <div class="empty-state">
+            <div class="welcome-illustration">🐾</div>
+            <div class="empty-title">Welcome to Lukluk</div>
+            <div class="empty-desc">Answer a few questions about your lifestyle, budget, and space. We'll match you to pets that truly fit your life — not just your heart.</div>
+            <button class="empty-cta">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              Start the Fit Quiz
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="empty-results">
+        <div class="component-box">
+          <div class="component-label">No Search Results</div>
+          <div class="empty-state">
+            <div class="empty-icon gray">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="empty-title">No matches found</div>
+            <div class="empty-desc">We couldn't find any pets matching your current filters. Try adjusting your budget range or pet type preference.</div>
+            <button class="empty-cta-outline">Clear Filters</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="showcase-divider">
+
+    <!-- ============================================ -->
+    <!-- 3. ERROR STATE -->
+    <!-- ============================================ -->
+    <div class="showcase-section" id="error">
+      <h2>Error State</h2>
+      <p class="desc">Inline alerts, full-page errors, and toast notifications for error handling.</p>
+
+      <div class="tab-bar" data-tab-group="error">
+        <button class="tab-btn active" data-tab="error-inline">Inline Alert</button>
+        <button class="tab-btn" data-tab="error-full">Full Page</button>
+        <button class="tab-btn" data-tab="error-toast">Toast Preview</button>
+      </div>
+
+      <div class="tab-panel active" id="error-inline">
+        <div class="component-box">
+          <div class="component-label">Alert Variants — Danger, Warning, Success</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="alert-inline alert-danger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div>
+                <div class="alert-title">Payment failed</div>
+                <div class="alert-body">Your subscription couldn't be processed. Please check your card details and try again.</div>
+              </div>
+              <button class="alert-close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="alert-inline alert-warning">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div>
+                <div class="alert-title">Trial ending soon</div>
+                <div class="alert-body">Your free trial expires in 3 days. Upgrade now to keep access to all features.</div>
+              </div>
+              <button class="alert-close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="alert-inline alert-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <div>
+                <div class="alert-title">Settings saved</div>
+                <div class="alert-body">Your profile has been updated successfully.</div>
+              </div>
+              <button class="alert-close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="error-full">
+        <div class="component-box">
+          <div class="component-label">Full Page Error — 500</div>
+          <div class="full-error">
+            <div class="full-error-code">500</div>
+            <div class="full-error-title">Something went wrong</div>
+            <div class="full-error-desc">We hit an unexpected error while loading your match results. Our team has been notified. Please try again in a moment.</div>
+            <button class="empty-cta">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Try Again
+            </button>
+          </div>
+        </div>
+        <div class="component-box" style="margin-top:12px;">
+          <div class="component-label">Full Page Error — 404</div>
+          <div class="full-error">
+            <div class="full-error-code">404</div>
+            <div class="full-error-title">Page not found</div>
+            <div class="full-error-desc">The page you're looking for doesn't exist or has been moved. Head back to your dashboard.</div>
+            <button class="empty-cta">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="error-toast">
+        <div class="component-box">
+          <div class="component-label">Toast Notifications</div>
+          <div class="toast-preview">
+            <div class="toast">
+              <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="toast-body">
+                <div class="toast-title">Connection lost</div>
+                <div class="toast-msg">Reconnecting to the server... Match data may be outdated.</div>
+              </div>
+              <button class="toast-dismiss">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="toast">
+              <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="toast-body">
+                <div class="toast-title">Rate limit reached</div>
+                <div class="toast-msg">Too many chat messages. Please wait 30 seconds before sending again.</div>
+              </div>
+              <button class="toast-dismiss">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="toast">
+              <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <div class="toast-body">
+                <div class="toast-title">Match saved</div>
+                <div class="toast-msg">Golden Retriever has been added to your favorites.</div>
+              </div>
+              <button class="toast-dismiss">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="showcase-divider">
+
+    <!-- ============================================ -->
+    <!-- 4. UNAUTHORIZED -->
+    <!-- ============================================ -->
+    <div class="showcase-section" id="unauthorized">
+      <h2>Unauthorized</h2>
+      <p class="desc">Sign-in prompts, 402 redirect previews, and subscription CTA cards for gated content.</p>
+
+      <div class="tab-bar" data-tab-group="unauthorized">
+        <button class="tab-btn active" data-tab="unauth-signin">Sign-In Prompt</button>
+        <button class="tab-btn" data-tab="unauth-redirect">402 Redirect</button>
+        <button class="tab-btn" data-tab="unauth-subscription">Subscription CTA</button>
+      </div>
+
+      <div class="tab-panel active" id="unauth-signin">
+        <div class="component-box">
+          <div class="component-label">Sign-In Required</div>
+          <div class="auth-prompt">
+            <div class="auth-prompt-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            </div>
+            <h3>Sign in to continue</h3>
+            <p>You need to be signed in to access your match results and save your pet preferences.</p>
+            <button class="auth-google-btn">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              Continue with Google
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="unauth-redirect">
+        <div class="component-box">
+          <div class="component-label">402 — Subscription Required</div>
+          <div class="redirect-preview">
+            <h4>Subscription Required</h4>
+            <p>You've reached the free tier limit. Upgrade to Pro to unlock unlimited match results and AI chat.</p>
+            <div class="redirect-bar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>Redirecting to upgrade page in <span class="redirect-timer">5</span>s...</span>
+            </div>
+            <button class="empty-cta" style="width:100%;justify-content:center;">Upgrade Now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="unauth-subscription">
+        <div class="component-box">
+          <div class="component-label">Subscription CTA Card</div>
+          <div class="cta-card">
+            <h3>Unlock Lukluk Pro</h3>
+            <p>Get unlimited matches, AI-powered chat, and priority support.</p>
+            <ul>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Unlimited pet match results</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Unlimited AI chat conversations</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Ownership mode with expense tracking</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Personalized adoption guidance</li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Priority support via LINE</li>
+            </ul>
+            <button class="btn-cta">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Upgrade to Pro — ฿299/month
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="showcase-divider">
+
+    <!-- ============================================ -->
+    <!-- DESIGN TOKENS -->
+    <!-- ============================================ -->
+    <div class="showcase-section" id="tokens">
+      <h2>Design Tokens</h2>
+      <p class="desc">Complete reference for colors, typography, spacing, border radii, shadows, and component-level tokens used across the Lukluk design system.</p>
+
+      <!-- Colors -->
+      <div class="token-section">
+        <h3>Color Palette</h3>
+        <div class="swatch-grid">
+          <div class="swatch"><div class="swatch-color" style="background:#fafafa"></div><div class="swatch-info"><div class="swatch-name">--bg</div><div class="swatch-hex">#fafafa</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#ffffff;border-bottom:1px solid var(--border)"></div><div class="swatch-info"><div class="swatch-name">--surface</div><div class="swatch-hex">#ffffff</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#1a1a2e"></div><div class="swatch-info"><div class="swatch-name">--fg</div><div class="swatch-hex">#1a1a2e</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#64748b"></div><div class="swatch-info"><div class="swatch-name">--muted</div><div class="swatch-hex">#64748b</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#e2e8f0"></div><div class="swatch-info"><div class="swatch-name">--border</div><div class="swatch-hex">#e2e8f0</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#f97316"></div><div class="swatch-info"><div class="swatch-name">--accent</div><div class="swatch-hex">#f97316</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#ea580c"></div><div class="swatch-info"><div class="swatch-name">--accent-hover</div><div class="swatch-hex">#ea580c</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#fff7ed"></div><div class="swatch-info"><div class="swatch-name">--accent-light</div><div class="swatch-hex">#fff7ed</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#22c55e"></div><div class="swatch-info"><div class="swatch-name">--success</div><div class="swatch-hex">#22c55e</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#f0fdf4"></div><div class="swatch-info"><div class="swatch-name">--success-light</div><div class="swatch-hex">#f0fdf4</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#f59e0b"></div><div class="swatch-info"><div class="swatch-name">--warning</div><div class="swatch-hex">#f59e0b</div></div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#ef4444"></div><div class="swatch-info"><div class="swatch-name">--danger</div><div class="swatch-hex">#ef4444</div></div></div>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div class="token-section">
+        <h3>Typography Scale</h3>
+        <div class="type-scale">
+          <div class="type-row">
+            <span class="type-label">Display</span>
+            <span class="type-specimen" style="font-size:32px;font-weight:800;letter-spacing:-0.03em;">Find the pet that fits</span>
+            <span class="type-meta">32px / 800 / -0.03em</span>
+          </div>
+          <div class="type-row">
+            <span class="type-label">Heading</span>
+            <span class="type-specimen" style="font-size:22px;font-weight:700;letter-spacing:-0.02em;">Match Results</span>
+            <span class="type-meta">22px / 700 / -0.02em</span>
+          </div>
+          <div class="type-row">
+            <span class="type-label">Subheading</span>
+            <span class="type-specimen" style="font-size:16px;font-weight:600;">Your Pet Preferences</span>
+            <span class="type-meta">16px / 600 / normal</span>
+          </div>
+          <div class="type-row">
+            <span class="type-label">Body</span>
+            <span class="type-specimen" style="font-size:14px;font-weight:400;">Lukluk matches you to pet types based on your budget, schedule, and lifestyle.</span>
+            <span class="type-meta">14px / 400 / 1.6</span>
+          </div>
+          <div class="type-row">
+            <span class="type-label">Small</span>
+            <span class="type-specimen" style="font-size:12px;font-weight:500;color:var(--muted);">Last updated 2 hours ago</span>
+            <span class="type-meta">12px / 500 / muted</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spacing -->
+      <div class="token-section">
+        <h3>Spacing Scale</h3>
+        <div class="spacing-grid">
+          <div class="spacing-item"><div class="spacing-bar" style="width:4px;height:4px;"></div><span class="spacing-label">4</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="width:8px;height:8px;"></div><span class="spacing-label">8</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="width:12px;height:12px;"></div><span class="spacing-label">12</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="width:16px;height:16px;"></div><span class="spacing-label">16</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="width:20px;height:20px;"></div><span class="spacing-label">20</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="width:24px;height:24px;"></div><span class="spacing-label">24</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="width:32px;height:32px;"></div><span class="spacing-label">32</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="width:40px;height:40px;"></div><span class="spacing-label">40</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="width:48px;height:48px;"></div><span class="spacing-label">48</span></div>
+          <div class="spacing-item"><div class="spacing-bar" style="width:64px;height:64px;"></div><span class="spacing-label">64</span></div>
+        </div>
+      </div>
+
+      <!-- Border Radius -->
+      <div class="token-section">
+        <h3>Border Radius</h3>
+        <div class="radius-grid">
+          <div class="radius-item"><div class="radius-box" style="border-radius:var(--radius-sm)"></div><span class="radius-label">--radius-sm: 8px</span></div>
+          <div class="radius-item"><div class="radius-box" style="border-radius:var(--radius)"></div><span class="radius-label">--radius: 12px</span></div>
+          <div class="radius-item"><div class="radius-box" style="border-radius:var(--radius-lg)"></div><span class="radius-label">--radius-lg: 16px</span></div>
+          <div class="radius-item"><div class="radius-box" style="border-radius:999px"></div><span class="radius-label">pill: 999px</span></div>
+          <div class="radius-item"><div class="radius-box" style="border-radius:50%"></div><span class="radius-label">circle: 50%</span></div>
+        </div>
+      </div>
+
+      <!-- Shadows -->
+      <div class="token-section">
+        <h3>Shadow Levels</h3>
+        <div class="shadow-grid">
+          <div class="shadow-item"><div class="shadow-box" style="box-shadow:var(--shadow-sm)"></div><span class="shadow-label">--shadow-sm</span></div>
+          <div class="shadow-item"><div class="shadow-box" style="box-shadow:var(--shadow)"></div><span class="shadow-label">--shadow</span></div>
+          <div class="shadow-item"><div class="shadow-box" style="box-shadow:var(--shadow-md)"></div><span class="shadow-label">--shadow-md</span></div>
+          <div class="shadow-item"><div class="shadow-box" style="box-shadow:var(--shadow-lg)"></div><span class="shadow-label">--shadow-lg</span></div>
+        </div>
+      </div>
+
+      <!-- Component Tokens -->
+      <div class="token-section">
+        <h3>Component Tokens — Badge & Status Colors</h3>
+        <div class="component-tokens">
+          <div class="component-token"><div class="component-token-dot" style="background:#eff6ff;border:1px solid #bfdbfe"></div><div class="component-token-info"><div class="component-token-name">Exploring</div><div class="component-token-val">#3b82f6 on #eff6ff</div></div></div>
+          <div class="component-token"><div class="component-token-dot" style="background:#f5f3ff;border:1px solid #ddd6fe"></div><div class="component-token-info"><div class="component-token-name">Considering</div><div class="component-token-val">#8b5cf6 on #f5f3ff</div></div></div>
+          <div class="component-token"><div class="component-token-dot" style="background:var(--success-light);border:1px solid #bbf7d0"></div><div class="component-token-info"><div class="component-token-name">Ready</div><div class="component-token-val">#16a34a on #f0fdf4</div></div></div>
+          <div class="component-token"><div class="component-token-dot" style="background:#fef2f2;border:1px solid #fecaca"></div><div class="component-token-info"><div class="component-token-name">Not a Fit</div><div class="component-token-val">#ef4444 on #fef2f2</div></div></div>
+          <div class="component-token"><div class="component-token-dot" style="background:#fef3c7"></div><div class="component-token-info"><div class="component-token-name">Unresolved</div><div class="component-token-val">#92400e on #fef3c7</div></div></div>
+          <div class="component-token"><div class="component-token-dot" style="background:#dcfce7"></div><div class="component-token-info"><div class="component-token-name">Resolved</div><div class="component-token-val">#166534 on #dcfce7</div></div></div>
+          <div class="component-token"><div class="component-token-dot" style="background:#f1f5f9"></div><div class="component-token-info"><div class="component-token-name">N/A</div><div class="component-token-val">#64748b on #f1f5f9</div></div></div>
+          <div class="component-token"><div class="component-token-dot" style="background:#f0f0ff;border:1px solid #ddd6fe"></div><div class="component-token-info"><div class="component-token-name">MBTI Tag</div><div class="component-token-val">#6366f1 on #f0f0ff</div></div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer class="footer">Lukluk v1 Style Guide · Global states + design token reference</footer>
+
+<script>
+// Sidebar active link tracking
+const sections = document.querySelectorAll('.showcase-section');
+const sidebarLinks = document.querySelectorAll('.sidebar-link');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      sidebarLinks.forEach(link => link.classList.remove('active'));
+      const id = entry.target.getAttribute('id');
+      const activeLink = document.querySelector(`.sidebar-link[href="#${id}"]`);
+      if (activeLink) activeLink.classList.add('active');
+    }
+  });
+}, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+sections.forEach(s => observer.observe(s));
+
+// Tab switching
+document.querySelectorAll('.tab-bar').forEach(bar => {
+  const buttons = bar.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tabId = btn.getAttribute('data-tab');
+      const panel = document.getElementById(tabId);
+      if (panel) {
+        bar.parentElement.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        panel.classList.add('active');
+      }
+    });
+  });
+});
+
+// Redirect timer countdown
+let timer = 5;
+const timerEl = document.querySelector('.redirect-timer');
+if (timerEl) {
+  setInterval(() => {
+    timer--;
+    if (timer <= 0) timer = 5;
+    timerEl.textContent = timer;
+  }, 1000);
+}
+</script>
+</body>
+</html>

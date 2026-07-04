@@ -1,42 +1,78 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import MatchCard from "@/components/match-card/MatchCard";
+import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
+import { ErrorAlert } from "@/components/layout/ErrorAlert";
+import { ArrowLeft, RefreshCw, Check, Loader2 } from "lucide-react";
 
 interface MatchEntry {
   pet_type_profile_id: string;
+  pet_name?: string;
+  species?: string;
   rank: number;
   responsible_fit_score: number;
   mbti_match_score: number;
+  mbti_label?: string;
   explanation: string;
 }
+
+const PET_LOGOS: Record<string, string> = {
+  "golden-retriever": "/assets/PetLogo/golden-retriever/1.png",
+  "siamese-cat": "/assets/PetLogo/siamese-cat/1.png",
+  "persian-cat": "/assets/PetLogo/persian-cat/1.png",
+  "american-shorthair-cat": "/assets/PetLogo/american-shorthair-cat/1.png",
+  "welsh-corgi": "/assets/PetLogo/welsh-corgi/1.png",
+  "siberian-husky": "/assets/PetLogo/siberian-husky/1.png",
+  "pug": "/assets/PetLogo/pug/1.png",
+  "bulldog": "/assets/PetLogo/bulldog/1.png",
+  "sphynx-cat": "/assets/PetLogo/sphynx-cat/1.png",
+  "hamster": "/assets/PetLogo/hamster/1.png",
+  "chinchilla": "/assets/PetLogo/chinchilla/1.png",
+  "ferret": "/assets/PetLogo/ferret/1.png",
+  "hedgehog": "/assets/PetLogo/hedgehog/1.png",
+  "fennec-fox": "/assets/PetLogo/fennec-fox/1.png",
+  "green-iguana": "/assets/PetLogo/green-iguana/1.png",
+  "axolotl": "/assets/PetLogo/axolotl/1.png",
+  "gerbil": "/assets/PetLogo/gerbil/1.png",
+  "sugar-glider": "/assets/PetLogo/sugar-glider/1.png",
+  "rabbit": "/assets/PetLogo/rabbit/1.png",
+};
 
 export default function ResultPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [matches, setMatches] = useState<MatchEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [subscribing, setSubscribing] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/match/${params.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMatches(data.top_matches || []);
+      } else {
+        setError("Could not load matches. The result may have been removed.");
+      }
+    } catch {
+      setError("Could not connect. Check your internet and try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(`/api/match/${params.id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setMatches(data.top_matches || []);
-        }
-      } catch (err) {
-        console.error("Failed to load match result", err);
-      } finally {
-        setLoading(false);
-      }
-    }
     load();
   }, [params.id]);
 
   async function handleSubscribe() {
+    setSubscribing(true);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -48,49 +84,227 @@ export default function ResultPage() {
         window.location.href = data.url;
       }
     } catch {
-      // Stripe test mode may not be configured
+      // Stripe test mode
+    } finally {
+      setSubscribing(false);
     }
   }
 
-  if (loading) {
-    return <div style={{ padding: 24 }}>Loading your matches...</div>;
+  function fitColor(score: number) {
+    if (score >= 80) return "text-success";
+    if (score >= 60) return "text-warning";
+    return "text-muted-foreground";
   }
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <h1 style={{ margin: 0 }}>Your Pet Matches</h1>
-        {matches.length > 0 && <MatchCard matches={matches} />}
+    <div className="flex min-h-screen flex-col">
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-[800px] items-center justify-between px-6">
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+            🐾 Lukluk
+          </Link>
+          <Link
+            href="/quiz"
+            className="flex items-center gap-1 rounded-full px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Retake Quiz
+          </Link>
+        </div>
+      </nav>
+
+      <div className="mx-auto w-full max-w-[800px] flex-1 px-6">
+        {/* Header */}
+        <div className="flex flex-wrap items-start justify-between gap-4 pt-12">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Your Pet Matches</h1>
+            <p className="mt-1 text-muted-foreground">
+              Ranked by Responsible Fit — budget, time, space, and lifestyle compatibility
+            </p>
+          </div>
+          {matches.length > 0 && <MatchCard matches={matches} />}
+        </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="mt-8 space-y-5">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex gap-6 rounded-xl border-2 border-border bg-card p-7">
+                <div className="h-14 w-14 animate-pulse rounded-xl bg-muted" />
+                <div className="flex-1 space-y-3">
+                  <div className="h-6 w-48 animate-pulse rounded-md bg-muted" />
+                  <div className="h-4 w-28 animate-pulse rounded-md bg-muted" />
+                  <div className="h-2 w-3/5 animate-pulse rounded-full bg-muted" />
+                  <div className="h-2 w-2/5 animate-pulse rounded-full bg-muted" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="mt-12 flex flex-col items-center text-center">
+            <div className="mb-4 text-5xl">⚠️</div>
+            <h2 className="text-xl font-bold">Could not load matches</h2>
+            <p className="mt-2 text-muted-foreground">{error}</p>
+            <button
+              onClick={load}
+              className="mt-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold transition-all hover:border-foreground/20 hover:-translate-y-px"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Results */}
+        {!loading && !error && matches.length > 0 && (
+          <div className="mt-8 space-y-5 pb-12">
+            {matches.map((m, i) => (
+              <div
+                key={m.pet_type_profile_id}
+                className={`flex gap-6 rounded-xl border-2 p-7 transition-all hover:shadow-md hover:-translate-y-0.5 ${
+                  m.rank === 1
+                    ? "border-primary shadow-[0_0_0_4px_rgba(249,115,22,0.08)]"
+                    : "border-border bg-card"
+                }`}
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                {/* Rank badge */}
+                <div
+                  className={`flex shrink-0 items-center justify-center overflow-hidden rounded-xl ${
+                    m.rank === 1
+                      ? "h-16 w-16 bg-primary text-xl text-primary-foreground shadow-lg shadow-primary/25"
+                      : "h-14 w-14 bg-primary/10 text-lg text-primary"
+                  } font-bold`}
+                >
+                  {PET_LOGOS[m.pet_type_profile_id] ? (
+                    <img
+                      src={PET_LOGOS[m.pet_type_profile_id]}
+                      alt={m.pet_name || m.pet_type_profile_id}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    `#${m.rank}`
+                  )}
+                </div>
+
+                {/* Match info */}
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className={`font-bold tracking-tight ${
+                      m.rank === 1 ? "text-2xl" : "text-xl"
+                    }`}
+                  >
+                    {m.pet_name || m.pet_type_profile_id}
+                  </h3>
+                  {m.species && (
+                    <span className="text-sm text-muted-foreground">{m.species}</span>
+                  )}
+
+                  {/* Score bars */}
+                  <div className="mt-4 flex flex-wrap gap-5">
+                    <div className="min-w-[140px]">
+                      <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        <span>Fit</span>
+                        <span className={fitColor(m.responsible_fit_score)}>
+                          {m.responsible_fit_score}%
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-border overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-success transition-all duration-700"
+                          style={{ width: `${m.responsible_fit_score}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="min-w-[140px]">
+                      <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                        <span>MBTI</span>
+                        <span>{m.mbti_match_score}%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-border overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-indigo-500 transition-all duration-700"
+                          style={{ width: `${m.mbti_match_score}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {m.mbti_label && (
+                    <span className="mt-3 inline-flex rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-600">
+                      {m.mbti_label}
+                    </span>
+                  )}
+
+                  <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                    {m.explanation}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && !error && matches.length === 0 && (
+          <div className="mt-12 flex flex-col items-center text-center">
+            <div className="mb-4 text-5xl">📋</div>
+            <h2 className="text-xl font-bold">Take the quiz first</h2>
+            <p className="mt-2 text-muted-foreground">
+              You need to complete the Fit Quiz before viewing your matches.
+            </p>
+            <button
+              onClick={() => router.push("/quiz")}
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:-translate-y-px"
+            >
+              Start Quiz
+            </button>
+          </div>
+        )}
+
+        {/* Subscribe CTA */}
+        <div className="my-12 rounded-2xl bg-primary/5 border border-primary/20 p-10 text-center">
+          <h3 className="text-2xl font-bold tracking-tight">Want to explore any of these?</h3>
+          <p className="mx-auto mt-2 max-w-[440px] text-muted-foreground">
+            Subscribe to create workspaces, chat with AI agents, track expenses, and get
+            personalized care guidance.
+          </p>
+          <div className="mt-7 flex flex-wrap justify-center gap-8">
+            {[
+              "Create planning workspaces",
+              "Chat with AI Decision Agent",
+              "Track expenses & concerns",
+            ].map((b) => (
+              <div key={b} className="flex items-center gap-2.5 text-sm">
+                <Check className="h-5 w-5 text-success" />
+                {b}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={handleSubscribe}
+            disabled={subscribing}
+            className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-primary px-8 py-3.5 text-base font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:-translate-y-px hover:shadow-xl hover:shadow-primary/30 disabled:opacity-60"
+          >
+            {subscribing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Redirecting...
+              </>
+            ) : (
+              "Subscribe Now"
+            )}
+          </button>
+        </div>
       </div>
 
-      {matches.length === 0 ? (
-        <div>
-          <p>Take the quiz first to see your matches.</p>
-          <button onClick={() => router.push("/quiz")}>Start Quiz</button>
-          <div style={{ marginTop: 32, padding: 16, border: "1px solid #ccc", borderRadius: 8 }}>
-            <h3>Unlock Full Experience</h3>
-            <p>Subscribe to create planning workspaces and chat with our Decision Agent.</p>
-            <button onClick={handleSubscribe}>Subscribe Now</button>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <ol>
-            {matches.map((m) => (
-              <li key={m.pet_type_profile_id} style={{ marginBottom: 16, border: "1px solid #ddd", padding: 12, borderRadius: 8 }}>
-                <strong>#{m.rank} — {m.pet_type_profile_id}</strong>
-                <div>Fit: {m.responsible_fit_score}% | MBTI: {m.mbti_match_score}%</div>
-                <p>{m.explanation}</p>
-              </li>
-            ))}
-          </ol>
-          <div style={{ marginTop: 24, padding: 16, border: "1px solid #ccc", borderRadius: 8 }}>
-            <h3>Want to explore any of these?</h3>
-            <p>Subscribe to create a planning workspace and get help from our Decision Agent.</p>
-            <button onClick={handleSubscribe}>Subscribe Now</button>
-          </div>
-        </div>
-      )}
+      <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
+        © 2026 Lukluk. All rights reserved.
+      </footer>
     </div>
   );
 }

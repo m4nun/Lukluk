@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukluk — Planning Workspace</title>
+
+<style>
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --fg: #1a1a2e;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --accent-light: #fff7ed;
+  --success: #22c55e;
+  --success-light: #f0fdf4;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); color: var(--fg); background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+/* NAV */
+.nav { border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 52px; padding: 0 20px; max-width: 100%; }
+.nav-back { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); transition: color 0.15s; }
+.nav-back:hover { color: var(--fg); }
+.nav-center { display: flex; align-items: center; gap: 8px; text-align: center; }
+.nav-pet-name { font-size: 14px; font-weight: 600; }
+.nav-pet-meta { font-size: 12px; color: var(--muted); }
+.nav-pet-avatar { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+.nav-pet-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.nav-logo { width: 28px; height: 28px; }
+
+/* WORKSPACE */
+.workspace { flex: 1; display: flex; overflow: hidden; }
+.panel-left { flex: 1; overflow-y: auto; border-right: 1px solid var(--border); background: var(--bg); }
+.panel-right { width: 400px; display: flex; flex-direction: column; background: var(--surface); flex-shrink: 0; }
+
+/* LEFT HEADER */
+.left-header { padding: 20px 24px 0; }
+.left-header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.left-header-avatar { width: 48px; height: 48px; border-radius: var(--radius); overflow: hidden; flex-shrink: 0; background: var(--accent-light); border: 1px solid var(--border); }
+.left-header-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.left-header h1 { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+.left-header p { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+/* STATUS BADGE */
+.status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.status-label { font-size: 13px; color: var(--muted); }
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.status-badge:hover { opacity: 0.85; }
+.status-badge.s-exploring { background: #eff6ff; color: #3b82f6; }
+.status-badge.s-considering { background: #f5f3ff; color: #8b5cf6; }
+.status-badge.s-ready { background: var(--success-light); color: #16a34a; }
+.status-badge.s-not-fit { background: #fef2f2; color: #dc2626; }
+.status-badge.s-already { background: #f0f9ff; color: #0284c7; }
+
+/* TABS */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 24px; }
+.tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+.tab:hover { color: var(--fg); }
+.tab.active { color: var(--fg); border-bottom-color: var(--accent); }
+
+/* LEFT CONTENT */
+.left-content { padding: 20px 24px; }
+
+/* EXPENSE TABLE */
+.expense-group { margin-bottom: 16px; }
+.expense-group-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8fafc; border-radius: var(--radius-sm); margin-bottom: 6px; }
+.expense-group-name { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.expense-group-total { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.expense-row { display: flex; align-items: baseline; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.expense-row:last-child { border-bottom: none; }
+.expense-item { flex: 1; }
+.expense-note { font-size: 12px; color: var(--muted); margin-left: 8px; }
+.expense-amount { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 100px; text-align: right; }
+.expense-total-row { display: flex; justify-content: space-between; padding: 12px; border-top: 2px solid var(--border); margin-top: 8px; font-weight: 700; font-size: 15px; }
+
+/* CONCERN LIST */
+.concern-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.concern-row:last-child { border-bottom: none; }
+.concern-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.concern-dot.c-unresolved { background: var(--warning); }
+.concern-dot.c-resolved { background: var(--success); }
+.concern-dot.c-na { background: #94a3b8; }
+.concern-title { font-size: 14px; font-weight: 500; flex: 1; }
+.concern-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.concern-badge.b-unresolved { background: #fef3c7; color: #92400e; }
+.concern-badge.b-resolved { background: #dcfce7; color: #166534; }
+.concern-badge.b-na { background: #f1f5f9; color: #64748b; }
+.concern-note { width: 100%; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* GUIDANCE GATE */
+.guidance-gate { background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-top: 20px; }
+.guidance-gate.locked { opacity: 0.7; }
+.guidance-gate.unlocked { background: var(--success-light); border-color: #bbf7d0; }
+.guidance-gate h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.guidance-gate p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.guidance-check { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 3px 0; }
+.guidance-check.done { color: var(--success); text-decoration: line-through; opacity: 0.7; }
+
+/* OWNERSHIP FORM */
+.ownership-form { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-top: 20px; background: var(--surface); }
+.ownership-form h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.ownership-form .sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.form-group input, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font); background: var(--surface); }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+.btn-primary { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; background: var(--accent); color: #fff; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; transition: background 0.15s; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* EMPTY STATE (tab) */
+.empty-tab { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 48px 24px; }
+.empty-tab-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.empty-tab-icon svg { width: 24px; height: 24px; color: var(--accent); }
+.empty-tab h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.empty-tab p { font-size: 13px; color: var(--muted); max-width: 300px; }
+.empty-tab a { font-size: 13px; color: var(--accent); font-weight: 600; margin-top: 8px; text-decoration: underline; }
+
+/* CHAT PANEL */
+.chat-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.chat-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+.chat-header-text h3 { font-size: 14px; font-weight: 600; }
+.chat-header-text p { font-size: 12px; color: var(--muted); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.chat-msg { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; line-height: 1.5; max-width: 85%; }
+.chat-msg.agent { background: var(--bg); border: 1px solid var(--border); align-self: flex-start; }
+.chat-msg.user { background: var(--fg); color: #fff; align-self: flex-end; border-radius: var(--radius) var(--radius) 4px var(--radius); }
+.chat-msg.system { background: var(--accent-light); border: 1px solid #fed7aa; align-self: center; font-size: 12px; color: var(--accent); max-width: 90%; text-align: center; }
+.chat-suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.chat-suggestion { padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; font-weight: 500; color: var(--fg); background: var(--surface); cursor: pointer; transition: all 0.15s; }
+.chat-suggestion:hover { border-color: var(--accent); background: var(--accent-light); }
+.chat-input-wrap { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.chat-input-wrap input { flex: 1; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; font-family: var(--font); }
+.chat-input-wrap input:focus { outline: none; border-color: var(--accent); }
+.chat-input-wrap button { padding: 8px 16px; background: var(--accent); color: #fff; border-radius: 999px; font-size: 13px; font-weight: 600; }
+
+/* DRAFT PANEL */
+.draft-panel { background: #fffbeb; border: 1px solid #fed7aa; border-radius: var(--radius); padding: 12px 16px; margin: 0 16px 12px; }
+.draft-panel h4 { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.draft-panel p { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.draft-actions { display: flex; gap: 8px; }
+.draft-actions button { padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.draft-accept { background: var(--success); color: #fff; }
+.draft-reject { background: var(--surface); border: 1px solid var(--border); color: var(--fg); }
+
+@media (max-width: 768px) {
+  .workspace { flex-direction: column; }
+  .panel-left { border-right: none; border-bottom: 1px solid var(--border); overflow-y: auto; }
+  .panel-right { width: 100%; flex: 1; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/dashboard" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Dashboard
+    </a>
+    <div class="nav-center">
+      <div class="nav-pet-avatar"><img src="public/assets/PetLogo/welsh-corgi/1.png" alt="Welsh Corgi"></div>
+      <div class="nav-pet-name">Future Corgi</div>
+      <div class="nav-pet-meta">Welsh Corgi · Planning</div>
+    </div>
+    <svg class="nav-logo" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="2"/><path d="M9 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z" fill="currentColor"/><circle cx="14" cy="17" r="2" fill="currentColor"/></svg>
+  </div>
+</nav>
+
+<div class="workspace">
+  <div class="panel-left">
+    <div class="left-header">
+      <div class="left-header-top">
+        <div class="left-header-avatar"><img src="public/assets/PetLogo/welsh-corgi/1.png" alt="Welsh Corgi"></div>
+        <div>
+          <h1>Future Corgi</h1>
+          <p>Welsh Corgi · ESFJ — The Caregiver</p>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Status:</span>
+        <span class="status-badge s-exploring">Exploring</span>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" id="tabExpenses" onclick="showTab('expenses')">Expenses</div>
+      <div class="tab" id="tabConcerns" onclick="showTab('concerns')">Concerns</div>
+    </div>
+    <div class="left-content" id="contentExpenses">
+      <div class="expense-group">
+        <div class="expense-group-header"><span class="expense-group-name">Initial Setup</span><span class="expense-group-total">15,500 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Purchase / Adoption fee <span class="expense-note">Breeder or shelter</span></span><span class="expense-amount">8,000 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Crate + bed</span><span class="expense-amount">2,500 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Initial vet + vaccines</span><span class="expense-amount">3,000 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Food bowls, leash, collar</span><span class="expense-amount">2,000 THB</span></div>
+      </div>
+      <div class="expense-group">
+        <div class="expense-group-header"><span class="expense-group-name">Monthly</span><span class="expense-group-total">4,800 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Premium kibble <span class="expense-note">12 kg/month</span></span><span class="expense-amount">2,000 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Grooming <span class="expense-note">Every 6 weeks</span></span><span class="expense-amount">1,200 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Preventive meds</span><span class="expense-amount">600 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Treats + toys</span><span class="expense-amount">500 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Misc supplies</span><span class="expense-amount">500 THB</span></div>
+      </div>
+      <div class="expense-group">
+        <div class="expense-group-header"><span class="expense-group-name">Annual</span><span class="expense-group-total">8,000 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Annual checkup</span><span class="expense-amount">3,000 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Vaccines booster</span><span class="expense-amount">2,000 THB</span></div>
+        <div class="expense-row"><span class="expense-item">Pet insurance <span class="expense-note">Optional</span></span><span class="expense-amount">3,000 THB</span></div>
+      </div>
+      <div class="expense-total-row"><span>Total First Year</span><span>82,100 THB</span></div>
+
+      <div class="guidance-gate locked">
+        <h4>Adoption Guidance</h4>
+        <p>Complete the following to unlock personalized adoption tips:</p>
+        <div class="guidance-check done">Review estimated expenses</div>
+        <div class="guidance-check">Review concern checklist</div>
+      </div>
+
+      <div class="ownership-form">
+        <h4>Already have this pet?</h4>
+        <div class="sub">Switch to Ownership Mode to track expenses, activities, and get care help.</div>
+        <div class="form-group">
+          <label>Pet Name</label>
+          <input type="text" placeholder="What's your pet's name?" id="petNameInput">
+        </div>
+        <div class="form-group">
+          <label>Age / Life Stage</label>
+          <select id="lifeStageSelect">
+            <option value="" disabled selected>Select life stage</option>
+            <option value="puppy">Puppy / Kitten (0-1 year)</option>
+            <option value="young">Young Adult (1-3 years)</option>
+            <option value="adult">Adult (3-7 years)</option>
+            <option value="senior">Senior (7+ years)</option>
+          </select>
+        </div>
+        <button class="btn-primary" disabled id="ownershipBtn">Switch to Ownership Mode</button>
+      </div>
+    </div>
+
+    <div class="left-content" id="contentConcerns" style="display:none;">
+      <div style="margin-bottom:16px;">
+        <span style="font-size:14px;font-weight:600;">2 of 5 concerns unresolved</span>
+      </div>
+      <div class="concern-row">
+        <div class="concern-dot c-unresolved"></div>
+        <div style="flex:1;">
+          <div class="concern-title">Grooming frequency</div>
+          <div class="concern-note">Corgis shed heavily — weekly brushing required, professional grooming every 6 weeks</div>
+        </div>
+        <span class="concern-badge b-unresolved">Unresolved</span>
+      </div>
+      <div class="concern-row">
+        <div class="concern-dot c-resolved"></div>
+        <div style="flex:1;">
+          <div class="concern-title">Back problems (IVDD risk)</div>
+          <div class="concern-note">Avoid stairs, use ramps, maintain healthy weight</div>
+        </div>
+        <span class="concern-badge b-resolved">Resolved</span>
+      </div>
+      <div class="concern-row">
+        <div class="concern-dot c-unresolved"></div>
+        <div style="flex:1;">
+          <div class="concern-title">Exercise needs vs apartment space</div>
+          <div class="concern-note">Need 1-2 hours daily exercise — confirm you can provide walks and play time</div>
+        </div>
+        <span class="concern-badge b-unresolved">Unresolved</span>
+      </div>
+      <div class="concern-row">
+        <div class="concern-dot c-resolved"></div>
+        <div style="flex:1;">
+          <div class="concern-title">Shedding season management</div>
+          <div class="concern-note">Heavy shed 2x/year — vacuum regularly, use lint rollers</div>
+        </div>
+        <span class="concern-badge b-resolved">Resolved</span>
+      </div>
+      <div class="concern-row">
+        <div class="concern-dot c-na"></div>
+        <div style="flex:1;">
+          <div class="concern-title">Apartment noise restrictions</div>
+          <div class="concern-note">Not applicable — your building allows dogs</div>
+        </div>
+        <span class="concern-badge b-na">N/A</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <div class="chat-header">
+      <div class="chat-dot"></div>
+      <div class="chat-header-text">
+        <h3>Decision Agent</h3>
+        <p>Ask about costs, concerns, or fit</p>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg system">Decision Agent can help you explore costs, concerns, and whether this pet fits your lifestyle.</div>
+      <div class="chat-msg agent">Hi! I'm your Decision Agent for the Welsh Corgi. I can help you understand costs, concerns, and whether this breed fits your lifestyle. What would you like to know?</div>
+      <div class="chat-msg user">Show me the monthly costs</div>
+      <div class="chat-msg agent">Based on your budget of 3,000-6,000 THB/month, here's the breakdown for a Corgi:<br><br><strong>Food:</strong> ~2,000 THB (premium kibble for medium breeds)<br><strong>Grooming:</strong> ~1,200 THB (every 6 weeks, heavy shedding)<br><strong>Preventive meds:</strong> ~600 THB (flea/tick + heartworm)<br><strong>Misc:</strong> ~1,000 THB (treats, toys, supplies)<br><br><strong>Total: ~4,800 THB/month</strong><br><br>This fits well within your budget. Would you like me to add this to your expense table?</div>
+      <div class="chat-msg user">Yes, add it</div>
+      <div class="chat-msg agent">Done! I've updated your Monthly Expenses section. The total estimated first year cost is now <strong>82,100 THB</strong>. Want to review the concerns next?</div>
+    </div>
+
+    <div class="draft-panel">
+      <h4>Draft suggestion</h4>
+      <p>The agent suggests adding "Pet insurance" to Annual expenses at ~3,000 THB/year for unexpected vet costs.</p>
+      <div class="draft-actions">
+        <button class="draft-accept">Accept</button>
+        <button class="draft-reject">Reject</button>
+      </div>
+    </div>
+
+    <div class="chat-suggestions">
+      <button class="chat-suggestion" onclick="sendSuggestion(this)">Show me the costs</button>
+      <button class="chat-suggestion" onclick="sendSuggestion(this)">What are the main concerns?</button>
+      <button class="chat-suggestion" onclick="sendSuggestion(this)">Does this pet fit my lifestyle?</button>
+      <button class="chat-suggestion" onclick="sendSuggestion(this)">How much time does this pet need?</button>
+    </div>
+    <div class="chat-input-wrap">
+      <input type="text" placeholder="Ask the Decision Agent..." id="chatInput">
+      <button onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(tab) {
+  document.getElementById('tabExpenses').classList.toggle('active', tab === 'expenses');
+  document.getElementById('tabConcerns').classList.toggle('active', tab === 'concerns');
+  document.getElementById('contentExpenses').style.display = tab === 'expenses' ? 'block' : 'none';
+  document.getElementById('contentConcerns').style.display = tab === 'concerns' ? 'block' : 'none';
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  if (!input.value.trim()) return;
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML += `<div class="chat-msg user">${input.value}</div>`;
+  input.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    msgs.innerHTML += `<div class="chat-msg agent">Let me look into that for you. Based on the Welsh Corgi profile and your lifestyle data, I'll have an answer shortly.</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 800);
+}
+
+function sendSuggestion(btn) {
+  document.getElementById('chatInput').value = btn.textContent;
+  sendChat();
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+document.getElementById('petNameInput').addEventListener('input', function() {
+  document.getElementById('ownershipBtn').disabled = !this.value.trim();
+});
+</script>
+</body>
+</html>

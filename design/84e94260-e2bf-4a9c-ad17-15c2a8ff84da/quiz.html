@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukluk - Fit Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --fg: #1a1a2e;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --accent-light: #fff7ed;
+  --accent-container: #f97316;
+  --on-accent: #ffffff;
+  --success: #22c55e;
+  --success-light: #f0fdf4;
+  --danger: #ef4444;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 2px 8px rgba(249,115,22,0.06);
+  --shadow-md: 0 4px 16px rgba(249,115,22,0.08);
+  --font-display: 'Quicksand', sans-serif;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --max-w: 640px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); color: var(--fg); background: var(--bg); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; line-height: 1; }
+
+/* NAV */
+.nav { border-bottom: 1px solid var(--border); background: rgba(250,250,250,0.85); backdrop-filter: blur(12px); }
+.nav-inner { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.nav-logo { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
+.nav-logo svg { width: 28px; height: 28px; }
+.nav-back { font-size: 14px; color: var(--muted); display: flex; align-items: center; gap: 4px; transition: color 0.15s; padding: 8px 12px; border-radius: var(--radius-full); }
+.nav-back:hover { color: var(--fg); background: var(--border); }
+
+/* PROGRESS */
+.progress-wrap { padding: 0 24px; max-width: var(--max-w); margin: 0 auto; width: 100%; }
+.progress-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 12px; }
+.progress-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.progress-bar { height: 8px; background: var(--border); border-radius: var(--radius-full); overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: var(--radius-full); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* QUIZ CONTENT */
+.quiz-content { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 48px 24px 64px; max-width: var(--max-w); margin: 0 auto; width: 100%; }
+.quiz-question { font-family: var(--font-display); font-size: clamp(24px, 4vw, 32px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; text-align: center; margin-bottom: 40px; max-width: 520px; }
+
+/* ANSWER CARDS - MPTI Bento Style */
+.answers { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 480px; }
+.answer-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  font-size: 15px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  width: 100%;
+  box-shadow: var(--shadow-sm);
+}
+.answer-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); border-color: rgba(249,115,22,0.2); }
+.answer-card:active { transform: translateY(0); }
+.answer-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  box-shadow: 0 0 0 4px rgba(249,115,22,0.1), var(--shadow-md);
+  transform: translateY(-4px);
+}
+.answer-card .answer-icon {
+  width: 48px; height: 48px; flex-shrink: 0;
+  border-radius: 50%; background: #f1f5f9;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.answer-card .answer-icon .material-symbols-outlined { font-size: 24px; color: var(--muted); }
+.answer-card.selected .answer-icon { background: var(--accent); }
+.answer-card.selected .answer-icon .material-symbols-outlined { color: var(--on-accent); font-variation-settings: 'FILL' 1; }
+.answer-card .answer-text { flex: 1; }
+.answer-card .answer-hint { font-size: 13px; color: var(--muted); margin-top: 2px; font-weight: 400; }
+.answer-card .check-indicator { display: none; }
+.answer-card.selected .check-indicator { display: flex; }
+
+/* SELECTED INDICATOR */
+.selected-badge { display: none; align-items: center; gap: 4px; padding: 4px 12px; background: var(--accent); color: var(--on-accent); border-radius: var(--radius-full); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 8px; }
+.answer-card.selected .selected-badge { display: inline-flex; }
+
+/* NAVIGATION */
+.quiz-nav { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 480px; margin-top: 32px; }
+.btn-back { display: inline-flex; align-items: center; gap: 6px; padding: 12px 20px; color: var(--muted); font-size: 14px; font-weight: 500; border-radius: var(--radius-full); transition: color 0.15s, background 0.15s; }
+.btn-back:hover { color: var(--fg); background: var(--border); }
+.btn-back:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-skip { font-size: 13px; color: var(--muted); font-weight: 500; padding: 12px 20px; border-radius: var(--radius-full); transition: color 0.15s; text-transform: uppercase; letter-spacing: 0.03em; }
+.btn-skip:hover { color: var(--fg); }
+
+/* FINISH SCREEN */
+.finish-screen { display: none; flex-direction: column; align-items: center; text-align: center; padding: 80px 24px; max-width: var(--max-w); margin: 0 auto; width: 100%; }
+.finish-screen.active { display: flex; }
+.quiz-content.hidden { display: none; }
+.finish-icon { width: 96px; height: 96px; border-radius: 50%; background: var(--success-light); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+.finish-icon .material-symbols-outlined { font-size: 48px; color: var(--success); font-variation-settings: 'FILL' 1; }
+.finish-screen h2 { font-family: var(--font-display); font-size: clamp(28px, 5vw, 36px); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; }
+.finish-screen p { font-size: 16px; color: var(--muted); max-width: 400px; margin-bottom: 32px; line-height: 1.6; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 16px 36px;
+  background: var(--accent); color: var(--on-accent);
+  border-radius: var(--radius-full); font-family: var(--font-display); font-size: 16px; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(249,115,22,0.25);
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(249,115,22,0.3); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* GLASS PANEL */
+.glass-panel { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 2px 8px rgba(249,115,22,0.05); }
+
+/* ERROR */
+.quiz-error { display: none; max-width: 480px; margin: 0 auto; padding: 16px 20px; background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); color: var(--danger); font-size: 14px; text-align: center; margin-top: 16px; }
+.quiz-error.visible { display: block; }
+
+/* ANIMATIONS */
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.answer-card { animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.answer-card:nth-child(1) { animation-delay: 0ms; }
+.answer-card:nth-child(2) { animation-delay: 60ms; }
+.answer-card:nth-child(3) { animation-delay: 120ms; }
+.answer-card:nth-child(4) { animation-delay: 180ms; }
+
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.finish-screen.active { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+@keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+.finish-icon { animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .answer-card, .finish-screen.active, .finish-icon { animation: none; }
+  .answer-card, .finish-screen.active { opacity: 1; transform: none; }
+  .finish-icon { transform: none; }
+}
+
+/* RESPONSIVE */
+@media (max-width: 360px) {
+  .quiz-content { padding: 32px 16px 48px; }
+  .answer-card { padding: 16px; gap: 12px; font-size: 14px; }
+  .quiz-question { font-size: 22px; margin-bottom: 32px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="2"/><path d="M9 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z" fill="currentColor"/><circle cx="14" cy="17" r="2" fill="currentColor"/></svg>
+      Lukluk
+    </a>
+    <a href="/" class="nav-back">
+      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+      Exit Quiz
+    </a>
+  </div>
+</nav>
+
+<div class="progress-wrap">
+  <div class="progress-header">
+    <span class="progress-label" id="progressLabel">Question 1 of 8</span>
+    <span class="progress-label" id="progressPct">12%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:12.5%"></div></div>
+</div>
+
+<div class="quiz-content" id="quizContent">
+  <h2 class="quiz-question" id="questionText">How much can you comfortably spend on your pet each month?</h2>
+  <div class="answers" id="answersWrap"></div>
+  <div class="quiz-nav">
+    <button class="btn-back" id="btnBack" disabled>
+      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+      Back
+    </button>
+    <button class="btn-skip" id="btnSkip">Skip to results</button>
+  </div>
+  <div class="quiz-error" id="quizError">Something went wrong. Please try again.</div>
+</div>
+
+<div class="finish-screen" id="finishScreen">
+  <div class="finish-icon">
+    <span class="material-symbols-outlined">check_circle</span>
+  </div>
+  <h2>All done!</h2>
+  <p>You've answered all questions. Let's find the pet types that truly fit your life.</p>
+  <button class="btn-primary" id="btnSeeResults">
+    See Your Matches
+    <span class="material-symbols-outlined" style="font-size:20px;">arrow_forward</span>
+  </button>
+</div>
+
+<script>
+const QUESTIONS = [
+  { q: "How much can you comfortably spend on your pet each month?", icon: "payments", options: [
+    { text: "Under 1,500 THB", hint: "Basic food and supplies only", icon: "savings" },
+    { text: "1,500 - 3,000 THB", hint: "Food, treats, routine vet", icon: "account_balance_wallet" },
+    { text: "3,000 - 6,000 THB", hint: "Food, grooming, regular checkups", icon: "credit_card" },
+    { text: "Over 6,000 THB", hint: "Premium care, insurance, grooming", icon: "diamond" }
+  ]},
+  { q: "How many hours per day can you dedicate to active pet care?", icon: "schedule", options: [
+    { text: "Less than 1 hour", hint: "Very limited time", icon: "timer" },
+    { text: "1 - 2 hours", hint: "Some daily time available", icon: "hourglass_top" },
+    { text: "2 - 4 hours", hint: "Plenty of daily interaction", icon: "schedule" },
+    { text: "4+ hours", hint: "Most of the day available", icon: "all_inclusive" }
+  ]},
+  { q: "What best describes your living space?", icon: "home", options: [
+    { text: "Small apartment (under 30 sqm)", hint: "Studio or small 1-bedroom", icon: "apartment" },
+    { text: "Medium apartment (30-60 sqm)", hint: "1-2 bedroom apartment", icon: "hotel" },
+    { text: "Large apartment or small house", hint: "60+ sqm or house with yard", icon: "house" },
+    { text: "House with garden", hint: "Ample indoor and outdoor space", icon: "yard" }
+  ]},
+  { q: "Does anyone in your household have allergies?", icon: "health_and_safety", options: [
+    { text: "No allergies", hint: "No known pet allergies", icon: "check_circle" },
+    { text: "Mild allergies", hint: "Sneezing, mild reactions", icon: "sentiment_neutral" },
+    { text: "Moderate allergies", hint: "Need hypoallergenic options", icon: "sick" },
+    { text: "Severe allergies", hint: "Must avoid dander entirely", icon: "warning" }
+  ]},
+  { q: "How often do you travel or stay overnight away from home?", icon: "flight", options: [
+    { text: "Rarely (a few times a year)", hint: "Almost always home", icon: "home" },
+    { text: "Monthly (1-2 times/month)", hint: "Regular short trips", icon: "departure_board" },
+    { text: "Weekly (3+ times/month)", hint: "Frequent travel schedule", icon: "flight" },
+    { text: "I work from home", hint: "Rarely leave for extended periods", icon: "laptop" }
+  ]},
+  { q: "What's your tolerance for pet noise?", icon: "volume_up", options: [
+    { text: "Very low", hint: "Apartment with thin walls, neighbors", icon: "volume_off" },
+    { text: "Moderate", hint: "Some barking/meowing is okay", icon: "volume_down" },
+    { text: "High", hint: "Noise doesn't bother me", icon: "volume_up" },
+    { text: "I prefer quiet pets", hint: "Solitary or silent species preferred", icon: "noise_aware" }
+  ]},
+  { q: "Do you have other pets at home?", icon: "pets", options: [
+    { text: "No other pets", hint: "First pet or solo household", icon: "heart_plus" },
+    { text: "One cat", hint: "Need cat-compatible pets", icon: "pets" },
+    { text: "One dog", hint: "Need dog-compatible pets", icon: "pets" },
+    { text: "Multiple pets", hint: "Need peacekeeper species", icon: "group" }
+  ]},
+  { q: "How much prior experience do you have with pets?", icon: "school", options: [
+    { text: "None - this would be my first", hint: "Beginner-friendly species preferred", icon: "new_releases" },
+    { text: "Some experience growing up", hint: "Had family pets as a child", icon: "child_care" },
+    { text: "Currently own a pet", hint: "Experienced owner adding another", icon: "pets" },
+    { text: "Experienced with multiple types", hint: "Comfortable with diverse needs", icon: "emoji_events" }
+  ]}
+];
+
+let currentStep = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+
+function render() {
+  const q = QUESTIONS[currentStep];
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('progressLabel').textContent = `Question ${currentStep + 1} of ${QUESTIONS.length}`;
+  document.getElementById('progressPct').textContent = Math.round(((currentStep + 1) / QUESTIONS.length) * 100) + '%';
+  document.getElementById('progressFill').style.width = ((currentStep + 1) / QUESTIONS.length * 100) + '%';
+  document.getElementById('btnBack').disabled = currentStep === 0;
+
+  const wrap = document.getElementById('answersWrap');
+  wrap.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const card = document.createElement('button');
+    card.className = 'answer-card' + (answers[currentStep] === i ? ' selected' : '');
+    card.innerHTML = `
+      <div class="answer-icon"><span class="material-symbols-outlined">${opt.icon}</span></div>
+      <div class="answer-text">${opt.text}<div class="answer-hint">${opt.hint}</div>
+        <div class="selected-badge"><span class="material-symbols-outlined" style="font-size:14px;">check_circle</span> SELECTED</div>
+      </div>`;
+    card.addEventListener('click', () => selectAnswer(i));
+    wrap.appendChild(card);
+  });
+}
+
+function selectAnswer(idx) {
+  answers[currentStep] = idx;
+  document.querySelectorAll('.answer-card').forEach((c, i) => c.classList.toggle('selected', i === idx));
+  setTimeout(() => {
+    if (currentStep < QUESTIONS.length - 1) {
+      currentStep++;
+      render();
+    } else {
+      document.getElementById('quizContent').classList.add('hidden');
+      document.getElementById('finishScreen').classList.add('active');
+    }
+  }, 500);
+}
+
+document.getElementById('btnBack').addEventListener('click', () => {
+  if (currentStep > 0) { currentStep--; render(); }
+});
+
+document.getElementById('btnSkip').addEventListener('click', () => {
+  document.getElementById('quizContent').classList.add('hidden');
+  document.getElementById('finishScreen').classList.add('active');
+});
+
+document.getElementById('btnSeeResults').addEventListener('click', () => {
+  window.location.href = '/result/0';
+});
+
+render();
+</script>
+</body>
+</html>

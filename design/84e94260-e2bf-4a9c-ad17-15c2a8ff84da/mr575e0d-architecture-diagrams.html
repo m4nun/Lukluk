@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukluk v1 — Architecture Diagrams</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; padding: 40px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  .subtitle { color: #64748b; font-size: 14px; margin-bottom: 40px; }
+  .section { margin-bottom: 48px; }
+  .section h2 { font-size: 18px; color: #f1f5f9; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid #1e293b; }
+  .section p { color: #94a3b8; font-size: 13px; margin-bottom: 16px; }
+  .mermaid { 
+    background: #1e293b; 
+    border: 1px solid #334155; 
+    border-radius: 12px; 
+    padding: 32px; 
+    overflow-x: auto;
+    margin-bottom: 8px;
+  }
+  .mermaid svg { max-width: 100%; }
+  .legend { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 16px; padding: 12px; background: #1e293b; border-radius: 8px; font-size: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } body { padding: 20px; } }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+  .toc a { color: #60a5fa; text-decoration: none; padding: 4px 12px; background: #1e293b; border-radius: 6px; font-size: 13px; border: 1px solid #334155; }
+  .toc a:hover { background: #334155; }
+  .stat-box { display: inline-block; padding: 4px 10px; background: #1e293b; border-radius: 4px; font-size: 12px; margin-right: 8px; margin-bottom: 8px; border: 1px solid #334155; }
+  .stat-num { color: #60a5fa; font-weight: 700; }
+  .code-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.6; white-space: pre; overflow-x: auto; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<h1>🐾 Lukluk v1 — Architecture Diagrams</h1>
+<p class="subtitle">23 routes · 19 pet profiles · 8 agent tools · 46 tests · 12 database tables</p>
+
+<div class="toc">
+  <a href="#system">System Overview</a>
+  <a href="#routes">Route Map</a>
+  <a href="#data">Data Flow</a>
+  <a href="#agent">Agent System</a>
+  <a href="#matching">Matching Engine</a>
+  <a href="#quiz">Quiz Flow</a>
+  <a href="#workspace">Workspace Layout</a>
+  <a href="#schema">Database Schema</a>
+  <a href="#modules">Module Dependency</a>
+  <a href="#drafts">Draft Workflow</a>
+  <a href="#auth">Auth Flow</a>
+</div>
+
+<!-- 1. SYSTEM OVERVIEW -->
+<div class="section" id="system">
+  <h2>1. System Overview</h2>
+  <p>Lukluk is a Next.js monolith deployed on Vercel with Supabase (PostgreSQL + Auth) and OpenRouter (LLM). The Decision Agent and Care Agent run inside Next.js API routes via LangGraph StateGraphs.</p>
+  
+  <div class="stat-box">Stack: <span class="stat-num">Next.js 16</span></div>
+  <div class="stat-box">Database: <span class="stat-num">Supabase</span></div>
+  <div class="stat-box">LLM: <span class="stat-num">OpenRouter (DeepSeek)</span></div>
+  <div class="stat-box">Hosting: <span class="stat-num">Vercel</span></div>
+  <div class="stat-box">Auth: <span class="stat-num">Google OAuth only</span></div>
+  <div class="stat-box">Payments: <span class="stat-num">Stripe test mode</span></div>
+
+  <div class="mermaid">
+graph TB
+    subgraph Vercel["Vercel (Next.js 16 Monolith)"]
+        direction TB
+        Pages["7 Page Routes<br/>/, /quiz, /result/[id], /dashboard,<br/>/workspace/[id], /owned/[id], /experiences"]
+        API["16 API Routes<br/>Auth, Match, Agent, Planning,<br/>Experiences, Ownership, Stripe, Seed"]
+        Proxy["Proxy (Session Refresh)"]
+        Lib["Core Libraries<br/>matching/, agent/, pipeline/,<br/>quiz/, stripe/, llm/, supabase/"]
+    end
+
+    subgraph Supabase["Supabase"]
+        Auth_Users["auth.users"]
+        DB["12 Tables (RLS)<br/>profiles, pet_type_profiles,<br/>lifestyle_profiles, match_results,<br/>planning_pet_profiles, owned_pet_profiles,<br/>agent_threads, agent_drafts,<br/>estimated_expenses, concern_checklist_items,<br/>owner_experiences, subscriptions"]
+    end
+
+    subgraph External["External Services"]
+        OpenRouter["OpenRouter<br/>(DeepSeek Flash v4)"]
+        Stripe["Stripe<br/>(Test Mode)"]
+        Google["Google OAuth"]
+    end
+
+    Pages --> API
+    API --> Lib
+    API --> DB
+    Lib --> DB
+    Lib --> OpenRouter
+    API --> Stripe
+    Pages --> Google
+    Proxy --> Auth_Users
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch" style="background:#60a5fa;"></span> Next.js App</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#34d399;"></span> Supabase</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#fbbf24;"></span> External Services</div>
+  </div>
+</div>
+
+<!-- 2. ROUTE MAP -->
+<div class="section" id="routes">
+  <h2>2. Route Map</h2>
+  <p>User-facing pages (top) and API routes (bottom) with their auth levels.</p>
+
+  <div class="mermaid">
+graph LR
+    subgraph Free["Free: No Auth Required"]
+        Landing["/ — Google Sign-In"]
+        GoogleAuth["/auth/google → OAuth Redirect"]
+        Callback["/auth/callback → Handle Token"]
+    end
+
+    subgraph FreeUser["Free: User Auth Required"]
+        Quiz["/quiz — 9-Step Quiz"]
+        Result["/result/[id] — Top 3 Matches"]
+        MatchAPI["POST /api/match<br/>Save + Run Matching"]
+        FollowUp["POST /api/match/follow-up<br/>LLM Follow-up Questions"]
+        MatchGet["GET /api/match/[id]<br/>Fetch Result"]
+        Logout["POST /api/auth/logout"]
+    end
+
+    subgraph Paid["Paid: Subscriber Only"]
+        Dashboard["/dashboard — Profile List"]
+        Workspace["/workspace/[id] — Two-Panel"]
+        Owned["/owned/[id] — Ownership Mode"]
+        PlanningAPI["GET/POST /api/planning<br/>CRUD Planning Profiles"]
+        ExperiencesPage["/experiences — Read + Submit"]
+        ExperiencesAPI["POST /api/experiences<br/>Submit Owner Experience"]
+        Transition["POST /api/ownership/transition<br/>Planning → Owned"]
+        OwnedAPI["GET /api/ownership/[id]<br/>Fetch Owned Profile"]
+    end
+
+    subgraph Agent["Agent API (User Auth)"]
+        DecisionAgent["POST /api/agent/chat<br/>Decision Agent"]
+        CareAgent["POST /api/agent/care<br/>Care Agent"]
+        DraftsAPI["GET/POST /api/agent/drafts<br/>List/Confirm/Reject"]
+    end
+
+    subgraph Payments["Payments (User Auth)"]
+        StripeCheckout["POST /api/stripe/checkout"]
+        StripeWebhook["POST /api/stripe/webhook"]
+    end
+
+    subgraph Dev["Dev Only"]
+        Seed["GET /api/seed<br/>YAML → Supabase"]
+    end
+
+    Landing --> GoogleAuth --> Callback
+    Quiz --> MatchAPI --> Result
+    Result --> FollowUp
+    Result --> StripeCheckout
+    StripeCheckout --> StripeWebhook
+    Dashboard --> PlanningAPI
+    Dashboard --> Workspace
+    Workspace --> DecisionAgent
+    Workspace --> DraftsAPI
+    Owned --> CareAgent
+    Owned --> OwnedAPI
+    Transition --> Owned
+  </div>
+
+  <div class="stat-box">Page Routes: <span class="stat-num">7</span></div>
+  <div class="stat-box">API Routes: <span class="stat-num">16</span></div>
+  <div class="stat-box">Free: <span class="stat-num">8 routes</span></div>
+  <div class="stat-box">Subscriber-gated: <span class="stat-num">7 routes</span></div>
+</div>
+
+<!-- 3. DATA FLOW -->
+<div class="section" id="data">
+  <h2>3. Data Flow</h2>
+  <p>How data moves from the quiz through matching to the workspace and eventually ownership.</p>
+
+  <div class="mermaid">
+flowchart TD
+    Quiz["Fit Quiz<br/>9 Fixed Questions"] --> Lifestyle["Lifestyle Profile<br/>(lifestyle_profiles)"]
+    Quiz --> FollowUps["LLM Follow-Up Questions<br/>(capped at 20)"]
+    FollowUps --> Lifestyle
+    
+    Lifestyle --> Matching["Matching Engine<br/>runMatch(profiles, lifestyle)<br/>— PURE FUNCTION —"]
+    PetProfiles["19 Pet Type Profiles<br/>(pet_type_profiles)<br/>Seeded from YAML"] --> Matching
+    
+    Matching --> MatchResult["Match Result<br/>(match_results)<br/>Top 3 with scores + explanations"]
+    
+    MatchResult --> Subscription["Stripe Subscription<br/>(subscriptions)"]
+    Subscription -->|"Subscriber"| PlanningProfile["Planning Pet Profile<br/>(planning_pet_profiles)"]
+    
+    PlanningProfile --> Expenses["Estimated Expenses<br/>(estimated_expenses)"]
+    PlanningProfile --> Concerns["Concern Checklist<br/>(concern_checklist_items)"]
+    PlanningProfile --> Decisions["Decision Status<br/>(exploring/considering/...)"]
+    
+    PlanningProfile --> AgentThread["Agent Thread<br/>(agent_threads)"]
+    AgentThread --> DecisionAgent["Decision Agent<br/>LangGraph + 4 Tools"]
+    
+    DecisionAgent --> Drafts["Agent Drafts<br/>(agent_drafts)<br/>Pending → Confirm/Reject"]
+    Drafts -->|"Confirmed"| PlanningProfile
+    
+    PlanningProfile -->|"Mark Ownership"| OwnedProfile["Owned Pet Profile<br/>(owned_pet_profiles)"]
+    
+    OwnedProfile --> ActualExp["Actual Expense Tracker"]
+    OwnedProfile --> Activity["Activity Schedule"]
+    OwnedProfile --> Food["Food Guide"]
+    
+    OwnedProfile --> CareAgent["Care Agent<br/>LangGraph + 4 Tools"]
+    
+    OwnerExp["Owner Experiences<br/>(owner_experiences)"] --> DecisionAgent
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch" style="background:#60a5fa;"></span> User Input</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#34d399;"></span> Pure Function</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#a78bfa;"></span> Database Table</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#fbbf24;"></span> Agent (LLM)</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#f472b6;"></span> Paid Feature</div>
+  </div>
+</div>
+
+<!-- 4. AGENT SYSTEM -->
+<div class="section" id="agent">
+  <h2>4. Agent System — LangGraph + Repository Pattern</h2>
+  <p>The agent architecture uses a single <code>createAgent()</code> factory with dependency injection. Tools write through a <code>DraftPlanningRepository</code> that wraps the real <code>SupabasePlanningRepository</code>. User confirms before data is committed.</p>
+
+  <div class="mermaid">
+graph TB
+    subgraph Client["Client (Browser)"]
+        AgentChat["AgentChat Component"]
+        DraftPanel["DraftPanel<br/>Polls every 5s"]
+    end
+
+    subgraph Route["API Route (api/agent/chat or care)"]
+        Auth["Auth Check<br/>(getUser → 401/403)"]
+        ThreadMgmt["Thread Management<br/>(agent_threads)"]
+        Wiring["Wiring<br/>SupabasePlanningRepository<br/>↓<br/>DraftPlanningRepository<br/>+ SupabaseDraftStore<br/>↓<br/>createAgentTools( repo )<br/>↓<br/>createAgent( opts )"]
+    end
+
+    subgraph Agent["LangGraph Agent (graph.ts)"]
+        direction TB
+        START["START"] --> AgentNode["agentNode<br/>(LLM + Tools)"]
+        AgentNode -->|"has tool_calls"| ToolNode["toolNode<br/>(invoke tool → ToolMessage)"]
+        ToolNode --> AgentNode
+        AgentNode -->|"no tool_calls"| END["END"]
+    end
+
+    subgraph Tools["Tools (tools.ts / care-tools.ts)"]
+        direction LR
+        GetContext["get_context<br/>(read: profile,<br/>expenses, concerns,<br/>experiences)"]
+        UpdateExp["update_expenses<br/>(write → draft)"]
+        UpdateConc["update_concerns<br/>(write → draft)"]
+        UpdateStatus["update_decision_status<br/>(write → draft)"]
+    end
+
+    subgraph Repo["Repository Pattern"]
+        DraftRepo["DraftPlanningRepository<br/>(draft-repo.ts)"]
+        RealRepo["SupabasePlanningRepository<br/>(supabase-repo.ts)"]
+        DraftStore["DraftStore Interface<br/>(draft-store.ts)"]
+        SupaDraft["SupabaseDraftStore<br/>(supabase-draft-store.ts)"]
+    end
+
+    subgraph Supabase["Supabase"]
+        DB_Tables["planning_pet_profiles<br/>estimated_expenses<br/>concern_checklist_items<br/>agent_drafts<br/>agent_threads"]
+    end
+
+    AgentChat -->|"POST message"| Auth
+    Auth --> ThreadMgmt --> Wiring
+    Wiring --> Agent
+    Agent --> Tools
+    Tools --> DraftRepo
+    DraftRepo -->|"Reads"| RealRepo
+    DraftRepo -->|"Writes"| DraftStore
+    DraftStore --> SupaDraft
+    RealRepo --> DB_Tables
+    SupaDraft --> DB_Tables
+
+    DraftPanel -->|"GET /api/agent/drafts"| DB_Tables
+    DraftPanel -->|"POST confirm/reject"| RealRepo
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <p style="color:#94a3b8;font-size:13px;margin-bottom:8px;">Decision Agent Tools</p>
+      <div class="code-box">get_context          → read profile + expenses + concerns + experiences
+update_expenses      → write expenses → draft
+update_concerns      → write concerns → draft
+update_decision_status → write status → draft</div>
+    </div>
+    <div>
+      <p style="color:#94a3b8;font-size:13px;margin-bottom:8px;">Care Agent Tools</p>
+      <div class="code-box">get_care_context       → read owned + expenses + schedule + food
+update_actual_expenses → write actual expenses → draft
+update_activity_schedule → write schedule → draft
+update_food_guide      → write food guide → draft</div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. MATCHING ENGINE -->
+<div class="section" id="matching">
+  <h2>5. Matching Engine — Pure Function</h2>
+  <p>The matching engine is a pure function that scores pet profiles against a lifestyle. Dimensions are pluggable data objects. <strong>46 tests cover this module.</strong></p>
+
+  <div class="mermaid">
+flowchart LR
+    subgraph Input["Inputs"]
+        Profiles["PetTypeProfile[]<br/>19 profiles from Supabase"]
+        Lifestyle["LifestyleProfileAnswers<br/>{budget_tier, time_available_hours,<br/>space_type, allergy_level,<br/>noise_tolerance, travel_frequency,<br/>has_existing_pets, experience_level,<br/>child_in_household}"]
+        Dimensions["ScoreDimension[]<br/>8 built-in dimensions"]
+    end
+
+    subgraph Engine["runMatch(profiles, lifestyle, dimensions?) — PURE"]
+        Score["scoreResponsibleFit()<br/>For each dimension: score() × weight<br/>Hard blockers: restricted ×0.3, CITES ×0.5"]
+        Mbti["scoreMbtiFit()<br/>child_friendly_score × child_weight<br/>+ beginner_match_score<br/>+ travel_match_score<br/>+ existing_pets_match_score"]
+        Explain["generateExplanation()<br/>Fit tier + dimension explain() notes"]
+    end
+
+    subgraph Output["Output"]
+        Top3["MatchResultEntry[]<br/>(sorted: fit desc, mbti desc)<br/>Top 3 returned"]
+    end
+
+    Profiles --> Score
+    Lifestyle --> Score
+    Lifestyle --> Mbti
+    Dimensions --> Score
+    Score --> Top3
+    Mbti --> Top3
+    Score --> Explain --> Top3
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <p style="color:#94a3b8;font-size:13px;margin-bottom:8px;">Score Dimensions (weights sum to 1.0)</p>
+      <div class="code-box">budget        20%   Tier comparison (low→very_high)
+time          15%   Available hours vs. active minutes
+space         10%   Apartment vs. house vs. outdoor
+allergy       15%   Allergen levels + hypoallergenic flag
+noise         10%   Barking/meowing vs. tolerance
+travel        10%   Boarding difficulty vs. frequency
+existing_pets 10%   Compatibility with current pets
+experience    10%   Beginner/intermediate/experienced</div>
+    </div>
+    <div>
+      <p style="color:#94a3b8;font-size:13px;margin-bottom:8px;">Hard Blockers</p>
+      <div class="code-box">restricted_in_thailand  → score × 0.3
+cites_protected         → score × 0.5</div>
+      <p style="color:#94a3b8;font-size:13px;margin-top:16px;margin-bottom:8px;">Test Coverage</p>
+      <div class="code-box">dimensions.test.ts  — 16 tests
+engine.test.ts       —  8 tests
+(weights, scoring, penalties,<br/>custom dimensions, explanations)</div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. QUIZ FLOW -->
+<div class="section" id="quiz">
+  <h2>6. Quiz Flow</h2>
+  <p>The quiz has 9 fixed questions followed by optional LLM follow-up rounds (capped at 20 total). Answers are tracked in sessionStorage during the quiz and saved to Supabase only when the user gets their result.</p>
+
+  <div class="mermaid">
+sequenceDiagram
+    actor User
+    participant Quiz as /quiz (Client)
+    participant MatchAPI as POST /api/match
+    participant FollowUp as POST /api/match/follow-up
+    participant Engine as Matching Engine (Pure)
+    participant LLM as OpenRouter (DeepSeek)
+    participant Supabase as Supabase
+
+    User->>Quiz: Start Quiz
+    loop 9 Questions
+        Quiz->>User: Show question (budget, time, space, allergy, noise, travel, pets, experience, children)
+        User->>Quiz: Select answer
+    end
+    
+    Quiz->>MatchAPI: POST { answers }
+    MatchAPI->>Engine: runMatch(profiles[], lifestyle)
+    Engine->>Engine: Score all 19 profiles × 8 dimensions
+    Engine-->>MatchAPI: Top 3 matches
+    MatchAPI->>Supabase: Save lifestyle_profiles + match_results
+    MatchAPI-->>Quiz: { matchResultId, matches }
+    
+    Quiz->>User: Show results → /result/[id]
+    
+    opt LLM Follow-ups (if confidence < 80 or close scores)
+        User->>FollowUp: POST { answers, followUps }
+        FollowUp->>Engine: runMatch(profiles[], lifestyle)
+        FollowUp->>LLM: "Generate up to 3 clarifying questions"
+        LLM-->>FollowUp: Question list
+        FollowUp-->>User: Follow-up questions
+        loop Until confidence or 20 cap
+            User->>FollowUp: Answer follow-ups
+            FollowUp->>Engine: Re-run match
+            FollowUp->>LLM: Generate more questions if needed
+        end
+    end
+  </div>
+</div>
+
+<!-- 7. WORKSPACE -->
+<div class="section" id="workspace">
+  <h2>7. Two-Panel Workspace</h2>
+  <p>The workspace page at <code>/workspace/[id]</code> splits into a left panel (structured data) and right panel (agent chat). The DraftPanel polls for agent proposals.</p>
+
+  <div class="mermaid">
+graph TB
+    subgraph Page["/workspace/[id]"]
+        direction LR
+        subgraph Left["Left Panel — Structured Data"]
+            direction TB
+            PetInfo["Pet Type Info<br/>(name, species, MBTI)"]
+            DecisionStatus_UI["DecisionStatus<br/>Dropdown: exploring, considering,<br/>ready_to_buy, not_a_fit,<br/>already_have"]
+            TabSwitcher["Tab Switcher"]
+            ExpenseTable["ExpenseTable<br/>Categorized: setup, monthly,<br/>annual, one-time"]
+            ConcernChecklist["ConcernChecklist<br/>● unresolved ● resolved ● n/a"]
+            DraftPanel_UI["DraftPanel<br/>(polls /api/agent/drafts every 5s)<br/>Accept / Reject buttons"]
+            GuidanceGate["GuidanceGate<br/>Locked until Expenses + Concerns viewed"]
+            OwnershipForm["Ownership Form<br/>(pet name + age → transition)"]
+        end
+        
+        subgraph Right["Right Panel — Agent Chat"]
+            direction TB
+            AgentChat_UI["AgentChat<br/>Message list + input<br/>Loading/error states<br/>Auto-scroll"]
+        end
+        
+        TabSwitcher --> ExpenseTable
+        TabSwitcher --> ConcernChecklist
+        DraftPanel_UI --> Expenses
+        DraftPanel_UI --> Concerns
+    end
+
+    subgraph APIs["API Calls"]
+        PlanningAPI2["GET /api/planning<br/>Load workspace data"]
+        StatusAPI["POST /api/agent/chat<br/>Update decision status"]
+        TransitionAPI["POST /api/ownership/transition<br/>Convert to owned"]
+    end
+  </div>
+</div>
+
+<!-- 8. DATABASE SCHEMA -->
+<div class="section" id="schema">
+  <h2>8. Database Schema — 12 Tables, 6 Zones</h2>
+
+  <div class="mermaid">
+erDiagram
+    auth_users ||--|| profiles : "1:1"
+    profiles ||--o{ lifestyle_profiles : has
+    profiles ||--o{ match_results : receives
+    profiles ||--o{ planning_pet_profiles : owns
+    profiles ||--o{ owned_pet_profiles : owns
+    profiles ||--o{ owner_experiences : submits
+    profiles ||--|| subscriptions : has
+    
+    lifestyle_profiles ||--o{ match_results : produces
+    
+    pet_type_profiles ||--o{ planning_pet_profiles : "references"
+    pet_type_profiles ||--o{ owned_pet_profiles : "references"
+    pet_type_profiles ||--o{ owner_experiences : about
+    
+    planning_pet_profiles ||--|| owned_pet_profiles : "converts to"
+    planning_pet_profiles ||--o{ agent_threads : has
+    planning_pet_profiles ||--o{ agent_drafts : receives
+    planning_pet_profiles ||--o{ estimated_expenses : contains
+    planning_pet_profiles ||--o{ concern_checklist_items : contains
+    
+    owned_pet_profiles ||--o{ agent_threads : has
+    
+    auth_users {
+        uuid id PK
+        string email
+    }
+    profiles {
+        uuid id PK_FK
+        string display_name
+    }
+    pet_type_profiles {
+        text id PK
+        string name
+        string species
+        string budget_tier
+        jsonb concerns
+        int matching_scores
+        text agent_guidance
+    }
+    lifestyle_profiles {
+        uuid id PK
+        uuid user_id FK
+        jsonb quiz_answers
+        jsonb follow_ups
+    }
+    match_results {
+        uuid id PK
+        uuid user_id FK
+        uuid lifestyle_profile_id FK
+        jsonb top_matches
+    }
+    planning_pet_profiles {
+        uuid id PK
+        uuid user_id FK
+        text pet_type_profile_id FK
+        string decision_status
+        jsonb estimated_expenses
+        jsonb concern_checklist
+        bool has_ownership
+    }
+    owned_pet_profiles {
+        uuid id PK
+        uuid user_id FK
+        uuid planning_pet_profile_id FK
+        text pet_type_profile_id FK
+        string pet_name
+        string age_life_stage
+        jsonb actual_expenses
+        jsonb activity_schedule
+        jsonb food_guide
+    }
+    agent_threads {
+        uuid id PK
+        uuid planning_pet_profile_id FK
+        uuid owned_pet_profile_id FK
+        text thread_id UNIQUE
+        string agent_type
+    }
+    agent_drafts {
+        uuid id PK
+        uuid planning_pet_profile_id FK
+        string target
+        jsonb current_value
+        jsonb proposed_value
+        string status
+    }
+    estimated_expenses {
+        uuid id PK
+        uuid planning_pet_profile_id FK
+        string category
+        string item
+        int amount_thb
+    }
+    concern_checklist_items {
+        uuid id PK
+        uuid planning_pet_profile_id FK
+        string concern_id
+        string title
+        string status
+    }
+    owner_experiences {
+        uuid id PK
+        uuid user_id FK
+        text pet_type_profile_id FK
+        string title
+        text body
+    }
+    subscriptions {
+        uuid id PK
+        uuid user_id FK UNIQUE
+        string stripe_subscription_id
+        string status
+    }
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch" style="background:#8b5cf6;"></span> Auth Zone</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#06b6d4;"></span> Static Pet Knowledge</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#10b981;"></span> User Data Zone</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#f59e0b;"></span> Agent System</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#f97316;"></span> Content</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#ec4899;"></span> Payments</div>
+  </div>
+</div>
+
+<!-- 9. MODULE DEPENDENCY -->
+<div class="section" id="modules">
+  <h2>9. Module Dependency Graph</h2>
+  <p>Arrows point from consumer to dependency. Pure functions (green border) have no Supabase dependency. Injectable interfaces (purple border) define contracts without implementation.</p>
+
+  <div class="mermaid">
+graph TB
+    subgraph Pages["Page Routes (7)"]
+        p_quiz["/quiz"]
+        p_result["/result/[id]"]
+        p_dash["/dashboard"]
+        p_workspace["/workspace/[id]"]
+        p_owned["/owned/[id]"]
+        p_exp["/experiences"]
+    end
+
+    subgraph API_Routes["API Routes (16)"]
+        api_match["/api/match"]
+        api_followup["/api/match/follow-up"]
+        api_agent_chat["/api/agent/chat"]
+        api_agent_care["/api/agent/care"]
+        api_drafts["/api/agent/drafts"]
+        api_planning["/api/planning"]
+        api_experiences["/api/experiences"]
+        api_transition["/api/ownership/transition"]
+        api_stripe["/api/stripe/*"]
+        api_seed["/api/seed"]
+    end
+
+    subgraph Lib_Core["Core Libraries"]
+        matching["matching/<br/>engine.ts (pure)<br/>dimensions.ts"]
+        quiz["quiz/<br/>questions.ts"]
+        pipeline["pipeline/<br/>validate.ts<br/>seed.ts"]
+        supabase["supabase/<br/>server.ts, client.ts,<br/>admin.ts"]
+        stripe_lib["stripe/<br/>guard.ts"]
+        llm["llm/<br/>config.ts"]
+    end
+
+    subgraph Lib_Agent["Agent Libraries (injectable)"]
+        repository["agent/repository.ts<br/>PlanningRepository interface"]
+        graph["agent/graph.ts<br/>createAgent() factory"]
+        tools["agent/tools.ts<br/>Decision tools via safeTool()"]
+        care_tools["agent/care-tools.ts<br/>Care tools via safeTool()"]
+        safe_tool["agent/safe-tool.ts<br/>try/catch wrapper"]
+        draft_store["agent/draft-store.ts<br/>DraftStore interface"]
+        draft_repo["agent/draft-repo.ts<br/>DraftPlanningRepository"]
+        supabase_repo["agent/supabase-repo.ts<br/>SupabasePlanningRepository"]
+        supabase_draft["agent/supabase-draft-store.ts<br/>SupabaseDraftStore"]
+    end
+
+    p_quiz --> quiz
+    p_result --> api_match
+    p_dash --> api_planning
+    p_workspace --> api_agent_chat
+    p_workspace --> api_drafts
+    p_owned --> api_agent_care
+    p_exp --> api_experiences
+
+    api_match --> matching
+    api_match --> supabase
+    api_followup --> matching
+    api_followup --> llm
+    api_agent_chat --> graph
+    api_agent_chat --> supabase_repo
+    api_agent_chat --> draft_repo
+    api_agent_chat --> supabase_draft
+    api_agent_care --> graph
+    api_agent_care --> supabase_repo
+    api_drafts --> draft_repo
+    api_planning --> supabase
+    api_planning --> stripe_lib
+    api_experiences --> supabase
+    api_experiences --> stripe_lib
+    api_transition --> supabase
+    api_seed --> pipeline
+
+    graph --> llm
+    graph --> safe_tool
+    tools --> safe_tool
+    tools --> repository
+    care_tools --> safe_tool
+    care_tools --> repository
+    draft_repo --> draft_store
+    draft_repo --> repository
+    supabase_repo --> supabase
+    supabase_draft --> supabase
+
+    matching --> dimensions
+
+    style matching fill:#064e3b,stroke:#059669,stroke-width:2px
+    style dimensions fill:#064e3b,stroke:#059669,stroke-width:2px
+    style quiz fill:#064e3b,stroke:#059669,stroke-width:2px
+    style pipeline fill:#064e3b,stroke:#059669,stroke-width:2px
+    style repository fill:#4c1d95,stroke:#7c3aed,stroke-width:2px
+    style draft_store fill:#4c1d95,stroke:#7c3aed,stroke-width:2px
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch" style="background:#059669;"></span> Pure Function (no Supabase dependency)</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#7c3aed;"></span> Injectable Interface</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#334155;"></span> Concrete Adapter</div>
+  </div>
+</div>
+
+<!-- 10. DRAFT WORKFLOW -->
+<div class="section" id="drafts">
+  <h2>10. Agent Draft Workflow</h2>
+  <p>Agent tool calls never write directly to the database. They create drafts. The user confirms or rejects. Manual edits discard stale drafts.</p>
+
+  <div class="mermaid">
+sequenceDiagram
+    actor User
+    participant Chat as AgentChat
+    participant API as POST /api/agent/chat
+    participant Graph as LangGraph Agent
+    participant DraftRepo as DraftPlanningRepository
+    participant DraftStore as SupabaseDraftStore
+    participant RealRepo as SupabasePlanningRepository
+    participant DraftPanel as DraftPanel
+    participant DB as Supabase
+
+    User->>Chat: "Update my expenses"
+    Chat->>API: POST { planningProfileId, message }
+    API->>Graph: agent.invoke({ messages: [HumanMessage] })
+    Graph->>Graph: LLM decides: call update_expenses tool
+    Graph->>DraftRepo: replaceExpenses(pid, newExpenses)
+    DraftRepo->>RealRepo: getExpenses(pid) — snapshot current
+    RealRepo-->>DraftRepo: current expenses
+    DraftRepo->>DraftStore: create({ target, current_value, proposed_value })
+    DraftStore->>DB: INSERT into agent_drafts (status: pending)
+    Graph-->>API: "I've proposed expense updates"
+    API-->>Chat: Response text
+
+    Note over DraftPanel,DB: DraftPanel polls every 5 seconds
+    DraftPanel->>DB: SELECT pending drafts
+    
+    alt User accepts
+        User->>DraftPanel: Click "Accept"
+        DraftPanel->>API: POST /api/agent/drafts { draftId, action: "confirm" }
+        API->>DB: UPDATE draft status = confirmed
+        API->>RealRepo: replaceExpenses(pid, proposed_value)
+        RealRepo->>DB: WRITE to estimated_expenses
+    else User rejects
+        User->>DraftPanel: Click "Reject"
+        DraftPanel->>API: POST { draftId, action: "reject" }
+        API->>DB: UPDATE draft status = rejected
+    else User manually edits
+        User->>Chat: Manual edit via left panel
+        Chat->>API: Discard stale drafts for that target
+        API->>DB: UPDATE drafts status = stale
+    end
+  </div>
+</div>
+
+<!-- 11. AUTH FLOW -->
+<div class="section" id="auth">
+  <h2>11. Auth Flow — Google OAuth Only</h2>
+
+  <div class="mermaid">
+sequenceDiagram
+    actor User
+    participant Landing as / (Landing Page)
+    participant NextJS as Next.js
+    participant Google as Google OAuth
+    participant SupabaseAuth as Supabase Auth
+    participant SupabaseDB as Supabase DB
+    participant Proxy as Proxy (Session Refresh)
+
+    User->>Landing: Click "Sign in with Google"
+    Landing->>NextJS: GET /auth/google
+    NextJS->>SupabaseAuth: signInWithOAuth({ provider: "google" })
+    SupabaseAuth-->>NextJS: OAuth URL
+    NextJS-->>User: Redirect to Google
+
+    User->>Google: Sign in + authorize
+    Google->>NextJS: GET /auth/callback?code=xxx
+    NextJS->>SupabaseAuth: exchangeCodeForSession(code)
+    SupabaseAuth-->>NextJS: Session token
+    
+    par Auto-provision profile
+        SupabaseAuth->>SupabaseDB: INSERT into profiles (trigger)
+    end
+
+    NextJS-->>User: Redirect to /quiz
+
+    loop Every request
+        User->>Proxy: Request any page
+        Proxy->>SupabaseAuth: getUser() — validate session
+        SupabaseAuth-->>Proxy: User data
+        Proxy->>Proxy: Set cookies, continue
+    end
+  </div>
+</div>
+
+<div style="margin-top: 48px; padding-top: 16px; border-top: 1px solid #1e293b; font-size: 12px; color: #475569; text-align: center;">
+  Lukluk v1 Architecture · 23 routes · 19 pet profiles · 8 agent tools · 46 tests · 12 database tables · Generated 2026-07-03
+</div>
+
+<script>
+  mermaid.initialize({ 
+    startOnLoad: true, 
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1e293b',
+      primaryTextColor: '#e2e8f0',
+      primaryBorderColor: '#334155',
+      lineColor: '#64748b',
+      secondaryColor: '#0f172a',
+      tertiaryColor: '#1e293b'
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukluk — Dashboard</title>
+
+<style>
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --fg: #1a1a2e;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --accent-light: #fff7ed;
+  --success: #22c55e;
+  --success-light: #f0fdf4;
+  --warning: #f59e0b;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --max-w: 960px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); color: var(--fg); background: var(--bg); line-height: 1.6; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(250,250,250,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 20px; letter-spacing: -0.02em; }
+.nav-logo svg { width: 28px; height: 28px; }
+.nav-actions { display: flex; align-items: center; gap: 16px; }
+.nav-link { font-size: 14px; color: var(--muted); font-weight: 500; transition: color 0.15s; }
+.nav-link:hover { color: var(--fg); }
+
+/* HEADER */
+.dash-header { padding: 48px 0 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.dash-header h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 700; letter-spacing: -0.02em; }
+.dash-header p { font-size: 15px; color: var(--muted); margin-top: 4px; }
+.btn-outline { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--fg); background: var(--surface); transition: border-color 0.15s; }
+.btn-outline:hover { border-color: #cbd5e1; }
+.btn-outline svg { width: 16px; height: 16px; }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--accent); color: #fff; border-radius: 999px; font-size: 13px; font-weight: 600; transition: background 0.15s; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary svg { width: 16px; height: 16px; }
+
+/* PROFILE CARDS */
+.profiles { padding: 32px 0 48px; }
+.profiles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.profile-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.profile-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.profile-avatar {
+  width: 52px; height: 52px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-info { flex: 1; min-width: 0; }
+.profile-name { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+.profile-meta { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.profile-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-exploring { background: #eff6ff; color: #3b82f6; }
+.badge-considering { background: #f5f3ff; color: #8b5cf6; }
+.badge-ready { background: var(--success-light); color: var(--success); }
+.badge-owned { background: var(--accent-light); color: var(--accent); }
+
+/* EMPTY STATE */
+.empty-state { display: none; text-align: center; padding: 80px 24px; }
+.empty-state.visible { display: block; }
+.empty-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+.empty-icon svg { width: 36px; height: 36px; color: var(--muted); }
+.empty-state h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.empty-state p { font-size: 15px; color: var(--muted); max-width: 400px; margin: 0 auto 28px; }
+
+/* LOADING */
+.skeleton { background: var(--border); border-radius: var(--radius-sm); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.skeleton-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; display: flex; gap: 16px; }
+.skeleton-avatar { width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0; }
+.skeleton-lines { flex: 1; }
+.skeleton-line { height: 14px; border-radius: 4px; margin-bottom: 8px; }
+.skeleton-badge { height: 22px; width: 80px; border-radius: 999px; }
+
+/* FOOTER */
+.footer { padding: 32px 0; border-top: 1px solid var(--border); }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; }
+.footer-copy { font-size: 12px; color: var(--muted); }
+
+@media (max-width: 768px) {
+  .profiles-grid { grid-template-columns: 1fr; }
+  .dash-header { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">
+      <svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="currentColor" stroke-width="2"/><path d="M9 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z" fill="currentColor"/><circle cx="14" cy="17" r="2" fill="currentColor"/></svg>
+      Lukluk
+    </a>
+    <div class="nav-actions">
+      <a href="/experiences" class="nav-link">Experiences</a>
+      <a href="/result/0" class="nav-link">Results</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="dash-header">
+    <div>
+      <h1>Your Dashboard</h1>
+      <p>Manage your pet decision workspaces</p>
+    </div>
+    <a href="/quiz" class="btn-outline">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      Take the quiz again
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div class="profiles" id="loadingState" style="display:none;">
+    <div class="profiles-grid">
+      <div class="skeleton-card"><div class="skeleton skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton skeleton-line" style="width:60%"></div><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-badge"></div></div></div>
+      <div class="skeleton-card"><div class="skeleton skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:35%"></div><div class="skeleton skeleton-badge"></div></div></div>
+      <div class="skeleton-card"><div class="skeleton skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton skeleton-line" style="width:50%"></div><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-badge"></div></div></div>
+    </div>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <h2>You don't have any workspaces yet</h2>
+    <p>Take the Fit Quiz to discover your top pet matches, then subscribe to start planning.</p>
+    <a href="/quiz" class="btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      Start the Quiz
+    </a>
+  </div>
+
+  <!-- Populated -->
+  <div class="profiles" id="profilesState" style="display:none;">
+    <div class="profiles-grid" id="profilesGrid"></div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-copy">&copy; 2026 Lukluk. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+const PET_IMAGES = {
+  "golden-retriever": "public/assets/PetLogo/golden-retriever/1.png",
+  "siamese-cat": "public/assets/PetLogo/siamese-cat/1.png",
+  "rabbit": "public/assets/PetLogo/rabbit/1.png",
+  "welsh-corgi": "public/assets/PetLogo/welsh-corgi/1.png",
+  "hamster": "public/assets/PetLogo/hamster/1.png",
+  "chinchilla": "public/assets/PetLogo/chinchilla/1.png",
+  "persian-cat": "public/assets/PetLogo/persian-cat/1.png",
+  "siberian-husky": "public/assets/PetLogo/siberian-husky/1.png"
+};
+
+const DEMO_PROFILES = [
+  { id: "pl-001", pet_name: "Future Corgi", species: "Dog", pet_type: "welsh-corgi", mbti: "ESFJ — The Caregiver", status: "exploring", owned: false },
+  { id: "pl-002", pet_name: "Luna", species: "Cat", pet_type: "siamese-cat", mbti: "INTJ — The Strategist", status: "considering", owned: false },
+  { id: "pl-003", pet_name: "Mochi", species: "Rabbit", pet_type: "rabbit", mbti: "ISFP — The Gentle Companion", status: "ready_to_buy", owned: false },
+  { id: "ow-001", pet_name: "Biscuit", species: "Hamster", pet_type: "hamster", mbti: "ISTP — The Independent", status: "already_have", owned: true }
+];
+
+function renderProfile(p) {
+  const statusMap = {
+    exploring: { label: "Exploring", cls: "badge-exploring" },
+    considering: { label: "Considering", cls: "badge-considering" },
+    ready_to_buy: { label: "Ready to adopt", cls: "badge-ready" },
+    already_have: { label: "Owned", cls: "badge-owned" }
+  };
+  const s = statusMap[p.status] || statusMap.exploring;
+  const petImg = PET_IMAGES[p.pet_type] || '';
+  return `
+    <a href="${p.owned ? '/owned/' + p.id : '/workspace/' + p.id}" class="profile-card">
+      <div class="profile-avatar">${petImg ? `<img src="${petImg}" alt="${p.pet_name}">` : p.pet_name.charAt(0)}</div>
+      <div class="profile-info">
+        <div class="profile-name">${p.pet_name}</div>
+        <div class="profile-meta">${p.species} &middot; ${p.mbti}</div>
+        <span class="profile-badge ${s.cls}">${s.label}</span>
+      </div>
+    </a>`;
+}
+
+function loadDashboard(showProfiles) {
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('emptyState').classList.remove('visible');
+  document.getElementById('profilesState').style.display = 'none';
+
+  setTimeout(() => {
+    document.getElementById('loadingState').style.display = 'none';
+    if (showProfiles) {
+      document.getElementById('profilesState').style.display = 'block';
+      document.getElementById('profilesGrid').innerHTML = DEMO_PROFILES.map(renderProfile).join('');
+    } else {
+      document.getElementById('emptyState').classList.add('visible');
+    }
+  }, 1000);
+}
+
+// Toggle between populated and empty for demo
+loadDashboard(true);
+</script>
+</body>
+</html>

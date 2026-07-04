@@ -2,35 +2,81 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import CareChat from "@/components/agent/CareChat";
+import ExpenseTable from "@/components/workspace/ExpenseTable";
+import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
+import { EmptyState } from "@/components/layout/EmptyState";
+import { ArrowLeft } from "lucide-react";
 
 interface OwnedData {
   id: string;
   pet_name: string;
   age_life_stage: string;
   got_date: string | null;
-  actual_expenses: Array<{ category: string; item: string; amount_thb: number; note?: string }>;
+  actual_expenses: Array<{
+    category: string;
+    item: string;
+    amount_thb: number;
+    note?: string;
+  }>;
   activity_schedule: Array<{ day: string; activity: string; time: string }>;
   food_guide: { brand?: string; amount?: string; frequency?: string; notes?: string };
-  pet_type_profiles: { name: string };
+  pet_type_profiles: { name: string; species: string; mbti_label: string };
+}
+
+const DAY_ORDER = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+const PET_EMOJIS: Record<string, string> = {
+  Dog: "🐕",
+  Cat: "🐈",
+  Rabbit: "🐇",
+  Hamster: "🐹",
+};
+
+function ageLabel(stage: string) {
+  switch (stage) {
+    case "puppy/kitten":
+      return "Puppy / Kitten";
+    case "young_adult":
+      return "Young Adult";
+    case "adult":
+      return "Adult";
+    case "senior":
+      return "Senior";
+    default:
+      return stage;
+  }
 }
 
 export default function OwnedPage() {
   const params = useParams<{ id: string }>();
   const [data, setData] = useState<OwnedData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"expenses" | "activity" | "food">("expenses");
+  const [activeTab, setActiveTab] = useState<"expenses" | "activity" | "food">(
+    "expenses",
+  );
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function load() {
       try {
         const res = await fetch(`/api/ownership/${params.id}`);
         if (res.ok) {
-          const fetchedData = await res.json();
-          setData(fetchedData);
+          setData(await res.json());
+        } else {
+          setError("Could not load pet profile");
         }
-      } catch (e) {
-        console.error("Failed to load owned profile", e);
+      } catch {
+        setError("Could not connect. Check your internet connection.");
       } finally {
         setLoading(false);
       }
@@ -38,79 +84,213 @@ export default function OwnedPage() {
     load();
   }, [params.id]);
 
-  if (loading) return <div style={{ padding: 24 }}>Loading...</div>;
-  if (!data) return null;
+  if (loading) {
+    return (
+      <div className="flex h-screen flex-col">
+        <div className="flex h-[52px] items-center border-b border-border px-5">
+          <LoadingSkeleton variant="text" rows={1} />
+        </div>
+        <div className="flex flex-1">
+          <div className="flex-1 overflow-auto p-6">
+            <LoadingSkeleton variant="card" />
+            <div className="mt-6">
+              <LoadingSkeleton variant="table" rows={6} />
+            </div>
+          </div>
+          <div className="w-[420px] border-l border-border bg-card" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center px-6">
+        <div className="mb-4 text-5xl">⚠️</div>
+        <h2 className="text-xl font-bold">Profile not found</h2>
+        <p className="mt-2 text-muted-foreground">
+          {error || "This pet profile may have been removed."}
+        </p>
+        <Link
+          href="/dashboard"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+        >
+          Back to Dashboard
+        </Link>
+      </div>
+    );
+  }
+
+  const emoji = PET_EMOJIS[data.pet_type_profiles.species] || "🐾";
+  const tabs = [
+    { key: "expenses" as const, label: "Actual Expenses" },
+    { key: "activity" as const, label: "Activity Schedule" },
+    { key: "food" as const, label: "Food Guide" },
+  ];
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      {/* Left Panel — Care Data */}
-      <div style={{ flex: 1, overflow: "auto", padding: 24, borderRight: "1px solid #eee" }}>
-        <h2>{data.pet_name}</h2>
-        <p style={{ color: "#666" }}>
-          {data.pet_type_profiles.name} · {data.age_life_stage}
-        </p>
+    <div className="flex h-screen flex-col overflow-hidden">
+      {/* Nav */}
+      <nav className="flex h-[52px] shrink-0 items-center border-b border-border bg-card px-5">
+        <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-1.5 font-bold text-base">
+            🐾 Lukluk
+          </Link>
+          <span className="block h-5 w-px bg-border" />
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Dashboard
+          </Link>
+        </div>
+        <div className="mx-auto flex items-center gap-2">
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full overflow-hidden bg-success/10 text-sm">
+            {emoji}
+          </div>
+          <span className="text-sm font-semibold">{data.pet_name}</span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-success/20 bg-success/5 px-2.5 py-0.5 text-[11px] font-semibold text-success">
+            ✓ Owned
+          </span>
+        </div>
+        <div className="w-[100px]" />
+      </nav>
 
-        <div style={{ display: "flex", gap: 8, margin: "16px 0" }}>
-          {(["expenses", "activity", "food"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{ fontWeight: activeTab === tab ? "bold" : "normal" }}
-            >
-              {tab === "expenses" ? "Actual Expenses" : tab === "activity" ? "Activity Schedule" : "Food Guide"}
-            </button>
-          ))}
+      {/* Body */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Panel */}
+        <div className="flex-1 overflow-y-auto border-r border-border p-6">
+          {/* Header */}
+          <div className="flex items-center gap-3.5 mb-5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-success/20 bg-success/5 text-xl">
+              {emoji}
+            </div>
+            <div>
+              <h1 className="text-xl font-bold">{data.pet_name}</h1>
+              <p className="text-sm text-muted-foreground">
+                {data.pet_type_profiles.name} · {ageLabel(data.age_life_stage)}
+              </p>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex border-b-2 border-border mb-5">
+            {tabs.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-0.5 ${
+                  activeTab === t.key
+                    ? "border-success text-foreground font-semibold"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab content */}
+          {activeTab === "expenses" && (
+            <ExpenseTable
+              expenses={data.actual_expenses}
+              variant="ownership"
+            />
+          )}
+
+          {activeTab === "activity" && (
+            <div>
+              {data.activity_schedule.length === 0 ? (
+                <EmptyState
+                  icon="📅"
+                  title="No schedule yet"
+                  description="The Care Agent can help build a daily routine for your pet."
+                  variant="accent"
+                />
+              ) : (
+                <div className="space-y-3">
+                  {DAY_ORDER.filter((day) =>
+                    data.activity_schedule.some((a) => a.day === day),
+                  ).map((day) => (
+                    <div
+                      key={day}
+                      className="overflow-hidden rounded-lg border border-border bg-card"
+                    >
+                      <div className="bg-muted/50 border-b border-border px-4 py-2.5 text-sm font-semibold">
+                        {day}
+                      </div>
+                      {data.activity_schedule
+                        .filter((a) => a.day === day)
+                        .map((a, i) => (
+                          <div
+                            key={i}
+                            className="flex items-baseline gap-3 border-b border-border px-4 py-2 text-sm last:border-b-0"
+                          >
+                            <span className="min-w-[60px] text-sm font-semibold text-primary tabular-nums">
+                              {a.time}
+                            </span>
+                            <span>{a.activity}</span>
+                          </div>
+                        ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "food" && (
+            <div>
+              {!data.food_guide.brand ? (
+                <EmptyState
+                  icon="🍽️"
+                  title="No food guide yet"
+                  description="Chat with the Care Agent for personalized feeding recommendations."
+                  variant="accent"
+                />
+              ) : (
+                <div className="rounded-xl border border-border bg-card p-5">
+                  <h4 className="text-sm font-semibold mb-3">
+                    Feeding Guide
+                  </h4>
+                  <div className="space-y-0">
+                    {[
+                      { label: "Brand", value: data.food_guide.brand },
+                      { label: "Amount per serving", value: data.food_guide.amount },
+                      { label: "Frequency", value: data.food_guide.frequency },
+                      { label: "Notes", value: data.food_guide.notes },
+                    ]
+                      .filter((r) => r.value)
+                      .map((r) => (
+                        <div
+                          key={r.label}
+                          className="flex justify-between border-b border-border py-2 text-sm last:border-b-0"
+                        >
+                          <span className="text-muted-foreground">
+                            {r.label}
+                          </span>
+                          <span className="font-medium">{r.value}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {activeTab === "expenses" && (
-          <div>
-            {data.actual_expenses.length === 0 ? (
-              <p>No expenses tracked yet. Chat with the Care Agent to start tracking.</p>
-            ) : (
-              data.actual_expenses.map((e, i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f0f0f0" }}>
-                  <span>{e.category}: {e.item}</span>
-                  <span>{e.amount_thb.toLocaleString()} THB</span>
-                  {e.note && <span style={{ color: "#666", fontSize: 12 }}>{e.note}</span>}
-                </div>
-              ))
-            )}
+        {/* Right Panel — Care Chat */}
+        <div className="w-[420px] shrink-0 flex flex-col bg-card">
+          <div className="flex items-center gap-2.5 border-b border-border px-4 py-3.5">
+            <span className="h-2 w-2 rounded-full bg-success" />
+            <div>
+              <h3 className="text-sm font-semibold">Care Agent</h3>
+              <p className="text-xs text-muted-foreground">Always available</p>
+            </div>
           </div>
-        )}
-
-        {activeTab === "activity" && (
-          <div>
-            {data.activity_schedule.length === 0 ? (
-              <p>No schedule yet. The Care Agent can help build a daily routine.</p>
-            ) : (
-              data.activity_schedule.map((a, i) => (
-                <div key={i} style={{ padding: "8px 0", borderBottom: "1px solid #f0f0f0" }}>
-                  <strong>{a.day}</strong>: {a.activity} ({a.time})
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {activeTab === "food" && (
-          <div>
-            {!data.food_guide.brand ? (
-              <p>No food guide yet. Chat with the Care Agent for recommendations.</p>
-            ) : (
-              <div>
-                <p><strong>Brand:</strong> {data.food_guide.brand}</p>
-                <p><strong>Amount:</strong> {data.food_guide.amount}</p>
-                <p><strong>Frequency:</strong> {data.food_guide.frequency}</p>
-                {data.food_guide.notes && <p><strong>Notes:</strong> {data.food_guide.notes}</p>}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Right Panel — Care Agent */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <CareChat ownedProfileId={params.id} />
+          <CareChat ownedProfileId={params.id} />
+        </div>
       </div>
     </div>
   );

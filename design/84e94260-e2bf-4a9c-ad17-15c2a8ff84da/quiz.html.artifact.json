@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "quiz.html",
+  "entry": "quiz.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-07-03T17:31:26.726Z",
+  "updatedAt": "2026-07-03T17:31:26.726Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}
