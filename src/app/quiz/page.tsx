@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
 const TOTAL = FIXED_QUESTIONS.length;
+const MAX_FOLLOW_UPS = 5;
 
 const QUESTION_ICONS = [
   "💰", "⏰", "🏠", "🤧", "✈️",
@@ -21,6 +22,11 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [finished, setFinished] = useState(false);
+  const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
+  const [followUpAnswers, setFollowUpAnswers] = useState<string[]>([]);
+  const [followUpStep, setFollowUpStep] = useState(0);
+  const [showFollowUp, setShowFollowUp] = useState(false);
+  const [generatingFollowUp, setGeneratingFollowUp] = useState(false);
 
   const question = FIXED_QUESTIONS[step];
   const answered = question ? answers[question.id] ?? null : null;
@@ -37,6 +43,43 @@ export default function QuizPage() {
     setStep((s) => Math.max(0, s - 1));
   }
 
+  async function handleFinish() {
+    setFinished(true);
+    setGeneratingFollowUp(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/match/follow-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers, followUps: [] }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.finished && data.followUpQuestions?.length) {
+          setFollowUpQuestions(data.followUpQuestions.slice(0, MAX_FOLLOW_UPS));
+          setFollowUpAnswers(new Array(data.followUpQuestions.length).fill(""));
+          setShowFollowUp(true);
+          setFinished(false);
+          return;
+        }
+
+        if (data.matches?.length) {
+          router.push(`/result/${data.matchResultId || "latest"}`);
+          return;
+        }
+      }
+    } catch {
+      // follow-up failed, proceed to match
+    } finally {
+      setGeneratingFollowUp(false);
+    }
+
+    // If no follow-ups, go straight to match
+    handleSubmit();
+  }
+
   async function handleSubmit() {
     setLoading(true);
     setError("");
@@ -44,7 +87,12 @@ export default function QuizPage() {
       const res = await fetch("/api/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, followUpAnswers: [] }),
+        body: JSON.stringify({
+          answers,
+          followUpAnswers: showFollowUp
+            ? followUpQuestions.map((q, i) => ({ question: q, answer: followUpAnswers[i] || "" }))
+            : [],
+        }),
       });
       if (!res.ok) throw new Error("Match failed");
       const data = await res.json();
@@ -55,6 +103,98 @@ export default function QuizPage() {
     }
   }
 
+  function handleFollowUpAnswer(value: string) {
+    const next = [...followUpAnswers];
+    next[followUpStep] = value;
+    setFollowUpAnswers(next);
+    if (followUpStep < followUpQuestions.length - 1) {
+      setTimeout(() => setFollowUpStep((s) => s + 1), 200);
+    } else {
+      handleSubmit();
+    }
+  }
+
+  // Follow-up question screen
+  if (showFollowUp && followUpStep < followUpQuestions.length) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
+          <div className="mx-auto flex h-14 max-w-[640px] items-center px-6">
+            <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+              <Image src="/assets/logo.png" alt="Lukluk" width={28} height={28} />
+              Lukluk
+            </Link>
+          </div>
+        </nav>
+
+        <div className="mx-auto w-full max-w-[640px] px-6 pt-4">
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+              Clarifying Question {followUpStep + 1} of {followUpQuestions.length}
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-border overflow-hidden">
+            <div
+              className="h-full rounded-full bg-warning transition-all duration-600 ease-out"
+              style={{ width: `${((followUpStep + 1) / followUpQuestions.length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="mx-auto flex w-full max-w-[640px] flex-1 flex-col items-center px-6 pt-16 pb-16">
+          <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-full bg-warning/10 text-2xl">
+            💡
+          </div>
+
+          <h2 className="max-w-[520px] text-center text-2xl font-bold leading-snug tracking-tight">
+            {followUpQuestions[followUpStep]}
+          </h2>
+
+          <p className="mt-4 text-sm text-muted-foreground text-center">
+            This helps narrow your best matches
+          </p>
+
+          <div className="mt-10 flex w-full max-w-[480px] flex-col gap-4">
+            <button
+              onClick={() => handleFollowUpAnswer("Yes")}
+              className="flex items-center gap-4 rounded-2xl border-2 border-transparent bg-card px-6 py-5 text-left text-[15px] font-medium transition-all duration-300 shadow-sm hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-success text-xl">✓</span>
+              <span>Yes</span>
+            </button>
+            <button
+              onClick={() => handleFollowUpAnswer("No")}
+              className="flex items-center gap-4 rounded-2xl border-2 border-transparent bg-card px-6 py-5 text-left text-[15px] font-medium transition-all duration-300 shadow-sm hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive text-xl">✗</span>
+              <span>No</span>
+            </button>
+            <button
+              onClick={() => handleFollowUpAnswer("Not sure")}
+              className="flex items-center gap-4 rounded-2xl border-2 border-transparent bg-card px-6 py-5 text-left text-[15px] font-medium transition-all duration-300 shadow-sm hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground text-xl">~</span>
+              <span>Not sure</span>
+            </button>
+            <button
+              onClick={() => handleSubmit()}
+              className="mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
+            >
+              Skip all clarifying questions
+            </button>
+          </div>
+
+          {error && (
+            <div className="mt-6 w-full max-w-[480px] rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4 text-sm text-destructive text-center">
+              {error}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Finish screen (no follow-ups generated)
   if (finished) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
@@ -67,31 +207,45 @@ export default function QuizPage() {
           </div>
         </nav>
         <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-          <div className="animate-scale-in mb-6">
-            <CheckCircle className="h-24 w-24 text-success" style={{ fillOpacity: 0.1 }} />
-          </div>
-          <h2 className="text-2xl font-bold">All done! 🎉</h2>
-          <p className="mt-2 max-w-sm text-muted-foreground">
-            You've answered all {TOTAL} questions. Let's find the pet types that truly fit your life.
-          </p>
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-[0_4px_16px_rgba(249,115,22,0.25)] transition-all hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(249,115,22,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Finding your matches...
-              </>
-            ) : (
-              "See Your Matches"
-            )}
-          </button>
-          {error && (
-            <div className="mt-6 max-w-[480px] rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4 text-sm text-destructive">
-              {error}
-            </div>
+          {generatingFollowUp ? (
+            <>
+              <div className="animate-scale-in mb-6">
+                <Loader2 className="h-16 w-16 text-primary animate-spin" />
+              </div>
+              <h2 className="text-xl font-bold">Analyzing your answers...</h2>
+              <p className="mt-2 max-w-sm text-muted-foreground">
+                Checking if we need any clarification before finding your matches.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="animate-scale-in mb-6">
+                <CheckCircle className="h-24 w-24 text-success" style={{ fillOpacity: 0.1 }} />
+              </div>
+              <h2 className="text-2xl font-bold">All done! 🎉</h2>
+              <p className="mt-2 max-w-sm text-muted-foreground">
+                You've answered all {TOTAL} questions. Let's find the pet types that truly fit your life.
+              </p>
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-[0_4px_16px_rgba(249,115,22,0.25)] transition-all hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(249,115,22,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Finding your matches...
+                  </>
+                ) : (
+                  "See Your Matches"
+                )}
+              </button>
+              {error && (
+                <div className="mt-6 max-w-[480px] rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -99,7 +253,6 @@ export default function QuizPage() {
   }
 
   if (!question) {
-    setFinished(true);
     return null;
   }
 
@@ -121,7 +274,7 @@ export default function QuizPage() {
             Lukluk
           </Link>
           <button
-            onClick={() => setFinished(true)}
+            onClick={handleFinish}
             className="text-sm text-muted-foreground transition-colors hover:text-foreground rounded-full px-3 py-2 hover:bg-muted"
           >
             Skip
