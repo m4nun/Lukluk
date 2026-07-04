@@ -4,13 +4,15 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { type User } from "@supabase/supabase-js";
+import { Sparkles, LogOut } from "lucide-react";
 
 export function AppNav() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
 
   useEffect(() => {
@@ -32,47 +34,47 @@ export function AppNav() {
     router.refresh();
   }
 
-  if (loading) {
-    return (
-      <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2.5 text-xl font-bold tracking-tight group">
-            <Image src="/assets/logo.png" alt="Lukluk" width={40} height={40} className="transition-transform duration-300 group-hover:rotate-[-3deg] group-hover:scale-105" />
-            Lukluk
-          </Link>
-        </div>
-      </nav>
-    );
-  }
+  const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl animate-fade-in">
-      <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2.5 text-xl font-bold tracking-tight group">
-          <Image src="/assets/logo.png" alt="Lukluk" width={40} height={40} className="transition-transform duration-300 group-hover:rotate-[-3deg] group-hover:scale-105" />
+    <nav className="sticky top-0 z-50 bg-background/85 backdrop-blur-xl border-b border-border">
+      <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+          <Image src="/assets/logo.png" alt="Lukluk" width={28} height={28} className="transition-transform duration-300 hover:rotate-[-5deg] hover:scale-110" />
           Lukluk
         </Link>
 
-        {user ? (
+        {/* Loading skeleton */}
+        {loading && (
           <div className="hidden sm:flex items-center gap-6">
-            <Link href="/dashboard" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-              Dashboard
-            </Link>
+            <div className="h-5 w-20 animate-pulse rounded-md bg-muted" />
+            <div className="h-9 w-36 animate-pulse rounded-full bg-muted" />
+          </div>
+        )}
+
+        {/* Logged-in nav */}
+        {!loading && user && (
+          <div className="hidden sm:flex items-center gap-6">
             <Link
-              href="/experiences"
-              className="relative text-sm font-medium text-muted-foreground transition-colors hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
+              href="/dashboard"
+              className={`text-sm font-medium transition-colors ${isActive("/dashboard") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              Experiences
+              Dashboard
             </Link>
             <button
               onClick={handleSignOut}
-              className="rounded-full border border-border px-5 py-2 text-sm font-medium text-muted-foreground transition-all hover:border-foreground/20 hover:text-foreground"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-all hover:border-foreground/20 hover:text-foreground hover:-translate-y-0.5 hover:shadow-sm"
             >
+              <LogOut className="h-3.5 w-3.5" />
               Sign out
             </button>
           </div>
-        ) : (
-          <div className="hidden sm:flex items-center gap-9">
+        )}
+
+        {/* Logged-out nav */}
+        {!loading && !user && (
+          <div className="hidden sm:flex items-center gap-8">
             <Link
               href="/experiences"
               className="relative text-sm font-medium text-muted-foreground transition-colors hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
@@ -80,8 +82,14 @@ export function AppNav() {
               Experiences
             </Link>
             <Link
+              href="/quiz"
+              className="relative text-sm font-medium text-muted-foreground transition-colors hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
+            >
+              Take the Quiz
+            </Link>
+            <Link
               href="/auth/google"
-              className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background shadow-[0_2px_8px_rgba(26,26,46,0.2)] transition-all hover:bg-[#2d2d4a] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(26,26,46,0.3)]"
+              className="inline-flex items-center gap-2.5 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background shadow-[0_2px_8px_rgba(26,26,46,0.2)] transition-all hover:bg-[#2d2d4a] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(26,26,46,0.3)]"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -93,6 +101,18 @@ export function AppNav() {
             </Link>
           </div>
         )}
+
+        {/* Mobile hamburger placeholder */}
+        <div className="flex sm:hidden">
+          {!loading && user && (
+            <button
+              onClick={handleSignOut}
+              className="rounded-full border border-border px-3 py-1.5 text-xs font-medium"
+            >
+              Sign out
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   );
