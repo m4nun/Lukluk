@@ -2,7 +2,8 @@ id: green-iguana
 name: Green Iguana
 species: reptile
 breed_or_category: Green Iguana
-description: ยักษ์ใหญ่ใจดีแห่งโลกสัตว์เลื้อยคลาน — Green Iguana เป็นสัตว์สุขุม สงบ ต้องการการดูแลจริงจังและพื้นที่กว้าง
+description: >-
+  ยักษ์ใหญ่ใจดีแห่งโลกสัตว์เลื้อยคลาน — Green Iguana เป็นสัตว์สุขุม สงบ ต้องการการดูแลจริงจังและพื้นที่กว้าง
 
 mbti_label: ISTJ — The Stoic Guardian
 mbti_traits:
@@ -10,7 +11,7 @@ mbti_traits:
   - เป็นระเบียบ (ต้องการ routine)
   - ไม่เรียกร้องความสนใจ
   - อายุยืน
-mbti_description: Iguana เป็นสัตว์ที่อยู่ในโลกของตัวเอง — มันต้องการสภาพแวดล้อมที่ถูกต้อง: อุณหภูมิ แสง UVB ความชื้น เมื่อทุกอย่างพอดี มันจะสงบและสวยงาม แต่มันไม่ใช่สัตว์กอด
+mbti_description: Iguana เป็นสัตว์ที่อยู่ในโลกของตัวเอง — มันต้องการสภาพแวดล้อมที่ถูกต้อง อุณหภูมิ แสง UVB ความชื้น เมื่อทุกอย่างพอดี มันจะสงบและสวยงาม แต่มันไม่ใช่สัตว์กอด
 
 appearance:
   size: extra_large

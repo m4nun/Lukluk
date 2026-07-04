@@ -50,7 +50,7 @@ export const petTypeProfileYamlSchema = z.object({
   allergies: z.object({
     allergen_level: z.enum(["none", "low", "medium", "high"]),
     hypoallergenic: z.boolean(),
-    notes: z.string().optional(),
+    notes: z.string().nullable().optional(),
   }),
 
   noise: z.object({
@@ -65,25 +65,25 @@ export const petTypeProfileYamlSchema = z.object({
     restricted_regions: z.array(z.string()),
     requires_permit: z.boolean(),
     cites_protected: z.boolean(),
-    notes: z.string().optional(),
+    notes: z.string().nullable().optional(),
   }),
 
   existing_pets: z.object({
     dog_friendly: z.boolean(),
     cat_friendly: z.boolean(),
     small_pet_safe: z.boolean(),
-    notes: z.string().optional(),
+    notes: z.string().nullable().optional(),
   }),
 
   travel: z.object({
     travel_friendly: z.boolean(),
     boarding_difficulty: z.enum(["easy", "moderate", "hard"]),
-    transport_notes: z.string().optional(),
+    transport_notes: z.string().nullable().optional(),
   }),
 
   experience: z.object({
     experience_level: z.enum(["beginner", "intermediate", "experienced"]),
-    notes: z.string().optional(),
+    notes: z.string().nullable().optional(),
   }),
 
   care: z.object({
