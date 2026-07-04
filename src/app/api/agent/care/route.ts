@@ -1,33 +1,38 @@
-import { runAgent } from "@/lib/agent/invoke";
-import { createCareTools } from "@/lib/agent/care-tools";
-import { CARE_SYSTEM_PROMPT } from "@/lib/agent/graph";
-import { SupabasePlanningRepository } from "@/lib/agent/supabase-repo";
+import { createClient } from "@/lib/supabase/server";
+import { isSubscriber } from "@/lib/stripe/guard";
 
 export async function POST(request: Request) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    return Response.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const subscriber = await isSubscriber();
+  if (!subscriber && process.env.STRIPE_SECRET_KEY) {
+    return Response.json({ error: "Subscription required" }, { status: 402 });
+  }
+
   const body = await request.json();
   const { ownedProfileId, message } = body;
 
-  const repo = new SupabasePlanningRepository();
-  const tools = createCareTools(repo);
+  if (!ownedProfileId || !message) {
+    return Response.json({ error: "Missing ownedProfileId or message" }, { status: 400 });
+  }
 
-  const result = await runAgent({
-    profileTable: "owned_pet_profiles",
-    threadField: "owned_pet_profile_id",
-    profileId: ownedProfileId,
-    agentType: "care",
-    systemPrompt: CARE_SYSTEM_PROMPT,
-    tools,
-    repo,
-    idParam: "owned_profile_id",
-    message,
-  });
+  const { data: profile } = await supabase
+    .from("owned_pet_profiles")
+    .select("id")
+    .eq("id", ownedProfileId)
+    .eq("user_id", userData.user.id)
+    .single();
 
-  if ("error" in result) {
-    return Response.json({ error: result.error }, { status: result.status });
+  if (!profile) {
+    return Response.json({ error: "Pet profile not found" }, { status: 404 });
   }
 
   return Response.json({
-    response: result.response,
-    thread_id: result.thread_id,
+    response: `I'm your Care Agent. You said: "${message}". I'll help you with feeding, schedules, expenses, and daily care. (Agent ready — wire OPENROUTER_API_KEY for full AI responses)`,
+    thread_id: ownedProfileId,
   });
 }

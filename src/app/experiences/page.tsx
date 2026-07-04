@@ -6,7 +6,7 @@ import Image from "next/image";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { ErrorAlert } from "@/components/layout/ErrorAlert";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2, MessageSquare } from "lucide-react";
 
 interface Experience {
   id: string;
@@ -281,7 +281,7 @@ export default function ExperiencesPage() {
         {!initialLoading && experiences.length === 0 && (
           <div className="mt-8">
             <EmptyState
-              icon="📝"
+              icon={<MessageSquare className="h-8 w-8" />}
               title="No experiences shared yet"
               description="Be the first to share your pet ownership story with the community."
               ctaLabel="Share Your Experience"
