@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import CareChat from "@/components/agent/CareChat";
+import AgentChat from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
@@ -289,7 +289,19 @@ export default function OwnedPage() {
               <p className="text-xs text-muted-foreground">Always available</p>
             </div>
           </div>
-          <CareChat ownedProfileId={params.id} />
+          <AgentChat
+            endpoint="/api/agent/care"
+            bodyKey="ownedProfileId"
+            profileId={params.id}
+            suggestions={[
+              "Track an expense",
+              "Build a daily routine",
+              "What food should I buy?",
+            ]}
+            placeholder="Ask about feeding, schedules, expenses..."
+            emptyTitle="Hi! I'm your Care Agent"
+            emptyDescription="Ask me about feeding, activity routines, tracking expenses, or any care concerns."
+          />
         </div>
       </div>
     </div>

@@ -300,7 +300,20 @@ export default function WorkspacePage() {
               <p className="text-xs text-muted-foreground">Always available</p>
             </div>
           </div>
-          <AgentChat planningProfileId={params.id} />
+          <AgentChat
+            endpoint="/api/agent/chat"
+            bodyKey="planningProfileId"
+            profileId={params.id}
+            suggestions={[
+              "Show me the costs",
+              "What are the main concerns?",
+              "Does this pet fit my lifestyle?",
+              "How much time does this pet need?",
+            ]}
+            placeholder="Ask about costs, concerns, lifestyle fit..."
+            emptyTitle="Hi! I'm your Decision Agent"
+            emptyDescription="Ask me anything about this pet type — costs, concerns, whether it fits your lifestyle."
+          />
         </div>
       </div>
     </div>

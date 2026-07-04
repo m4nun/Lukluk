@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { BotMessageSquareIcon } from "lucide-react";
 import {
   Conversation,
   ConversationContent,
@@ -19,18 +18,25 @@ interface ChatMessage {
   text: string;
 }
 
-const SUGGESTIONS = [
-  "Show me the costs",
-  "What are the main concerns?",
-  "Does this pet fit my lifestyle?",
-  "How much time does this pet need?",
-];
+interface AgentChatProps {
+  endpoint: string;
+  bodyKey: string;
+  profileId: string;
+  suggestions: string[];
+  placeholder: string;
+  emptyTitle: string;
+  emptyDescription: string;
+}
 
 export default function AgentChat({
-  planningProfileId,
-}: {
-  planningProfileId: string;
-}) {
+  endpoint,
+  bodyKey,
+  profileId,
+  suggestions,
+  placeholder,
+  emptyTitle,
+  emptyDescription,
+}: AgentChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,10 +53,10 @@ export default function AgentChat({
     setLoading(true);
 
     try {
-      const res = await fetch("/api/agent/chat", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planningProfileId, message: messageText }),
+        body: JSON.stringify({ [bodyKey]: profileId, message: messageText }),
       });
 
       if (!res.ok) throw new Error("Agent request failed");
@@ -75,18 +81,13 @@ export default function AgentChat({
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center gap-2 border-b px-4 py-3">
-        <BotMessageSquareIcon className="size-4 text-muted-foreground" />
-        <span className="font-semibold text-sm">Decision Agent</span>
-      </div>
-
+    <div className="flex flex-1 flex-col">
       <Conversation className="flex-1">
         <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
-              title="Hi! I'm your Decision Agent"
-              description="Ask me anything about this pet type — costs, concerns, whether it fits your lifestyle."
+              title={emptyTitle}
+              description={emptyDescription}
             />
           ) : (
             messages.map((msg, i) => (
@@ -111,7 +112,7 @@ export default function AgentChat({
           )}
 
           {error && (
-            <div className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-destructive text-xs">
+            <div className="mx-4 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-destructive text-xs">
               {error}
             </div>
           )}
@@ -121,7 +122,7 @@ export default function AgentChat({
 
       <div className="border-t px-4 py-3">
         <Suggestions>
-          {SUGGESTIONS.map((s) => (
+          {suggestions.map((s) => (
             <Suggestion
               key={s}
               suggestion={s}
@@ -141,7 +142,7 @@ export default function AgentChat({
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about costs, concerns, lifestyle fit..."
+            placeholder={placeholder}
             disabled={loading}
             className="flex-1"
           />
