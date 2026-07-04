@@ -15,18 +15,17 @@ const QUESTION_ICONS = [
   Volume2, PawPrint, GraduationCap, Baby,
 ];
 
+type Phase = "quiz" | "analyzing" | "followup" | "matching";
+
 export default function QuizPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [finished, setFinished] = useState(false);
+  const [phase, setPhase] = useState<Phase>("quiz");
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
   const [followUpAnswers, setFollowUpAnswers] = useState<string[]>([]);
   const [followUpStep, setFollowUpStep] = useState(0);
-  const [showFollowUp, setShowFollowUp] = useState(false);
-  const [generatingFollowUp, setGeneratingFollowUp] = useState(false);
 
   const question = FIXED_QUESTIONS[step];
   const answered = question ? answers[question.id] ?? null : null;
@@ -36,6 +35,8 @@ export default function QuizPage() {
     setAnswers(next);
     if (step < TOTAL - 1) {
       setTimeout(() => setStep((s) => s + 1), 200);
+    } else {
+      setTimeout(() => handleFinish(), 300);
     }
   }
 
@@ -44,11 +45,8 @@ export default function QuizPage() {
   }
 
   async function handleFinish() {
-    setFinished(true);
-    setGeneratingFollowUp(true);
+    setPhase("analyzing");
     setError("");
-
-    let hasFollowUp = false;
 
     try {
       const res = await fetch("/api/match/follow-up", {
@@ -62,35 +60,25 @@ export default function QuizPage() {
         if (!data.finished && data.followUpQuestions?.length) {
           setFollowUpQuestions(data.followUpQuestions.slice(0, MAX_FOLLOW_UPS));
           setFollowUpAnswers(new Array(data.followUpQuestions.length).fill(""));
-          setShowFollowUp(true);
-          setFinished(false);
-          hasFollowUp = true;
+          setPhase("followup");
+          return;
         }
       }
     } catch {
-      // follow-up failed, proceed to match
+      // LLM fail — skip to match
     }
 
-    setGeneratingFollowUp(false);
-
-    if (!hasFollowUp) {
-      handleSubmit();
-    }
+    handleSubmit([]);
   }
 
-  async function handleSubmit() {
-    setLoading(true);
+  async function handleSubmit(followUps: Array<{ question: string; answer: string }>) {
+    setPhase("matching");
     setError("");
     try {
       const res = await fetch("/api/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          answers,
-          followUpAnswers: showFollowUp
-            ? followUpQuestions.map((q, i) => ({ question: q, answer: followUpAnswers[i] || "" }))
-            : [],
-        }),
+        body: JSON.stringify({ answers, followUpAnswers: followUps }),
       });
       if (!res.ok) throw new Error("Match failed");
       const data = await res.json();
@@ -98,8 +86,8 @@ export default function QuizPage() {
       sessionStorage.setItem("lukluk_match_id", data.matchResultId || "latest");
       router.push(`/result/${data.matchResultId || "latest"}`);
     } catch (e) {
+      setPhase("analyzing");
       setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
-      setLoading(false);
     }
   }
 
@@ -107,14 +95,77 @@ export default function QuizPage() {
     const next = [...followUpAnswers];
     next[followUpStep] = value;
     setFollowUpAnswers(next);
+
     if (followUpStep < followUpQuestions.length - 1) {
       setTimeout(() => setFollowUpStep((s) => s + 1), 200);
     } else {
-      handleSubmit();
+      const all = followUpQuestions.map((q, i) => ({ question: q, answer: next[i] || "" }));
+      handleSubmit(all);
     }
   }
 
-  if (showFollowUp && followUpStep < followUpQuestions.length) {
+  function handleSkipFollowUps() {
+    const all = followUpQuestions.map((q, i) => ({
+      question: q,
+      answer: followUpAnswers[i] || "",
+    }));
+    handleSubmit(all);
+  }
+
+  // --- ANALYZING SCREEN ---
+  if (phase === "analyzing") {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
+          <div className="mx-auto flex h-14 max-w-[640px] items-center px-6">
+            <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+              <Image src="/assets/logo.png" alt="Lukluk" width={28} height={28} />
+              Lukluk
+            </Link>
+          </div>
+        </nav>
+        <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+          <div className="animate-scale-in mb-6">
+            <Loader2 className="h-16 w-16 text-primary animate-spin" />
+          </div>
+          <h2 className="text-xl font-bold">Analyzing your answers...</h2>
+          <p className="mt-2 max-w-sm text-muted-foreground">
+            Checking if we need any clarification before finding your matches.
+          </p>
+          <p className="mt-6 text-xs text-muted-foreground/60">Powered by AI</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- MATCHING SCREEN ---
+  if (phase === "matching") {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
+          <div className="mx-auto flex h-14 max-w-[640px] items-center px-6">
+            <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+              <Image src="/assets/logo.png" alt="Lukluk" width={28} height={28} />
+              Lukluk
+            </Link>
+          </div>
+        </nav>
+        <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+          <div className="animate-scale-in mb-6">
+            <Loader2 className="h-16 w-16 text-primary animate-spin" />
+          </div>
+          <h2 className="text-xl font-bold">Finding your matches...</h2>
+          <p className="mt-2 max-w-sm text-muted-foreground">
+            Scoring all 19 pet types across 8 dimensions to find your best fits.
+          </p>
+          <p className="mt-6 text-xs text-muted-foreground/60">This takes just a moment</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- FOLLOW-UP SCREEN ---
+  if (phase === "followup" && followUpStep < followUpQuestions.length) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
@@ -178,7 +229,7 @@ export default function QuizPage() {
               <span>Not sure</span>
             </button>
             <button
-              onClick={() => handleSubmit()}
+              onClick={handleSkipFollowUps}
               className="mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
             >
               Skip all clarifying questions
@@ -195,63 +246,7 @@ export default function QuizPage() {
     );
   }
 
-  if (finished) {
-    return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
-          <div className="mx-auto flex h-14 max-w-[640px] items-center px-6">
-            <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
-              <Image src="/assets/logo.png" alt="Lukluk" width={28} height={28} />
-              Lukluk
-            </Link>
-          </div>
-        </nav>
-        <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-          {generatingFollowUp ? (
-            <>
-              <div className="animate-scale-in mb-6">
-                <Loader2 className="h-16 w-16 text-primary animate-spin" />
-              </div>
-              <h2 className="text-xl font-bold">Analyzing your answers...</h2>
-              <p className="mt-2 max-w-sm text-muted-foreground">
-                Checking if we need any clarification before finding your matches.
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="animate-scale-in mb-6">
-                <CheckCircle className="h-24 w-24 text-success" style={{ fillOpacity: 0.1 }} />
-              </div>
-              <h2 className="text-2xl font-bold">All done!</h2>
-              <p className="mt-2 max-w-sm text-muted-foreground">
-                You've answered all {TOTAL} questions. Let's find the pet types that truly fit your life.
-              </p>
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-[0_4px_16px_rgba(249,115,22,0.25)] transition-all hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(249,115,22,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Finding your matches...
-                  </>
-                ) : (
-                  "See Your Matches"
-                )}
-              </button>
-              {error && (
-                <div className="mt-6 max-w-[480px] rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    );
-  }
-
+  // --- QUIZ SCREEN ---
   if (!question) {
     return null;
   }
