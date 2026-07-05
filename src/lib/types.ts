@@ -153,14 +153,14 @@ export interface ExpenseItem {
   category: "initial" | "monthly" | "annual" | "one_time" | "food" | "medical" | "grooming" | "supplies" | "other";
   item: string;
   amount_thb: number;
-  note?: string;
+  note?: string | null;
 }
 
 export interface ConcernChecklistItem {
   concern_id: string;
   title: string;
   status: ConcernStatus;
-  note?: string;
+  note?: string | null;
 }
 
 // ---- Owner Experience ----

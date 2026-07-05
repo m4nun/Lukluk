@@ -17,7 +17,7 @@ export function createAgentTools(repo: PlanningRepository) {
           category: z.enum(["initial", "monthly", "annual", "one_time"]),
           item: z.string(),
           amount_thb: z.number().int().min(0),
-          note: z.string().optional(),
+          note: z.string().optional().nullable(),
         })),
       }),
     }
@@ -37,7 +37,7 @@ export function createAgentTools(repo: PlanningRepository) {
           concern_id: z.string(),
           title: z.string(),
           status: z.enum(["unresolved", "resolved", "not_applicable"]),
-          note: z.string().optional(),
+          note: z.string().optional().nullable(),
         })),
       }),
     }
@@ -140,7 +140,7 @@ export function createCareTools(repo: PlanningRepository) {
           category: z.enum(["food", "medical", "grooming", "supplies", "other"]),
           item: z.string(),
           amount_thb: z.number().int().min(0),
-          note: z.string().optional(),
+          note: z.string().optional().nullable(),
         })),
       }),
     }
@@ -176,10 +176,10 @@ export function createCareTools(repo: PlanningRepository) {
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         guide: z.object({
-          brand: z.string().optional(),
-          amount: z.string().optional(),
-          frequency: z.string().optional(),
-          notes: z.string().optional(),
+          brand: z.string().optional().nullable(),
+          amount: z.string().optional().nullable(),
+          frequency: z.string().optional().nullable(),
+          notes: z.string().optional().nullable(),
         }),
       }),
     }

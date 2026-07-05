@@ -25,10 +25,10 @@ export interface ActivityEntry {
 }
 
 export interface FoodGuide {
-  brand?: string;
-  amount?: string;
-  frequency?: string;
-  notes?: string;
+  brand?: string | null;
+  amount?: string | null;
+  frequency?: string | null;
+  notes?: string | null;
 }
 
 export interface OwnerExperienceRow {
