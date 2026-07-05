@@ -487,9 +487,23 @@ CREATE POLICY "drafts_update_own" ON public.agent_drafts FOR UPDATE
 
 -- Agent Threads: users read/write own
 CREATE POLICY "threads_select_own" ON public.agent_threads FOR SELECT
-  USING (EXISTS (SELECT 1 FROM public.planning_pet_profiles p WHERE p.id = planning_pet_profile_id AND p.user_id = auth.uid()));
+  USING (
+    EXISTS (SELECT 1 FROM public.planning_pet_profiles p WHERE p.id = planning_pet_profile_id AND p.user_id = auth.uid())
+    OR
+    EXISTS (SELECT 1 FROM public.owned_pet_profiles o WHERE o.id = owned_pet_profile_id AND o.user_id = auth.uid())
+  );
 CREATE POLICY "threads_insert_own" ON public.agent_threads FOR INSERT
-  WITH CHECK (EXISTS (SELECT 1 FROM public.planning_pet_profiles p WHERE p.id = planning_pet_profile_id AND p.user_id = auth.uid()));
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.planning_pet_profiles p WHERE p.id = planning_pet_profile_id AND p.user_id = auth.uid())
+    OR
+    EXISTS (SELECT 1 FROM public.owned_pet_profiles o WHERE o.id = owned_pet_profile_id AND o.user_id = auth.uid())
+  );
+CREATE POLICY "threads_update_own" ON public.agent_threads FOR UPDATE
+  USING (
+    EXISTS (SELECT 1 FROM public.planning_pet_profiles p WHERE p.id = planning_pet_profile_id AND p.user_id = auth.uid())
+    OR
+    EXISTS (SELECT 1 FROM public.owned_pet_profiles o WHERE o.id = owned_pet_profile_id AND o.user_id = auth.uid())
+  );
 
 -- Owner Experiences: everyone reads, subscribers insert, author updates
 CREATE POLICY "experiences_select" ON public.owner_experiences FOR SELECT USING (true);

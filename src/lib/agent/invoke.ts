@@ -53,11 +53,15 @@ export async function runAgent(config: RunAgentConfig) {
       insert.planning_pet_profile_id = null;
     }
 
-    const { data: newThread } = await supabase
+    const { data: newThread, error: insertError } = await supabase
       .from("agent_threads")
       .insert(insert)
       .select("thread_id")
       .single();
+    
+    if (insertError || !newThread) {
+      return { error: `Failed to create agent thread: ${insertError?.message || "unknown"}`, status: 500 } as const;
+    }
     thread = newThread;
   }
 
@@ -85,6 +89,6 @@ export async function runAgent(config: RunAgentConfig) {
 
   return {
     response: responseText,
-    thread_id: thread!.thread_id,
+    thread_id: thread?.thread_id || "",
   };
 }
