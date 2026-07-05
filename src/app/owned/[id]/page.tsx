@@ -283,8 +283,22 @@ export default function OwnedPage() {
               <ScheduleCards
                 schedules={data.schedule}
                 onReorder={refreshData}
-                onRemove={refreshData}
-                onComplete={refreshData}
+                onRemove={async (scheduleId) => {
+                  await fetch(`/api/ownership/${params.id}/schedule`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ schedule_id: scheduleId }),
+                  });
+                  refreshData();
+                }}
+                onComplete={async (scheduleId) => {
+                  await fetch(`/api/ownership/${params.id}/schedule`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ schedule_id: scheduleId, completed: true }),
+                  });
+                  refreshData();
+                }}
                 onAdd={() => {}}
               />
             )}
