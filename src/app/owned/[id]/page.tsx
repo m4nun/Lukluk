@@ -25,8 +25,8 @@ interface OwnedData {
     amount_thb: number;
     note?: string;
   }>;
-  activity_schedule: ActivityCard[];
-  food_guide: FoodCard[];
+  activity_schedule: ActivityCard[] | null;
+  food_guide: FoodCard[] | { brand?: string; amount?: string; frequency?: string; notes?: string } | null;
   pet_type_profiles: { name: string; species: string; mbti_label: string };
 }
 

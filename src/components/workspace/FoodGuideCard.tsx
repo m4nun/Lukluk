@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   DndContext,
@@ -24,7 +24,7 @@ import type { FoodCard } from "@/lib/types";
 import { Utensils, Scale, Clock, StickyNote, Plus } from "lucide-react";
 
 interface FoodGuideCardProps {
-  cards: FoodCard[];
+  cards: FoodCard[] | { brand?: string; amount?: string; frequency?: string; notes?: string } | null;
   petName: string;
   petSpecies?: string;
   petImage?: string | null;
@@ -32,6 +32,23 @@ interface FoodGuideCardProps {
   onReorder?: (cards: FoodCard[]) => void;
   onRemove?: (id: string) => void;
   onAdd?: () => void;
+}
+
+function normalizeCards(input: FoodGuideCardProps["cards"]): FoodCard[] {
+  if (!input) return [];
+  if (Array.isArray(input)) return input;
+  // Old format: single object
+  if (input.brand || input.amount || input.frequency || input.notes) {
+    return [{
+      id: "food-1",
+      name: "Main Food",
+      brand: input.brand || "",
+      amount: input.amount || "",
+      frequency: input.frequency || "",
+      notes: input.notes || null,
+    }];
+  }
+  return [];
 }
 
 export default function FoodGuideCard({
@@ -44,14 +61,20 @@ export default function FoodGuideCard({
   onRemove,
   onAdd,
 }: FoodGuideCardProps) {
-  const [localCards, setLocalCards] = useState<FoodCard[]>(cards);
+  const [localCards, setLocalCards] = useState<FoodCard[]>(() => normalizeCards(cards));
+
+  useEffect(() => {
+    setLocalCards(normalizeCards(cards));
+  }, [cards]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  if (cards.length === 0) {
+  const normalized = normalizeCards(cards);
+
+  if (normalized.length === 0) {
     return (
       <EmptyState
         icon={<Utensils className="h-6 w-6" />}
