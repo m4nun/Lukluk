@@ -234,7 +234,7 @@ export default function AgentChat({
       </Conversation>
 
       <div className="border-t px-4 py-3 shrink-0">
-        <Suggestions>
+        <Suggestions className="max-h-9 overflow-hidden">
           {suggestions.map((s) => (
             <Suggestion
               key={s}

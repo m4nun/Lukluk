@@ -379,7 +379,7 @@ export default function WorkspacePage() {
                 </svg>
               </button>
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 min-h-0">
               <AgentChat
                 endpoint="/api/agent/chat"
                 bodyKey="planningProfileId"

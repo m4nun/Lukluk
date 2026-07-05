@@ -15,7 +15,7 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
@@ -125,9 +125,10 @@ export default function ActivityCards({
   }
 
   return (
-    <div className="space-y-3">
+    <div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={localActivities.map((a) => a.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={localActivities.map((a) => a.id)} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {localActivities.map((activity) => {
             const IconComp = getActivityIcon(activity.icon);
             return (
@@ -181,6 +182,7 @@ export default function ActivityCards({
               </DeskCard>
             );
           })}
+          </div>
         </SortableContext>
       </DndContext>
     </div>

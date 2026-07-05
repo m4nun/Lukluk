@@ -15,7 +15,7 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
@@ -103,10 +103,11 @@ export default function FoodGuideCard({
   }
 
   return (
-    <div className="space-y-3">
+    <div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={localCards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-          {localCards.map((card) => (
+        <SortableContext items={localCards.map((c) => c.id)} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {localCards.map((card) => (
             <DeskCard
               key={card.id}
               id={card.id}
@@ -173,12 +174,13 @@ export default function FoodGuideCard({
           {onAdd && (
             <button
               onClick={onAdd}
-              className="w-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-6 text-gray-400 hover:border-amber-300 hover:text-amber-600 transition-colors"
+              className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-6 text-gray-400 hover:border-amber-300 hover:text-amber-600 transition-colors min-h-[200px]"
             >
               <Plus className="h-8 w-8" />
               <span className="text-sm font-medium">Add Food Card</span>
             </button>
           )}
+          </div>
         </SortableContext>
       </DndContext>
     </div>
