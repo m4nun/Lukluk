@@ -109,10 +109,10 @@ export default function OwnedPage() {
   if (error || !data) {
     return (
       <div className="flex h-screen flex-col items-center justify-center px-6">
-        <h2 className="text-xl font-bold">{t.workspace.notFound}</h2>
-        <p className="mt-2 text-gray-500">{error || t.workspace.notFoundDesc}</p>
+        <h2 className="text-xl font-bold">Workspace not found</h2>
+        <p className="mt-2 text-gray-500">{error || "This workspace may have been deleted"}</p>
         <Link href="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white">
-          {t.workspace.backToDashboard}
+          Back to Dashboard
         </Link>
       </div>
     );
@@ -122,10 +122,10 @@ export default function OwnedPage() {
   const totalCost = data.actual_expenses.reduce((sum, e) => sum + e.amount_thb, 0);
 
   const tabs = [
-    { key: "expenses" as const, label: t.workspace.actualExpenses },
-    { key: "food" as const, label: t.workspace.foodGuide },
-    { key: "schedule" as const, label: t.workspace.schedule },
-    { key: "health" as const, label: t.workspace.health },
+    { key: "expenses" as const, label: "Actual Expenses" },
+    { key: "food" as const, label: "Food Guide" },
+    { key: "schedule" as const, label: "Schedule" },
+    { key: "health" as const, label: "Health" },
   ];
 
   return (
@@ -140,7 +140,7 @@ export default function OwnedPage() {
           <div className="h-5 w-px bg-gray-200" />
           <Link href="/dashboard" className="flex items-center gap-1 text-[13px] text-gray-500 transition-colors hover:text-gray-900 rounded-full px-2.5 py-1 hover:bg-gray-100">
             <ArrowLeft className="h-3.5 w-3.5" />
-            {t.nav.dashboard}
+            Dashboard
           </Link>
         </div>
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
@@ -152,7 +152,7 @@ export default function OwnedPage() {
           <span className="text-sm font-semibold">{data.pet_name}</span>
           <span className="inline-flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-2.5 py-0.5 text-[11px] font-semibold text-green-600">
             <PawPrint className="h-3 w-3" fill="currentColor" />
-            {t.status.owned}
+            Owned
           </span>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -229,7 +229,7 @@ export default function OwnedPage() {
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
-                      {t.workspace.deletePet}
+                      Delete Pet
                     </button>
                   </div>
                 </>
@@ -330,22 +330,22 @@ export default function OwnedPage() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-gray-900">{t.careAgent.title}</h3>
-              <p className="text-xs text-gray-500">{t.careAgent.description}</p>
+              <h3 className="text-sm font-semibold text-gray-900">Care Agent</h3>
+              <p className="text-xs text-gray-500">Help with feeding, schedule, and expenses</p>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-green-600">
               <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-              {t.careAgent.available}
+              Available
             </div>
           </div>
           <AgentChat
             endpoint="/api/agent/care"
             bodyKey="ownedProfileId"
             profileId={params.id}
-            suggestions={[t.careAgent.suggestions.trackExpense, t.careAgent.suggestions.feedingTips, t.careAgent.suggestions.activityIdeas]}
-            placeholder={t.careAgent.placeholder}
-            emptyTitle={t.careAgent.emptyTitle}
-            emptyDescription={t.careAgent.emptyDescription}
+            suggestions={["Track an expense", "Feeding tips", "Schedule ideas"]}
+            placeholder="Type a message"
+            emptyTitle="Hi, I'm the Care Agent"
+            emptyDescription="I help with feeding schedules, expense tracking, and pet care questions"
             onMessageSent={refreshData}
             externalInput={chatInput}
             onExternalInputConsumed={() => setChatInput("")}
@@ -374,8 +374,8 @@ export default function OwnedPage() {
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="text-[15px] font-semibold">{t.careAgent.title}</h3>
-            <p className="text-xs text-gray-500">{t.careAgent.alwaysAvailable}</p>
+            <h3 className="text-[15px] font-semibold">Care Agent</h3>
+            <p className="text-xs text-gray-500">Always available</p>
           </div>
           <button onClick={() => setChatOpen(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -388,10 +388,10 @@ export default function OwnedPage() {
             endpoint="/api/agent/care"
             bodyKey="ownedProfileId"
             profileId={params.id}
-            suggestions={[t.careAgent.suggestions.trackExpense, t.careAgent.suggestions.feedingTips]}
-            placeholder={t.careAgent.placeholder}
-            emptyTitle={t.careAgent.emptyTitle}
-            emptyDescription={t.careAgent.suggestions.activityIdeas}
+            suggestions={["Track an expense", "Feeding tips"]}
+            placeholder="Type a message"
+            emptyTitle="Hi, I'm the Care Agent"
+            emptyDescription="Schedule ideas"
             onMessageSent={refreshData}
             externalInput={chatInput}
             onExternalInputConsumed={() => setChatInput("")}
@@ -400,26 +400,6 @@ export default function OwnedPage() {
           />
         </div>
       </div>
-
-      {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 flex justify-around py-2 pb-[max(8px,env(safe-area-inset-bottom))]">
-        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
-          <Home className="h-5 w-5" />
-          <span className="text-[10px] font-medium">{t.common.home}</span>
-        </Link>
-        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-orange-500">
-          <PawPrint className="h-5 w-5" />
-          <span className="text-[10px] font-medium">{t.common.pets}</span>
-        </Link>
-        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
-          <Receipt className="h-5 w-5" />
-          <span className="text-[10px] font-medium">{t.common.expenses}</span>
-        </Link>
-        <Link href="/profile" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
-          <User className="h-5 w-5" />
-          <span className="text-[10px] font-medium">{t.common.profile}</span>
-        </Link>
-      </nav>
 
       {/* Edit Modal */}
       {showEditModal && (

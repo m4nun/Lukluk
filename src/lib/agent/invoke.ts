@@ -172,11 +172,6 @@ export async function runAgent(config: RunAgentConfig) {
     iteration: 0,
   });
 
-  let aiMessages = result.messages.filter(
-    (m) => m.constructor.name === "AIMessage",
-  ) as AIMessage[];
-  let lastAiMessage = aiMessages[aiMessages.length - 1];
-
   const calledTools = result.messages.some(
     (m) => m.constructor.name === "ToolMessage",
   );
@@ -188,7 +183,7 @@ export async function runAgent(config: RunAgentConfig) {
 You MUST use tools. Do NOT just give text advice.
 
 STEP 1: Call web_search to find information about what the user asked.
-STEP 2: Call update_activity_schedule or update_food_guide to create cards with the search results.
+STEP 2: Call update_food_guide, update_schedule, update_actual_expenses, or add_health_metric to create/update cards with the results.
 
 Call web_search NOW with a relevant query.`
       : `The user asked: "${config.message}"
@@ -203,23 +198,53 @@ Call web_search NOW with a relevant query.`;
     result = await agent.invoke({
       messages: [
         new HumanMessage(enrichedMessage),
-        lastAiMessage,
+        result.messages[result.messages.length - 1],
         new HumanMessage(forcePrompt),
       ],
       profileId: config.profileId,
-      iteration: 0,
+      iteration: result.iteration || 1,
     });
-
-    aiMessages = result.messages.filter(
-      (m) => m.constructor.name === "AIMessage",
-    ) as AIMessage[];
-    lastAiMessage = aiMessages[aiMessages.length - 1];
   }
 
-  const responseText =
-    typeof lastAiMessage?.content === "string"
-      ? lastAiMessage.content
-      : JSON.stringify(lastAiMessage?.content);
+  // Extract the final text response from the last AI message
+  let responseText = "";
+  const allAiMessages = result.messages.filter(
+    (m) => m.constructor.name === "AIMessage",
+  ) as AIMessage[];
+
+  // Get the last AI message that has actual text content (not just tool calls)
+  for (let i = allAiMessages.length - 1; i >= 0; i--) {
+    const msg = allAiMessages[i];
+    const hasToolCalls = msg.tool_calls?.length;
+
+    if (!hasToolCalls && msg.content) {
+      if (typeof msg.content === "string") {
+        responseText = msg.content;
+      } else if (Array.isArray(msg.content)) {
+        // Handle array content format from some models
+        const textParts = msg.content
+          .filter((p: any) => p.type === "text")
+          .map((p: any) => p.text);
+        responseText = textParts.join("\n");
+      } else {
+        responseText = JSON.stringify(msg.content);
+      }
+      break;
+    }
+  }
+
+  // Fallback: if no text response found, use the last AI message content
+  if (!responseText && allAiMessages.length > 0) {
+    const lastMsg = allAiMessages[allAiMessages.length - 1];
+    if (typeof lastMsg.content === "string") {
+      responseText = lastMsg.content;
+    } else if (Array.isArray(lastMsg.content)) {
+      const textParts = lastMsg.content
+        .filter((p: any) => p.type === "text")
+        .map((p: any) => p.text);
+      responseText = textParts.join("\n");
+    }
+  }
 
   const steps = extractSteps(result.messages.filter(
     (m) => m.constructor.name === "AIMessage" || m.constructor.name === "ToolMessage",

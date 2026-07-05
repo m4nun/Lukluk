@@ -19,6 +19,7 @@ export function getChatModel(temperature = 0.7) {
   return new ChatOpenAI({
     model: config.model,
     temperature,
+    maxTokens: 4096,
     configuration: {
       baseURL: config.baseURL,
       apiKey: config.apiKey,

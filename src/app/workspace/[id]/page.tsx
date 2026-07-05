@@ -192,10 +192,10 @@ export default function WorkspacePage() {
   if (error || !data) {
     return (
       <div className="flex h-screen flex-col items-center justify-center px-6">
-        <h2 className="text-xl font-bold">{t.workspace.notFound}</h2>
-        <p className="mt-2 text-gray-500">{error || t.workspace.notFoundDesc}</p>
+        <h2 className="text-xl font-bold">Workspace not found</h2>
+        <p className="mt-2 text-gray-500">{error || "This workspace may have been deleted"}</p>
         <Link href="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white">
-          {t.workspace.backToDashboard}
+          Back to Dashboard
         </Link>
       </div>
     );
@@ -216,7 +216,7 @@ export default function WorkspacePage() {
           <div className="h-5 w-px bg-gray-200" />
           <Link href="/dashboard" className="flex items-center gap-1 text-[13px] text-gray-500 transition-colors hover:text-gray-900 rounded-full px-2.5 py-1 hover:bg-gray-100">
             <ArrowLeft className="h-3.5 w-3.5" />
-            {t.nav.dashboard}
+            Dashboard
           </Link>
         </div>
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
@@ -297,7 +297,7 @@ export default function WorkspacePage() {
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              {t.workspace.estimatedExpenses}
+              Estimated Expenses
             </button>
             <button
               onClick={() => setActiveTab("concerns")}
@@ -307,7 +307,7 @@ export default function WorkspacePage() {
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              {t.workspace.concernChecklist}
+              Concern Checklist
             </button>
           </div>
 
@@ -349,22 +349,22 @@ export default function WorkspacePage() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-gray-900">{t.decisionAgent.title}</h3>
-              <p className="text-xs text-gray-500">{t.decisionAgent.description}</p>
+              <h3 className="text-sm font-semibold text-gray-900">Decision Agent</h3>
+              <p className="text-xs text-gray-500">Help with costs, concerns, and lifestyle fit</p>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-green-600">
               <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-              {t.decisionAgent.available}
+              Available
             </div>
           </div>
           <AgentChat
             endpoint="/api/agent/chat"
             bodyKey="planningProfileId"
             profileId={params.id}
-            suggestions={[t.decisionAgent.suggestions.showCosts, t.decisionAgent.suggestions.mainConcerns, t.decisionAgent.suggestions.lifestyleFit]}
-            placeholder={t.decisionAgent.placeholder}
-            emptyTitle={t.decisionAgent.emptyTitle}
-            emptyDescription={t.decisionAgent.emptyDescription}
+            suggestions={["Show estimated costs", "Main concerns?", "Does this pet fit my lifestyle?"]}
+            placeholder="Type a message"
+            emptyTitle="Hi, I'm the Decision Agent"
+            emptyDescription="Ask me about costs, concerns, or whether this pet fits your lifestyle"
             onMessageSent={refreshData}
             externalInput={chatInput}
             onExternalInputConsumed={() => setChatInput("")}
@@ -395,8 +395,8 @@ export default function WorkspacePage() {
                 </svg>
               </div>
               <div className="flex-1">
-                <h3 className="text-[15px] font-semibold">{t.decisionAgent.title}</h3>
-                <p className="text-xs text-gray-500">{t.decisionAgent.alwaysAvailable}</p>
+                <h3 className="text-[15px] font-semibold">Decision Agent</h3>
+                <p className="text-xs text-gray-500">Always available</p>
               </div>
               <button onClick={() => setChatOpen(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -409,10 +409,10 @@ export default function WorkspacePage() {
                 endpoint="/api/agent/chat"
                 bodyKey="planningProfileId"
                 profileId={params.id}
-                suggestions={[t.decisionAgent.suggestions.showCosts, t.decisionAgent.suggestions.mainConcerns]}
-                placeholder={t.decisionAgent.placeholder}
-                emptyTitle={t.decisionAgent.emptyTitle}
-                emptyDescription={t.decisionAgent.suggestions.lifestyleFit}
+                suggestions={["Show estimated costs", "Main concerns?"]}
+                placeholder="Type a message"
+                emptyTitle="Hi, I'm the Decision Agent"
+                emptyDescription="Does this pet fit my lifestyle?"
                 onMessageSent={refreshData}
                 externalInput={chatInput}
                 onExternalInputConsumed={() => setChatInput("")}
@@ -424,35 +424,15 @@ export default function WorkspacePage() {
         </>
       )}
 
-      {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 flex justify-around py-2 pb-[max(8px,env(safe-area-inset-bottom))]">
-        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
-          <Home className="h-5 w-5" />
-          <span className="text-[10px] font-medium">{t.common.home}</span>
-        </Link>
-        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-orange-500">
-          <PawPrint className="h-5 w-5" />
-          <span className="text-[10px] font-medium">{t.common.pets}</span>
-        </Link>
-        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
-          <Receipt className="h-5 w-5" />
-          <span className="text-[10px] font-medium">{t.common.expenses}</span>
-        </Link>
-        <Link href="/profile" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
-          <User className="h-5 w-5" />
-          <span className="text-[10px] font-medium">{t.common.profile}</span>
-        </Link>
-      </nav>
-
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <>
           <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setShowDeleteConfirm(false)} />
           <div className="fixed inset-x-4 top-[20%] z-50 rounded-2xl bg-white shadow-xl max-w-sm mx-auto">
             <div className="px-5 py-5">
-              <h3 className="text-base font-bold text-gray-900">{t.workspace.removeConfirm.replace("{name}", displayName)}</h3>
+              <h3 className="text-base font-bold text-gray-900">Remove {displayName}?</h3>
               <p className="mt-2 text-sm text-gray-500">
-                {t.workspace.removeDesc}
+                This will remove the pet from your workspaces. You can explore it again later.
               </p>
             </div>
             <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-5 py-4">
@@ -460,14 +440,15 @@ export default function WorkspacePage() {
                 onClick={() => setShowDeleteConfirm(false)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
               >
-                {t.common.cancel}
+                Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
                 className="px-5 py-2 rounded-xl bg-red-500 text-sm font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
               >
-                {deleting ? t.workspace.removing : t.workspace.remove}
+                {deleting ? "Removing..." : "Remove"}
+              </button>
               </button>
             </div>
           </div>
