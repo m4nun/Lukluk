@@ -167,9 +167,10 @@ export default function AgentChat({
   }, [input, loading, endpoint, bodyKey, profileId, onMessageSent]);
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
-      <Conversation className="flex-1 min-h-0">
-        <ConversationContent>
+    <div className="flex h-full flex-col">
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <Conversation className="h-full">
+          <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
               title={emptyTitle}
@@ -231,7 +232,8 @@ export default function AgentChat({
           )}
         </ConversationContent>
         <ConversationScrollButton />
-      </Conversation>
+        </Conversation>
+      </div>
 
       <div className="border-t px-4 py-3 shrink-0">
         <Suggestions className="max-h-9 overflow-hidden">
