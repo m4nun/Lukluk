@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { AppNav } from "@/components/layout/AppNav";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { ErrorAlert } from "@/components/layout/ErrorAlert";
-import { ChevronRight, RefreshCw, PawPrint, Home } from "lucide-react";
+import { ChevronRight, RefreshCw, PawPrint, Home, Plus } from "lucide-react";
 import { getPetLogo } from "@/lib/pet-logos";
 
 interface PlanningProfile {
@@ -36,11 +37,8 @@ const statusLabels: Record<string, string> = {
   already_have: "Owned",
 };
 
-function guessSlug(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, "-");
-}
-
-export default function DashboardPage() {  const router = useRouter();
+export default function DashboardPage() {
+  const router = useRouter();
   const [profiles, setProfiles] = useState<PlanningProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,25 +68,7 @@ export default function DashboardPage() {  const router = useRouter();
 
   return (
     <div className="flex min-h-screen flex-col">
-      <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-[960px] items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
-            <Image src="/assets/logo.png" alt="Lukluk" width={28} height={28} />
-            Lukluk
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/experiences" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Experiences
-            </Link>
-            <Link
-              href="/quiz"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold transition-colors hover:border-foreground/20"
-            >
-              Retake Quiz
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <AppNav />
 
       <div className="mx-auto w-full max-w-[960px] flex-1 px-6">
         <div className="flex flex-wrap items-start justify-between gap-4 pt-12">
@@ -98,6 +78,13 @@ export default function DashboardPage() {  const router = useRouter();
               Manage your planning profiles and explore pet matches.
             </p>
           </div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <Plus className="h-4 w-4" />
+            Explore Pet
+          </Link>
         </div>
 
         {loading && (

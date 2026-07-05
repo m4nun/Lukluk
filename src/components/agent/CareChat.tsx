@@ -1,17 +1,22 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { HeartIcon } from "lucide-react";
+import { useState, useCallback } from "react";
+import { HeartIcon, ArrowUp } from "lucide-react";
 import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import { Message, MessageContent } from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputTextarea,
+  PromptInputSubmit,
+  PromptInputFooter,
+} from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
 
 interface ChatMessage {
@@ -33,9 +38,8 @@ export default function CareChat({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  async function handleSend(text?: string) {
+  const handleSend = useCallback(async (text?: string) => {
     const messageText = (text ?? input).trim();
     if (!messageText || loading) return;
 
@@ -66,9 +70,8 @@ export default function CareChat({
       ]);
     } finally {
       setLoading(false);
-      inputRef.current?.focus();
     }
-  }
+  }, [input, loading, ownedProfileId]);
 
   return (
     <div className="flex h-full flex-col">
@@ -90,7 +93,9 @@ export default function CareChat({
                 key={i}
                 from={msg.role === "user" ? "user" : "assistant"}
               >
-                <MessageContent>{msg.text}</MessageContent>
+                <MessageContent>
+                  <MessageResponse>{msg.text}</MessageResponse>
+                </MessageContent>
               </Message>
             ))
           )}
@@ -120,25 +125,27 @@ export default function CareChat({
           ))}
         </Suggestions>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
-          className="mt-3 flex gap-2"
-        >
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about feeding, schedules, expenses..."
-            disabled={loading}
-            className="flex-1"
-          />
-          <Button type="submit" disabled={loading || !input.trim()} size="sm">
-            Send
-          </Button>
-        </form>
+        <div className="mt-3">
+          <PromptInput
+            onSubmit={() => handleSend()}
+            className="rounded-xl border"
+          >
+            <PromptInputBody>
+              <PromptInputTextarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask about feeding, schedules, expenses..."
+                disabled={loading}
+                className="min-h-[44px] max-h-[120px]"
+              />
+            </PromptInputBody>
+            <PromptInputFooter>
+              <PromptInputSubmit disabled={loading || !input.trim()}>
+                <ArrowUp className="size-4" />
+              </PromptInputSubmit>
+            </PromptInputFooter>
+          </PromptInput>
+        </div>
       </div>
     </div>
   );

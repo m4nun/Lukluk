@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import AgentChat from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ConcernChecklist from "@/components/workspace/ConcernChecklist";
@@ -12,7 +11,6 @@ import DraftPanel from "@/components/workspace/DraftPanel";
 import GuidanceGate from "@/components/workspace/GuidanceGate";
 import OwnershipForm from "@/components/workspace/OwnershipForm";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
-import { ErrorAlert } from "@/components/layout/ErrorAlert";
 import { ArrowLeft, AlertTriangle, PawPrint } from "lucide-react";
 
 interface WorkspaceData {
@@ -78,6 +76,21 @@ export default function WorkspacePage() {
     }
     load();
   }, [params.id]);
+
+  async function refreshData() {
+    try {
+      const res = await fetch("/api/planning");
+      if (res.ok) {
+        const profiles = await res.json();
+        const profile = profiles.find(
+          (p: { id: string }) => p.id === params.id,
+        );
+        if (profile) setData(profile);
+      }
+    } catch {
+      // silent fail on refresh
+    }
+  }
 
   async function handleStatusUpdate(newStatus: string) {
     if (!data) return;
@@ -299,6 +312,7 @@ export default function WorkspacePage() {
             placeholder="Ask about costs, concerns, lifestyle fit..."
             emptyTitle="Hi! I'm your Decision Agent"
             emptyDescription="Ask me anything about this pet type — costs, concerns, whether it fits your lifestyle."
+            onMessageSent={refreshData}
           />
         </div>
       </div>

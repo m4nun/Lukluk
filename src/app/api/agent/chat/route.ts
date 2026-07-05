@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSubscriber } from "@/lib/stripe/guard";
+import { runAgent } from "@/lib/agent/invoke";
+import { SupabasePlanningRepository } from "@/lib/agent/supabase-repo";
+import { createAgentTools } from "@/lib/agent/tools";
+import { DECISION_SYSTEM_PROMPT } from "@/lib/agent/graph";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -22,7 +26,7 @@ export async function POST(request: Request) {
 
   const { data: profile } = await supabase
     .from("planning_pet_profiles")
-    .select("id")
+    .select("id, user_id")
     .eq("id", planningProfileId)
     .eq("user_id", userData.user.id)
     .single();
@@ -31,9 +35,24 @@ export async function POST(request: Request) {
     return Response.json({ error: "Workspace not found" }, { status: 404 });
   }
 
-  // Stub response — full agent will be wired when OpenRouter key is set
-  return Response.json({
-    response: `I'm your Decision Agent. You said: "${message}". I'll help you evaluate costs, concerns, and compatibility for this pet type. (Agent ready — wire OPENROUTER_API_KEY for full AI responses)`,
-    thread_id: planningProfileId,
+  const repo = new SupabasePlanningRepository();
+  const tools = createAgentTools(repo);
+
+  const result = await runAgent({
+    profileTable: "planning_pet_profiles",
+    threadField: "planning_pet_profile_id",
+    profileId: planningProfileId,
+    agentType: "decision",
+    systemPrompt: DECISION_SYSTEM_PROMPT,
+    tools,
+    repo,
+    idParam: "planning_profile_id",
+    message,
   });
+
+  if ("error" in result) {
+    return Response.json({ error: result.error }, { status: result.status });
+  }
+
+  return Response.json(result);
 }

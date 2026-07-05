@@ -1,17 +1,23 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useCallback } from "react";
 import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import { Message, MessageContent } from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputTextarea,
+  PromptInputSubmit,
+  PromptInputFooter,
+} from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
+import { ArrowUp } from "lucide-react";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -26,6 +32,7 @@ interface AgentChatProps {
   placeholder: string;
   emptyTitle: string;
   emptyDescription: string;
+  onMessageSent?: () => void;
 }
 
 export default function AgentChat({
@@ -36,14 +43,14 @@ export default function AgentChat({
   placeholder,
   emptyTitle,
   emptyDescription,
+  onMessageSent,
 }: AgentChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  async function handleSend(text?: string) {
+  const handleSend = useCallback(async (text?: string) => {
     const messageText = (text ?? input).trim();
     if (!messageText || loading) return;
 
@@ -65,6 +72,7 @@ export default function AgentChat({
         ...prev,
         { role: "assistant", text: data.response },
       ]);
+      onMessageSent?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
       setMessages((prev) => [
@@ -76,9 +84,8 @@ export default function AgentChat({
       ]);
     } finally {
       setLoading(false);
-      inputRef.current?.focus();
     }
-  }
+  }, [input, loading, endpoint, bodyKey, profileId, onMessageSent]);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -95,7 +102,11 @@ export default function AgentChat({
                 key={i}
                 from={msg.role === "user" ? "user" : "assistant"}
               >
-                <MessageContent>{msg.text}</MessageContent>
+                <MessageContent>
+                  <MessageResponse>
+                    {msg.text}
+                  </MessageResponse>
+                </MessageContent>
               </Message>
             ))
           )}
@@ -131,25 +142,27 @@ export default function AgentChat({
           ))}
         </Suggestions>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
-          className="mt-3 flex gap-2"
-        >
-          <Input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={placeholder}
-            disabled={loading}
-            className="flex-1"
-          />
-          <Button type="submit" disabled={loading || !input.trim()} size="sm">
-            Send
-          </Button>
-        </form>
+        <div className="mt-3">
+          <PromptInput
+            onSubmit={() => handleSend()}
+            className="rounded-xl border"
+          >
+            <PromptInputBody>
+              <PromptInputTextarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={placeholder}
+                disabled={loading}
+                className="min-h-[44px] max-h-[120px]"
+              />
+            </PromptInputBody>
+            <PromptInputFooter>
+              <PromptInputSubmit disabled={loading || !input.trim()}>
+                <ArrowUp className="size-4" />
+              </PromptInputSubmit>
+            </PromptInputFooter>
+          </PromptInput>
+        </div>
       </div>
     </div>
   );

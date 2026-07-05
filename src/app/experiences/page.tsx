@@ -3,7 +3,6 @@
 import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { ErrorAlert } from "@/components/layout/ErrorAlert";
 import { AlertTriangle, Loader2, MessageSquare } from "lucide-react";
@@ -16,6 +15,12 @@ interface Experience {
   ownership_duration: string | null;
   created_at: string;
   profiles?: { name: string; species?: string };
+}
+
+interface PetType {
+  id: string;
+  name: string;
+  species: string;
 }
 
 function timeAgo(dateStr: string) {
@@ -35,6 +40,7 @@ function timeAgo(dateStr: string) {
 
 export default function ExperiencesPage() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [petTypes, setPetTypes] = useState<PetType[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -58,8 +64,20 @@ export default function ExperiencesPage() {
     }
   }
 
+  async function loadPetTypes() {
+    try {
+      const res = await fetch("/api/pet");
+      if (res.ok) {
+        setPetTypes(await res.json());
+      }
+    } catch {
+      // silent
+    }
+  }
+
   useEffect(() => {
     loadExperiences();
+    loadPetTypes();
   }, []);
 
   async function handleSubmit(e: FormEvent) {
@@ -171,13 +189,19 @@ export default function ExperiencesPage() {
                 <label className="mb-1.5 block text-sm font-semibold">
                   Pet Type
                 </label>
-                <input
+                <select
                   value={petTypeId}
                   onChange={(e) => setPetTypeId(e.target.value)}
-                  placeholder="e.g., golden-retriever"
                   required
                   className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm transition-colors focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/10"
-                />
+                >
+                  <option value="">Select a pet type...</option>
+                  {petTypes.map((pet) => (
+                    <option key={pet.id} value={pet.id}>
+                      {pet.name} ({pet.species.replace(/_/g, " ")})
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-sm font-semibold">

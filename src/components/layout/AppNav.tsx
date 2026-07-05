@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { type User } from "@supabase/supabase-js";
-import { Sparkles, LogOut } from "lucide-react";
+import { CircleUserRound } from "lucide-react";
 
 export function AppNav() {
   const [user, setUser] = useState<User | null>(null);
@@ -62,19 +62,25 @@ export function AppNav() {
             >
               Dashboard
             </Link>
-            <button
-              onClick={handleSignOut}
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-all hover:border-foreground/20 hover:text-foreground hover:-translate-y-0.5 hover:shadow-sm"
+            <Link
+              href="/profile"
+              className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive("/profile") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              <LogOut className="h-3.5 w-3.5" />
-              Sign out
-            </button>
+              <CircleUserRound className="h-3.5 w-3.5" />
+              Profile
+            </Link>
           </div>
         )}
 
         {/* Logged-out nav */}
         {!loading && !user && (
           <div className="hidden sm:flex items-center gap-8">
+            <Link
+              href="/pricing"
+              className={`relative text-sm font-medium transition-colors hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full ${isActive("/pricing") ? "text-foreground after:w-full" : "text-muted-foreground"}`}
+            >
+              Pricing
+            </Link>
             <Link
               href="/experiences"
               className="relative text-sm font-medium text-muted-foreground transition-colors hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"

@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSubscriber } from "@/lib/stripe/guard";
+import { runAgent } from "@/lib/agent/invoke";
+import { SupabasePlanningRepository } from "@/lib/agent/supabase-repo";
+import { createCareTools } from "@/lib/agent/tools";
+import { CARE_SYSTEM_PROMPT } from "@/lib/agent/graph";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -22,7 +26,7 @@ export async function POST(request: Request) {
 
   const { data: profile } = await supabase
     .from("owned_pet_profiles")
-    .select("id")
+    .select("id, user_id")
     .eq("id", ownedProfileId)
     .eq("user_id", userData.user.id)
     .single();
@@ -31,8 +35,24 @@ export async function POST(request: Request) {
     return Response.json({ error: "Pet profile not found" }, { status: 404 });
   }
 
-  return Response.json({
-    response: `I'm your Care Agent. You said: "${message}". I'll help you with feeding, schedules, expenses, and daily care. (Agent ready — wire OPENROUTER_API_KEY for full AI responses)`,
-    thread_id: ownedProfileId,
+  const repo = new SupabasePlanningRepository();
+  const tools = createCareTools(repo);
+
+  const result = await runAgent({
+    profileTable: "owned_pet_profiles",
+    threadField: "owned_pet_profile_id",
+    profileId: ownedProfileId,
+    agentType: "care",
+    systemPrompt: CARE_SYSTEM_PROMPT,
+    tools,
+    repo,
+    idParam: "owned_profile_id",
+    message,
   });
+
+  if ("error" in result) {
+    return Response.json({ error: result.error }, { status: result.status });
+  }
+
+  return Response.json(result);
 }

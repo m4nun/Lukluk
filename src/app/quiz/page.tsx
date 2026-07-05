@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FIXED_QUESTIONS } from "@/lib/quiz/questions";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Loader2, CheckCircle, PiggyBank, Clock, Home, Siren, Plane, Volume2, PawPrint, GraduationCap, Baby, Check, X, Minus } from "lucide-react";
+import { ArrowLeft, Loader2, PiggyBank, Clock, Home, Siren, Plane, Volume2, PawPrint, GraduationCap, Baby, Send } from "lucide-react";
 
 const TOTAL = FIXED_QUESTIONS.length;
 const MAX_FOLLOW_UPS = 5;
@@ -17,15 +17,42 @@ const QUESTION_ICONS = [
 
 type Phase = "quiz" | "analyzing" | "followup" | "matching";
 
+interface FollowUpQuestion {
+  question: string;
+  options: string[];
+}
+
 export default function QuizPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isRetake = searchParams.get("retake") === "true";
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [phase, setPhase] = useState<Phase>("quiz");
-  const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
+  const [followUpQuestions, setFollowUpQuestions] = useState<FollowUpQuestion[]>([]);
   const [followUpAnswers, setFollowUpAnswers] = useState<string[]>([]);
   const [followUpStep, setFollowUpStep] = useState(0);
+  const [submittingFollowUp, setSubmittingFollowUp] = useState(false);
+
+  useEffect(() => {
+    if (isRetake) return;
+    
+    async function checkExistingLifestyle() {
+      try {
+        const res = await fetch("/api/lifestyle");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.hasLifestyle) {
+            router.push("/dashboard");
+          }
+        }
+      } catch {
+        // Allow quiz to proceed on error
+      }
+    }
+    checkExistingLifestyle();
+  }, [isRetake, router]);
 
   const question = FIXED_QUESTIONS[step];
   const answered = question ? answers[question.id] ?? null : null;
@@ -59,7 +86,8 @@ export default function QuizPage() {
         const data = await res.json();
         if (!data.finished && data.followUpQuestions?.length) {
           setFollowUpQuestions(data.followUpQuestions.slice(0, MAX_FOLLOW_UPS));
-          setFollowUpAnswers(new Array(data.followUpQuestions.length).fill(""));
+          setFollowUpAnswers([]);
+          setFollowUpStep(0);
           setPhase("followup");
           return;
         }
@@ -91,25 +119,38 @@ export default function QuizPage() {
     }
   }
 
-  function handleFollowUpAnswer(value: string) {
-    const next = [...followUpAnswers];
-    next[followUpStep] = value;
-    setFollowUpAnswers(next);
+  async function handleFollowUpSubmit() {
+    if (submittingFollowUp) return;
+
+    const selectedAnswer = followUpAnswers[followUpStep];
+    if (!selectedAnswer) return;
+
+    setSubmittingFollowUp(true);
 
     if (followUpStep < followUpQuestions.length - 1) {
-      setTimeout(() => setFollowUpStep((s) => s + 1), 200);
+      setFollowUpStep((s) => s + 1);
+      setSubmittingFollowUp(false);
     } else {
-      const all = followUpQuestions.map((q, i) => ({ question: q, answer: next[i] || "" }));
-      handleSubmit(all);
+      const all = followUpQuestions.map((q, i) => ({
+        question: q.question,
+        answer: followUpAnswers[i] || "",
+      }));
+      await handleSubmit(all);
     }
   }
 
-  function handleSkipFollowUps() {
-    const all = followUpQuestions.map((q, i) => ({
-      question: q,
+  function handleOptionSelect(option: string) {
+    const nextAnswers = [...followUpAnswers];
+    nextAnswers[followUpStep] = option;
+    setFollowUpAnswers(nextAnswers);
+  }
+
+  async function handleSkipFollowUps() {
+    const all = followUpQuestions.slice(0, followUpStep).map((q, i) => ({
+      question: q.question,
       answer: followUpAnswers[i] || "",
     }));
-    handleSubmit(all);
+    await handleSubmit(all);
   }
 
   // --- ANALYZING SCREEN ---
@@ -166,6 +207,9 @@ export default function QuizPage() {
 
   // --- FOLLOW-UP SCREEN ---
   if (phase === "followup" && followUpStep < followUpQuestions.length) {
+    const currentQuestion = followUpQuestions[followUpStep];
+    const selectedAnswer = followUpAnswers[followUpStep];
+
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
@@ -199,49 +243,72 @@ export default function QuizPage() {
           </div>
 
           <h2 className="max-w-[520px] text-center text-2xl font-bold leading-snug tracking-tight">
-            {followUpQuestions[followUpStep]}
+            {currentQuestion.question}
           </h2>
 
-          <p className="mt-4 text-sm text-muted-foreground text-center">
-            This helps narrow your best matches
+          <p className="mt-3 text-sm text-muted-foreground text-center">
+            Select the option that best matches your situation
           </p>
 
-          <div className="mt-10 flex w-full max-w-[480px] flex-col gap-4">
-            <button
-              onClick={() => handleFollowUpAnswer("Yes")}
-              className="flex items-center gap-4 rounded-2xl border-2 border-transparent bg-card px-6 py-5 text-left text-[15px] font-medium transition-all duration-300 shadow-sm hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
-            >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/10 text-success"><Check className="h-5 w-5" /></span>
-              <span>Yes</span>
-            </button>
-            <button
-              onClick={() => handleFollowUpAnswer("No")}
-              className="flex items-center gap-4 rounded-2xl border-2 border-transparent bg-card px-6 py-5 text-left text-[15px] font-medium transition-all duration-300 shadow-sm hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
-            >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive"><X className="h-5 w-5" /></span>
-              <span>No</span>
-            </button>
-            <button
-              onClick={() => handleFollowUpAnswer("Not sure")}
-              className="flex items-center gap-4 rounded-2xl border-2 border-transparent bg-card px-6 py-5 text-left text-[15px] font-medium transition-all duration-300 shadow-sm hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
-            >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"><Minus className="h-5 w-5" /></span>
-              <span>Not sure</span>
-            </button>
-            <button
-              onClick={handleSkipFollowUps}
-              className="mt-2 text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
-            >
-              Skip all clarifying questions
-            </button>
+          <div className="mt-8 w-full max-w-[520px] flex flex-col gap-3">
+            {currentQuestion.options.map((option, i) => {
+              const selected = selectedAnswer === option;
+              return (
+                <button
+                  key={option}
+                  onClick={() => handleOptionSelect(option)}
+                  className={`flex items-center gap-4 rounded-2xl border-2 px-6 py-4 text-left text-[15px] font-medium transition-all duration-300 shadow-sm ${
+                    selected
+                      ? "border-primary bg-primary/5 shadow-[0_0_0_4px_rgba(249,115,22,0.1)] -translate-y-1"
+                      : "border-transparent bg-card hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
+                  }`}
+                  style={{ animationDelay: `${i * 60}ms` }}
+                >
+                  <span
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm transition-colors ${
+                      selected ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {String.fromCharCode(65 + i)}
+                  </span>
+                  <span className="flex-1">{option}</span>
+                  {selected && (
+                    <span className="shrink-0 rounded-full bg-primary px-3 py-1 text-[11px] font-bold uppercase tracking-[0.05em] text-primary-foreground">
+                      Selected
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          {error && (
-            <div className="mt-6 w-full max-w-[480px] rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4 text-sm text-destructive text-center">
-              {error}
-            </div>
-          )}
+          <div className="mt-6 flex items-center justify-between w-full max-w-[520px]">
+            <button
+              onClick={handleSkipFollowUps}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Skip all
+            </button>
+            <button
+              onClick={handleFollowUpSubmit}
+              disabled={!selectedAnswer || submittingFollowUp}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {submittingFollowUp ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {followUpStep < followUpQuestions.length - 1 ? "Next" : "Finish"}
+            </button>
+          </div>
         </div>
+
+        {error && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-[480px] rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4 text-sm text-destructive text-center">
+            {error}
+          </div>
+        )}
       </div>
     );
   }
