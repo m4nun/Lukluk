@@ -1,104 +1,76 @@
-# Lukluk Handoff — Final
+# Lukluk Handoff — 2026-07-04
 
-**Date**: 2026-07-03
-**Status**: All engineering complete. Build clean. 46 tests pass. 23 routes. Architecture reviewed and deepened.
+Generated from 16-commit session. Full project docs at `HANDOFF_NEXT.md`, asset guide at `ASSET_GUIDE.md`.
 
-## Phases Completed
+## What the Next Session Is About
 
-1. **Architecture Grilling** — 13 ADRs (Next.js + Supabase + OpenRouter + Vercel, Google OAuth only, LangGraph agent)
-2. **Full Implementation** — 19 Pet Type Profiles, 16 API routes, matching engine, quiz, Stripe, planning/ownership workspaces
-3. **Codebase Design** — `PlanningRepository` interface, `ScoreDimension` pluggable, matching engine made pure
-4. **Page Shells** — 8 pages + 4 components (no styling)
-5. **PRD Gaps Closed** — Care Agent, Draft workflow, Guidance gate, Match Card export
-6. **Architecture Review & Deepening** — 5 improvements applied (see below)
+Pick up where this session left off — the project is functionally complete with mock/demo backends. Read `HANDOFF_NEXT.md` for full context, then continue testing, polishing, and optionally wiring production keys (Stripe, OpenRouter).
 
-## Architecture Review Results (Phase 6)
+## Project at a Glance
 
-5 deepening candidates accepted and applied. Build stayed green throughout.
+- **Stack**: Next.js 16.2.10 (Turbopack), Supabase, OpenRouter (optional)
+- **Branch**: `master` (16 commits, clean build, zero TS errors)
+- **`.env.local`**: Supabase URL + anon key set. No Stripe or OpenRouter keys.
+- **Pet data**: 19 YAML profiles in `pet_pools/`, seeded to Supabase `pet_type_profiles` table.
+- **Pet images**: `public/assets/PetLogo/{folder}/1.png` — see `ASSET_GUIDE.md` for naming conventions and sizes.
+- **YAML → asset mapping**: `src/lib/pet-logos.ts` handles the two mismatches (`american-shorthair` → `american-shorthair-cat`, `sphynx` → `sphynx-cat`)
 
-| # | Change | Lines Saved | Key File |
-|---|--------|------------|----------|
-| 1 | Collapsed twin agent factories → single `createAgent({profileId, repo, tools, systemPrompt, idParam})` | ~100 | `agent/graph.ts` |
-| 2 | Centralized LLM config → `getChatModel()` + `callLLM()` in one file | ~10 | `lib/llm/config.ts` |
-| 3 | Fixed DraftPlanningRepository leak → `DraftStore` interface + `SupabaseDraftStore` adapter, all 6 writes now snapshot `current_value` consistently | 0 (quality) | `agent/draft-store.ts`, `agent/supabase-draft-store.ts` |
-| 4 | Shared agent route boilerplate — both routes now have thread persistence, return `thread_id` | 0 (quality) | `api/agent/chat/route.ts`, `api/agent/care/route.ts` |
-| 5 | SafeTool wrapper — `safeTool(fn, {name, description, schema})` eliminates 48 lines of repeated try/catch across 8 tools | ~48 | `agent/safe-tool.ts` |
+## Key Architecture Decisions
 
-Also fixed: 2 Next.js 16 `params: Promise<>` type errors, unused import. 2 bonus API routes discovered + fixed: `GET /api/match/[id]`, `GET /api/ownership/[id]`.
+- **Mock-first subscription**: Every protected route checks `process.env.STRIPE_SECRET_KEY`. When absent, sub checks are skipped. Plug the key → real Stripe checkout/webhook activate with zero code changes.
+- **OpenRouter agents**: `src/lib/llm/config.ts` calls `https://openrouter.ai/api/v1`. Without `OPENROUTER_API_KEY`, `callLLM()` returns null and rule-based fallbacks take over in `api/match/follow-up`.
+- **Guest quiz flow**: Matches stored in `sessionStorage`, result page reads from it. No auth or DB write needed for guests.
+- **Agent chat is stub**: `api/agent/chat` and `api/agent/care` return placeholder responses with auth + sub checks. The real LangGraph agent is in `src/lib/agent/invoke.ts` — just needs an OpenRouter key.
+- **Phase machine for quiz**: `quiz → analyzing → followup → matching` — single `phase` state variable, no ad-hoc flags.
 
-## Routes (23 total)
+## Current Flow (All Working)
 
-| Page Route | Description |
-|-----------|-------------|
-| `/` | Google sign-in landing |
-| `/quiz` | 9-step quiz |
-| `/result/[id]` | Top 3 matches + subscription CTA + Match Card export |
-| `/dashboard` | Planning profile list |
-| `/workspace/[id]` | Two-panel: expenses/concerns/status + draft panel + guidance gate + Decision Agent |
-| `/owned/[id]` | Ownership: expenses/activity/food + Care Agent |
-| `/experiences` | Read + submit owner anecdotes |
+```
+Landing → "Start Quiz" → 9 questions → analyzing spinner
+  → rule-based follow-ups (or LLM if key set)
+  → matching spinner → /result/latest → 3 ranked matches
+  → "Explore This Pet" button per match:
+      Auth'd + sub → POST /api/planning → /workspace/[id]
+      Not auth'd → Google OAuth with return URL → retry
+      No sub → inline subscription prompt → Stripe/demo → retry
+```
 
-| API Route | Auth | Notes |
-|----------|------|-------|
-| `/auth/google`, `/auth/callback` | None | Google OAuth flow |
-| `/api/auth/logout` | User | |
-| `/api/match`, `/api/match/follow-up` | User | Main match + LLM follow-up |
-| `/api/match/[id]` (GET) | User | Fetch match result by ID |
-| `/api/agent/chat` | User | Decision Agent (draft-wrapped) |
-| `/api/agent/care` | User | Care Agent (thread persistence) |
-| `/api/agent/drafts` | User | List pending, confirm, reject |
-| `/api/planning` | Subscriber | CRUD planning profiles |
-| `/api/experiences` | Subscriber | Submit owner experience |
-| `/api/ownership/transition` | Subscriber | Planning → owned conversion |
-| `/api/ownership/[id]` (GET) | User | Fetch owned profile |
-| `/api/stripe/checkout`, `/api/stripe/webhook` | User/Stripe | Test mode payments |
-| `/api/seed` | Dev only | YAML → Supabase pipeline |
+## Critical Files
 
-## Key Modules
+| File | Purpose |
+|------|---------|
+| `HANDOFF_NEXT.md` | Full feature status table, API endpoint matrix, remaining tasks |
+| `ASSET_GUIDE.md` | Pet image naming, color tokens, nav states, CTA patterns |
+| `src/lib/pet-logos.ts` | Shared `getPetLogo(id)` — maps YAML IDs to asset folder paths |
+| `src/lib/stripe/guard.ts` | `isSubscriber()` — mock-aware subscription check |
+| `src/lib/llm/config.ts` | `callLLM()` — OpenRouter API client |
+| `src/lib/matching/engine.ts` | `runMatch()` — 8-dimension scoring engine |
+| `src/lib/matching/dimensions.ts` | 8 score dimensions with weights and explanations |
+| `src/lib/quiz/questions.ts` | 9 fixed questions + `transformAnswers()` |
+| `src/app/api/match/route.ts` | POST — runs match, saves for auth, returns for all |
+| `src/app/api/match/follow-up/route.ts` | POST — LLM/rule-based follow-up questions |
+| `src/app/quiz/page.tsx` | Phase machine: quiz → analyzing → followup → matching |
+| `src/app/result/[id]/page.tsx` | Reads sessionStorage, shows matches, workspace/sub flow |
+| `src/app/page.tsx` | Landing — AppNav, 19-pet grid, Start Quiz + Google CTA |
+| `src/components/layout/AppNav.tsx` | Auth-aware nav: logged-out vs logged-in states |
+| `src/app/api/stripe/checkout/route.ts` | Demo mode without keys, real Stripe with keys |
+| `src/app/api/stripe/webhook/route.ts` | Mock fallback when no Stripe keys |
+| `src/app/dashboard/page.tsx` | Workspace list, auth gated by middleware |
+| `src/lib/supabase/middleware.ts` | Protects `/dashboard`, `/workspace`, `/owned` |
+| `supabase_schema.sql` | DB schema (run manually in Supabase SQL editor) |
 
-| Module | Interface | Tests |
-|--------|-----------|-------|
-| `matching/engine.ts` | `runMatch(profiles, lifestyle, dimensions?)` | 8 |
-| `matching/dimensions.ts` | `ScoreDimension[]` (8 dimensions) | 16 |
-| `quiz/questions.ts` | `FIXED_QUESTIONS`, `transformAnswers()` | 11 |
-| `pipeline/validate.ts` | `validatePetProfile()`, `consistencyCheck()` | 11 |
-| `agent/graph.ts` | `createAgent(opts)` — single factory for both agents | — |
-| `agent/repository.ts` | `PlanningRepository` (18 methods) | — |
-| `agent/tools.ts` | `createAgentTools(repo)` — 4 tools via `safeTool()` | — |
-| `agent/care-tools.ts` | `createCareTools(repo)` — 4 tools via `safeTool()` | — |
-| `agent/safe-tool.ts` | `safeTool(fn, opts)` — try/catch wrapper | — |
-| `agent/draft-store.ts` | `DraftStore` interface + `CreateDraft` type | — |
-| `agent/supabase-draft-store.ts` | `SupabaseDraftStore` adapter | — |
-| `agent/draft-repo.ts` | `DraftPlanningRepository(real, drafts, userId)` — injectable! | — |
-| `llm/config.ts` | `getChatModel()`, `callLLM()` — centralized LLM | — |
-| `stripe/guard.ts` | `isSubscriber()`, `requireSubscriber()` | — |
+## What Still Needs Work
 
-## Architecture Principles (enforced)
-
-1. **Inject dependencies** — repo, drafts, tools, dimensions are injected, not imported
-2. **Pure functions at seams** — matching, quiz, validation are pure
-3. **Interface before implementation** — `PlanningRepository`, `ScoreDimension`, `DraftStore`
-4. **Lazy init** — Supabase admin, Stripe are lazy
-5. **Google OAuth only** — no email/password
-6. **RLS on all tables** — security at database level
-7. **Agent writes → drafts → user confirms** — no direct writes from agent tools
-8. **Single agent factory** — `createAgent()` serves both Decision and Care agents
-
-## Remaining Work
-
-**Design** (KANBAN.md — 18 cards, Design-owned):
-Product narrative, onboarding flow, quiz UI, follow-up question UX, Match Result page, Shareable Match Card styling, subscription upgrade styling, subscriber dashboard UI, two-panel workspace design, expense table interactions, concern checklist interactions, decision status UI, agent chat styling, draft confirmation flow styling, Owner Experiences design, guidance gate styling, ownership setup flow, ownership workspace styling, responsive system, empty/loading/error states, Design QA.
-
-**Testing gaps** (no tests exist for):
-- `agent/repository.ts` — 18-method interface, testable with an in-memory adapter
-- `agent/tools.ts`, `agent/care-tools.ts` — tools are testable via `safeTool` + mock repo
-- `agent/draft-repo.ts` — draft wrapper is now testable via mock `DraftStore`
-- `agent/graph.ts` — agent graph with mock tools and model
-- API route behavior (requires running Supabase + Stripe)
+1. **Google OAuth** — must be tested manually in browser. Middleware redirects unauthenticated `/dashboard` to `/`, `/auth/google` + `/auth/callback` are wired and redirect to `/dashboard`.
+2. **Stripe keys** — add `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` to `.env.local`. Checkout and webhook activate automatically.
+3. **OpenRouter key** — add `OPENROUTER_API_KEY` to `.env.local`. Agent chat becomes real AI, follow-up questions use LLM instead of rules.
+4. **Pet images** — place PNGs in `public/assets/PetLogo/{id}/1.png` for each YAML `id`. See `ASSET_GUIDE.md` for sizing per component.
+5. **Design/styling pass** — everything functions, needs visual polish from `design/` HTML files.
+6. **Remove unused `src/app/experiences` route?** — standalone experiences page may be redundant since each pet detail page has its own experiences section.
 
 ## Suggested Skills
 
-- `design` — Design the UI for all remaining Design cards
-- `tdd` — Write tests for agent, draft, and API modules
-- `to-issues` — Create GitHub issues from kanban
-- `code-review` — Review implementation against PRD and ADR
+- **`agent-browser`** — Run through full quiz flow, verify result page shows matches with images, test Explore/Subscribe/Create workspace flows
+- **`code-review`** — Review the 16-commit diff against `design/` specs
+- **`diagnosing-bugs`** — If any API 500s or image 404s appear during browser testing
+- **`tdd`** — Write integration tests for quiz → match → result pipeline
