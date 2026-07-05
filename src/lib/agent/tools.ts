@@ -57,15 +57,9 @@ function createWebSearchTool() {
     },
     {
       name: "web_search",
-      description: `WHEN TO CALL: User asks about current prices, availability, specific brands, recent news, or any question requiring up-to-date real-world information.
-
-WHAT IT DOES: Searches the web and returns structured results with titles, summaries, and source URLs.
-
-TRIGGERS: "how much does X cost", "what brands", "is X available", "recent news about", "what's the best"
-
-DO NOT CALL: For general pet care advice you already know, or when updating existing data without needing new information.`,
+      description: `Search the web for current prices, products, or real-world info. Use ONLY when you need up-to-date data. Do NOT call for general advice.`,
       schema: z.object({
-        query: z.string().describe("Specific search query. Include location if relevant (e.g., 'Golden Gentleman price Thailand 2026')"),
+        query: z.string().describe("Search query, e.g., 'Golden Retriever price Thailand 2026'"),
       }),
     }
   );
@@ -82,22 +76,14 @@ export function createAgentTools(repo: PlanningRepository) {
     },
     {
       name: "update_expenses",
-      description: `WHEN TO CALL: User discusses pet costs, expenses, budget, or wants price estimates. Call AFTER web_search if you need current prices.
-
-WHAT IT DOES: Replaces the expense table with new items. Each item needs: category, item name, amount in THB, optional note.
-
-CATEGORIES: "initial" (one-time purchase), "monthly" (recurring), "annual" (yearly), "one_time" (occasional)
-
-TRIGGERS: "how much does X cost", "what's the monthly expense", "create a budget", "estimate expenses"
-
-IMPORTANT: This REPLACES all existing expenses. Include ALL items, not just new ones.`,
+      description: `Update the expense table. REPLACES all existing expenses. Categories: initial, monthly, annual, one_time.`,
       schema: z.object({
         planning_profile_id: z.string().uuid(),
         expenses: z.array(z.object({
           category: z.enum(["initial", "monthly", "annual", "one_time"]),
-          item: z.string().describe("Expense name, e.g., 'Food (Royal Canin)'"),
-          amount_thb: z.number().int().min(0).describe("Amount in Thai Baht"),
-          note: z.string().optional().nullable().describe("Additional details"),
+          item: z.string().describe("Expense name"),
+          amount_thb: z.number().int().min(0).describe("Amount in THB"),
+          note: z.string().optional().nullable(),
         })),
       }),
     }
@@ -111,22 +97,14 @@ IMPORTANT: This REPLACES all existing expenses. Include ALL items, not just new 
     },
     {
       name: "update_concerns",
-      description: `WHEN TO CALL: User asks about concerns, risks, downsides, or worries about pet ownership. Call AFTER web_search if you need current information.
-
-WHAT IT DOES: Replaces the concern checklist. Each concern needs: unique ID, title, status, optional note.
-
-STATUSES: "unresolved" (needs attention), "resolved" (addressed), "not_applicable" (doesn't apply)
-
-TRIGGERS: "what are the concerns", "what are the risks", "what should I worry about", "downsides of"
-
-IMPORTANT: This REPLACES all existing concerns. Include ALL concerns, not just new ones.`,
+      description: `Update the concern checklist. REPLACES all existing concerns. Statuses: unresolved, resolved, not_applicable.`,
       schema: z.object({
         planning_profile_id: z.string().uuid(),
         concerns: z.array(z.object({
-          concern_id: z.string().describe("Unique ID like 'shedding', 'allergies', 'cost'"),
-          title: z.string().describe("Short title like 'Heavy shedding'"),
+          concern_id: z.string().describe("Unique ID like 'shedding'"),
+          title: z.string().describe("Short title"),
           status: z.enum(["unresolved", "resolved", "not_applicable"]),
-          note: z.string().optional().nullable().describe("Details or mitigation tips"),
+          note: z.string().optional().nullable(),
         })),
       }),
     }
@@ -139,15 +117,7 @@ IMPORTANT: This REPLACES all existing concerns. Include ALL concerns, not just n
     },
     {
       name: "update_decision_status",
-      description: `WHEN TO CALL: User explicitly states they're ready to buy, not interested, or still exploring.
-
-WHAT IT DOES: Updates the decision status to reflect the user's choice.
-
-STATUSES: "exploring" (just looking), "considering" (thinking about it), "ready_to_buy" (decided), "not_a_fit" (not for me), "already_have" (already own one)
-
-TRIGGERS: "I'm ready to buy", "I want to get one", "not for me", "I'll pass", "still thinking"
-
-DO NOT CALL: Unless the user explicitly states their decision.`,
+      description: `Update decision status. Call only when user explicitly states their decision. Statuses: exploring, considering, ready_to_buy, not_a_fit, already_have.`,
       schema: z.object({
         planning_profile_id: z.string().uuid(),
         status: z.enum(["exploring", "considering", "ready_to_buy", "not_a_fit", "already_have"]),
@@ -179,11 +149,7 @@ DO NOT CALL: Unless the user explicitly states their decision.`,
     },
     {
       name: "get_context",
-      description: `WHEN TO CALL: You need to understand the current state before making updates. Usually NOT needed because context is pre-injected.
-
-WHAT IT DOES: Returns full context including pet info, expenses, concerns, and owner experiences.
-
-TRIGGERS: Rarely needed. Context is usually pre-injected into the conversation.`,
+      description: `Get current planning data. Usually NOT needed - context is pre-injected.`,
       schema: z.object({
         planning_profile_id: z.string().uuid(),
       }),
@@ -230,11 +196,7 @@ export function createCareTools(repo: PlanningRepository) {
     },
     {
       name: "get_care_context",
-      description: `WHEN TO CALL: You need to understand the current state before making updates. Usually NOT needed because context is pre-injected.
-
-WHAT IT DOES: Returns full context including pet details, expenses, activities, food guide, schedule (vet visits, vaccines, grooming), and health metrics (weight history).
-
-TRIGGERS: Rarely needed. Context is usually pre-injected into the conversation.`,
+      description: `Get current care data. Usually NOT needed - context is pre-injected.`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
       }),
@@ -249,22 +211,14 @@ TRIGGERS: Rarely needed. Context is usually pre-injected into the conversation.`
     },
     {
       name: "update_actual_expenses",
-      description: `WHEN TO CALL: User wants to track or update actual expenses for their pet. Call AFTER web_search if you need current prices.
-
-WHAT IT DOES: Replaces the expense tracker with new items. Each item needs: category, item name, amount in THB, optional note.
-
-CATEGORIES: "food", "medical", "grooming", "supplies", "other"
-
-TRIGGERS: "track my expenses", "how much am I spending", "update my budget", "monthly costs"
-
-IMPORTANT: This REPLACES all existing expenses. Include ALL items, not just new ones.`,
+      description: `Update expense tracker. REPLACES all existing. Categories: food, medical, grooming, supplies, other.`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         expenses: z.array(z.object({
           category: z.enum(["food", "medical", "grooming", "supplies", "other"]),
-          item: z.string().describe("Expense name, e.g., 'Cat food (Royal Canin)'"),
-          amount_thb: z.number().int().min(0).describe("Amount in Thai Baht"),
-          note: z.string().optional().nullable().describe("Additional details"),
+          item: z.string().describe("Expense name"),
+          amount_thb: z.number().int().min(0).describe("Amount in THB"),
+          note: z.string().optional().nullable(),
         })),
       }),
     }
@@ -278,23 +232,17 @@ IMPORTANT: This REPLACES all existing expenses. Include ALL items, not just new 
     },
     {
       name: "update_food_guide",
-      description: `WHEN TO CALL: User asks about feeding, food, diet, or feeding schedule. Call AFTER web_search to find specific brands and products.
-
-WHAT IT DOES: Replaces the food guide. Each card needs: unique ID, meal name, brand, amount, frequency, optional image and notes.
-
-TRIGGERS: "what should I feed my pet", "food recommendations", "feeding schedule", "best food brands"
-
-IMPORTANT: This REPLACES all existing food cards. Include ALL cards, not just new ones. Use web_search first to find real products with images.`,
+      description: `Update food guide. REPLACES all existing cards. Use web_search first for real products.`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         cards: z.array(z.object({
-          id: z.string().describe("Unique ID like 'breakfast-1', 'dinner-2'"),
-          name: z.string().describe("Meal name like 'Breakfast', 'Dinner', 'Snack'"),
-          brand: z.string().describe("Brand and product like 'Royal Canin Indoor'"),
-          amount: z.string().describe("Amount like '40g', '1 can', '1 cup'"),
-          frequency: z.string().describe("When to feed like 'Daily at 7am', '2x daily'"),
-          image: z.string().optional().nullable().describe("URL to product image from web search"),
-          notes: z.string().optional().nullable().describe("Preparation tips or notes"),
+          id: z.string().describe("Unique ID"),
+          name: z.string().describe("Meal name"),
+          brand: z.string().describe("Brand and product"),
+          amount: z.string().describe("Amount"),
+          frequency: z.string().describe("When to feed"),
+          image: z.string().optional().nullable(),
+          notes: z.string().optional().nullable(),
         })),
       }),
     }
@@ -314,26 +262,18 @@ IMPORTANT: This REPLACES all existing food cards. Include ALL cards, not just ne
     },
     {
       name: "update_schedule",
-      description: `WHEN TO CALL: User asks to schedule a vet visit, vaccine, grooming, checkup, or any appointment. Also call when user wants to add, remove, or change schedule items.
-
-WHAT IT DOES: Replaces the schedule with new events. Each event needs: unique ID, title, event_type, date, optional recurring settings and notes.
-
-EVENT_TYPES: "vaccine", "checkup", "grooming", "medication", "boarding", "emergency", "other"
-
-TRIGGERS: "schedule vet visit", "book grooming", "when is the next checkup", "remind me to vaccinate", "add appointment"
-
-IMPORTANT: This REPLACES all existing schedule events. Include ALL events, not just new ones.`,
+      description: `Update schedule. REPLACES all events. Types: vaccine, checkup, grooming, medication, boarding, emergency, other.`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         schedule: z.array(z.object({
-          id: z.string().describe("Unique ID like 'vacc-1', 'checkup-2'"),
-          title: z.string().describe("Event title like 'Annual vaccination', 'Dental cleaning'"),
+          id: z.string().describe("Unique ID"),
+          title: z.string().describe("Event title"),
           event_type: z.enum(["vaccine", "checkup", "grooming", "medication", "boarding", "emergency", "other"]),
-          date: z.string().describe("Date in YYYY-MM-DD format"),
-          completed_date: z.string().optional().nullable().describe("Date when completed, if done"),
-          recurring: z.boolean().optional().describe("Whether this event repeats"),
-          recurrence_days: z.number().int().optional().nullable().describe("Days between recurrences if recurring"),
-          notes: z.string().optional().nullable().describe("Additional notes"),
+          date: z.string().describe("YYYY-MM-DD"),
+          completed_date: z.string().optional().nullable(),
+          recurring: z.boolean().optional(),
+          recurrence_days: z.number().int().optional().nullable(),
+          notes: z.string().optional().nullable(),
         })),
       }),
     }
@@ -360,20 +300,14 @@ IMPORTANT: This REPLACES all existing schedule events. Include ALL events, not j
     },
     {
       name: "add_health_metric",
-      description: `WHEN TO CALL: User wants to log a health measurement like weight. Currently supports weight tracking.
-
-WHAT IT DOES: Adds a new health measurement to the pet's health history.
-
-TRIGGERS: "log weight", "record weight", "my pet weighs", "update weight", "add weight measurement"
-
-IMPORTANT: Include the value, unit (e.g., "kg", "lbs"), and date.`,
+      description: `Log a health measurement (weight). Include value, unit, and date.`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         metric_type: z.enum(["weight"]),
         value: z.number().describe("Measurement value"),
         unit: z.string().describe("Unit like 'kg', 'lbs'"),
-        recorded_date: z.string().describe("Date in YYYY-MM-DD format"),
-        notes: z.string().optional().nullable().describe("Additional notes"),
+        recorded_date: z.string().describe("YYYY-MM-DD"),
+        notes: z.string().optional().nullable(),
       }),
     }
   );

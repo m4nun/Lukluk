@@ -4,7 +4,7 @@ import { StructuredTool } from "@langchain/core/tools";
 import type { PlanningRepository } from "./repository";
 import { getChatModel } from "@/lib/llm/config";
 
-const MAX_ITERATIONS = 10;
+const MAX_ITERATIONS = 3;
 
 const AgentState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
@@ -21,79 +21,41 @@ const AgentState = Annotation.Root({
   }),
 });
 
-export const DECISION_SYSTEM_PROMPT = `You are a pet advisor for Lukluk, a Thai pet adoption platform.
+export const DECISION_SYSTEM_PROMPT = `You are a pet advisor for Lukluk.
 
-ROLE: Help users decide if a pet type is right for them by providing data-driven advice.
+STYLE: Be direct, concise (2-3 sentences max). Use the data already provided in context. Do NOT over-think.
 
-CRITICAL RULE: After using tools, you MUST provide a clear text response summarizing what you found and did. Never end without a text message to the user.
+RULES:
+1. If the answer is in the pre-injected context, answer IMMEDIATELY without tools
+2. Only use web_search when you genuinely need current market prices
+3. When you use a tool, respond RIGHT AFTER with a brief answer
+4. Ask ONE clarifying question if the user is vague — don't guess
+5. End with a proactive suggestion when relevant (e.g., "Want me to update your expenses?")
 
-BEHAVIOR:
-- Answer questions directly using the pre-injected context
-- Use web_search ONLY when you need current prices or real-time information
-- Use tools to update the user's data (expenses, concerns, status)
-- Be helpful, concise, and practical
-- ALWAYS end with a text response after calling tools
+RESPONSE FORMAT:
+- Greet briefly if first message
+- Answer the question directly
+- Offer ONE next step (update data, check concerns, etc.)
 
-TOOL USAGE PATTERN:
-1. User asks about costs → web_search(query="[pet] price Thailand") → update_expenses → TEXT RESPONSE
-2. User asks about concerns → web_search(query="[pet] ownership concerns") → update_concerns → TEXT RESPONSE
-3. User makes a decision → update_decision_status → TEXT RESPONSE
+NEVER: Write long paragraphs, repeat information, or call multiple tools unnecessarily.`;
 
-EXAMPLES:
+export const CARE_SYSTEM_PROMPT = `You are a pet care assistant for Lukluk.
 
-User: "How much does a Golden Gentleman cost?"
-Assistant: [calls web_search(query="Golden Gentleman price Thailand 2026")]
-Tool result: SEARCH RESULTS: Golden Gentleman costs 15,000-50,000 THB...
-Assistant: [calls update_expenses(expenses=[{category:"initial", item:"Golden Gentleman puppy", amount_thb:25000}, {category:"monthly", item:"Food", amount_thb:2000}])]
-Tool result: SUCCESS: Updated 2 expense items.
-Assistant: "Golden Gentlemen cost 15,000-50,000 THB. Monthly expenses include food (2,000 THB) and grooming (800 THB)."
+STYLE: Be direct, concise (2-3 sentences max). Use the data already provided in context. Do NOT over-think.
 
-User: "What are the concerns about owning a cat?"
-Assistant: [calls web_search(query="cat ownership concerns Thailand")]
-Tool result: SEARCH RESULTS: Shedding, allergies, scratching...
-Assistant: [calls update_concerns(concerns=[{concern_id:"shedding", title:"Heavy shedding", status:"unresolved", note:"Requires daily brushing"}])]
-Tool result: SUCCESS: Updated 1 concern.
-Assistant: "Main concern is heavy shedding - requires daily brushing."`;
+RULES:
+1. If the answer is in the pre-injected context, answer IMMEDIATELY without tools
+2. Only use web_search when user asks for specific products/brands/prices
+3. When you use a tool, respond RIGHT AFTER with a brief answer
+4. Ask ONE clarifying question if the user is vague — don't guess
+5. End with a proactive suggestion when relevant (e.g., "Want me to log that?")
 
-export const CARE_SYSTEM_PROMPT = `You are a pet care assistant for Lukluk, a Thai pet adoption platform.
+RESPONSE FORMAT:
+- Greet briefly if first message
+- Answer the question directly
+- Offer ONE next step (log weight, schedule vet, update food, etc.)
 
-ROLE: Help pet owners manage their pet's food, expenses, schedule (vet visits, vaccines, grooming), and health (weight tracking).
-
-CRITICAL RULE: After using tools, you MUST provide a clear text response summarizing what you found and did. Never end without a text message to the user.
-
-BEHAVIOR:
-- Answer questions directly using the pre-injected context
-- Use web_search to find real products, brands, and services with images
-- Use tools to update the user's data (food, expenses, schedule, health)
-- Be helpful, concise, and practical
-- When user asks about scheduling vet visits, vaccines, or grooming → use update_schedule
-- When user wants to log weight or health measurements → use add_health_metric
-- ALWAYS end with a text response after calling tools
-
-TOOL USAGE PATTERN:
-1. User asks about food → web_search(query="[pet type] food brands Thailand") → update_food_guide → TEXT RESPONSE
-2. User asks about expenses → update_actual_expenses → TEXT RESPONSE
-3. User asks about scheduling vet visit / vaccine / grooming → update_schedule → TEXT RESPONSE
-4. User wants to log weight → add_health_metric → TEXT RESPONSE
-
-EXAMPLES:
-
-User: "Schedule a vet checkup for next month"
-Assistant: [calls update_schedule(schedule=[{id:"sched-1", title:"Annual checkup", event_type:"checkup", date:"2026-08-05"}])]
-Tool result: SUCCESS: Updated schedule with 1 events.
-Assistant: "Scheduled a vet checkup for August 5, 2026."
-
-User: "My dog weighs 25kg today"
-Assistant: [calls add_health_metric(metric_type:"weight", value:25, unit:"kg", recorded_date:"2026-07-05")]
-Tool result: Added weight measurement: 25 kg on 2026-07-05.
-Assistant: "Logged your dog's weight: 25 kg on July 5, 2026."
-
-User: "What food should I buy for my cat?"
-Assistant: [calls web_search(query="best cat food brands Royal Canin Whiskas Thailand price")]
-Tool result: SEARCH RESULTS: Royal Canin, Whiskas, Hill's...
-Assistant: [calls update_food_guide(cards=[{id:"food-1", name:"Breakfast", brand:"Royal Canin Indoor", amount:"40g", frequency:"Daily at 7am"}, {id:"food-2", name:"Dinner", brand:"Whiskas Adult", amount:"30g", frequency:"Daily at 6pm"}])]
-Tool result: SUCCESS: Updated 2 food cards.
-Assistant: "Created 2 food cards: Breakfast (Royal Canin Indoor, 40g at 7am) and Dinner (Whiskas Adult, 30g at 6pm)."`;
+NEVER: Write long paragraphs, repeat information, or call multiple tools unnecessarily.`;
 
 export interface AgentOpts {
   profileId: string;
@@ -112,9 +74,9 @@ export interface ProgressEvent {
 function getToolLabel(toolName: string): ProgressEvent {
   switch (toolName) {
     case "web_search":
-      return { type: "searching", message: "Searching the web..." };
+      return { type: "searching", message: "Searching..." };
     case "update_food_guide":
-      return { type: "creating", message: "Creating food guide..." };
+      return { type: "creating", message: "Updating food guide..." };
     case "update_expenses":
     case "update_actual_expenses":
       return { type: "creating", message: "Updating expenses..." };
@@ -125,9 +87,9 @@ function getToolLabel(toolName: string): ProgressEvent {
     case "update_schedule":
       return { type: "creating", message: "Updating schedule..." };
     case "add_health_metric":
-      return { type: "creating", message: "Logging health measurement..." };
+      return { type: "creating", message: "Logging measurement..." };
     case "get_care_context":
-      return { type: "thinking", message: "Loading care data..." };
+      return { type: "thinking", message: "Loading data..." };
     default:
       return { type: "thinking", message: "Processing..." };
   }
@@ -136,7 +98,7 @@ function getToolLabel(toolName: string): ProgressEvent {
 export function createAgent(opts: AgentOpts) {
   const { profileId, tools, systemPrompt, idParam, onProgress } = opts;
 
-  const model = getChatModel(0.7);
+  const model = getChatModel(0.5);
   const modelWithTools = model.bindTools(tools);
 
   async function agentNode(state: typeof AgentState.State) {

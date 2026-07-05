@@ -172,40 +172,6 @@ export async function runAgent(config: RunAgentConfig) {
     iteration: 0,
   });
 
-  const calledTools = result.messages.some(
-    (m) => m.constructor.name === "ToolMessage",
-  );
-
-  if (!calledTools) {
-    const forcePrompt = config.agentType === "care"
-      ? `The user asked: "${config.message}"
-
-You MUST use tools. Do NOT just give text advice.
-
-STEP 1: Call web_search to find information about what the user asked.
-STEP 2: Call update_food_guide, update_schedule, update_actual_expenses, or add_health_metric to create/update cards with the results.
-
-Call web_search NOW with a relevant query.`
-      : `The user asked: "${config.message}"
-
-You MUST use tools. Do NOT just give text advice.
-
-STEP 1: Call web_search to find information about what the user asked.
-STEP 2: Call update_expenses or update_concerns to update their data.
-
-Call web_search NOW with a relevant query.`;
-
-    result = await agent.invoke({
-      messages: [
-        new HumanMessage(enrichedMessage),
-        result.messages[result.messages.length - 1],
-        new HumanMessage(forcePrompt),
-      ],
-      profileId: config.profileId,
-      iteration: result.iteration || 1,
-    });
-  }
-
   // Extract the final text response from the last AI message
   let responseText = "";
   const allAiMessages = result.messages.filter(
