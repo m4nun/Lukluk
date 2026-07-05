@@ -16,6 +16,40 @@ interface RunAgentConfig {
   message: string;
 }
 
+async function fetchDecisionContext(repo: PlanningRepository, profileId: string): Promise<string> {
+  try {
+    const profile = await repo.getProfile(profileId);
+    if (!profile) return "";
+
+    const [expenses, concerns, experiences] = await Promise.all([
+      repo.getExpenses(profileId),
+      repo.getConcerns(profileId),
+      repo.getOwnerExperiences(profile.pet_type.id),
+    ]);
+
+    return `\n\n--- CURRENT STATE (auto-loaded, DO NOT ask user for IDs) ---\nPet: ${profile.pet_type.name} (${profile.pet_type.species})\nStatus: ${profile.decision_status}\nExpenses (${expenses.length} items): ${JSON.stringify(expenses)}\nConcerns (${concerns.length} items): ${JSON.stringify(concerns)}\nOwner experiences (${experiences.length}): ${JSON.stringify(experiences)}\n--- END STATE ---`;
+  } catch {
+    return "";
+  }
+}
+
+async function fetchCareContext(repo: PlanningRepository, profileId: string): Promise<string> {
+  try {
+    const owned = await repo.getOwnedProfile(profileId);
+    if (!owned) return "";
+
+    const [expenses, schedule, foodGuide] = await Promise.all([
+      repo.getActualExpenses(profileId),
+      repo.getActivitySchedule(profileId),
+      repo.getFoodGuide(profileId),
+    ]);
+
+    return `\n\n--- CURRENT STATE (auto-loaded, DO NOT ask user for IDs) ---\nPet: ${owned.pet_name} (${owned.pet_type.name}, ${owned.age_life_stage})\nExpenses (${expenses.length} items): ${JSON.stringify(expenses)}\nActivity schedule (${schedule.length} entries): ${JSON.stringify(schedule)}\nFood guide: ${JSON.stringify(foodGuide)}\n--- END STATE ---`;
+  } catch {
+    return "";
+  }
+}
+
 export async function runAgent(config: RunAgentConfig) {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -27,6 +61,7 @@ export async function runAgent(config: RunAgentConfig) {
     .from(config.profileTable)
     .select("id, user_id")
     .eq("id", config.profileId)
+    .eq("user_id", userData.user.id)
     .single();
 
   if (!profile || profile.user_id !== userData.user.id) {
@@ -58,12 +93,18 @@ export async function runAgent(config: RunAgentConfig) {
       .insert(insert)
       .select("thread_id")
       .single();
-    
+
     if (insertError || !newThread) {
       return { error: `Failed to create agent thread: ${insertError?.message || "unknown"}`, status: 500 } as const;
     }
     thread = newThread;
   }
+
+  const contextSnippet = config.agentType === "care"
+    ? await fetchCareContext(config.repo, config.profileId)
+    : await fetchDecisionContext(config.repo, config.profileId);
+
+  const enrichedMessage = config.message + contextSnippet;
 
   const agent = createAgent({
     profileId: config.profileId,
@@ -73,15 +114,40 @@ export async function runAgent(config: RunAgentConfig) {
     idParam: config.idParam,
   });
 
-  const result = await agent.invoke({
-    messages: [new HumanMessage(config.message)],
+  let result = await agent.invoke({
+    messages: [new HumanMessage(enrichedMessage)],
     profileId: config.profileId,
   });
 
-  const aiMessages = result.messages.filter(
+  let aiMessages = result.messages.filter(
     (m) => m.constructor.name === "AIMessage",
   ) as AIMessage[];
-  const lastAiMessage = aiMessages[aiMessages.length - 1];
+  let lastAiMessage = aiMessages[aiMessages.length - 1];
+
+  const calledTools = result.messages.some(
+    (m) => m.constructor.name === "ToolMessage",
+  );
+
+  if (!calledTools) {
+    const forcePrompt = config.agentType === "care"
+      ? "The user asked you something. You have tools available. Call update_actual_expenses, update_activity_schedule, or update_food_guide NOW with realistic data based on the CURRENT STATE provided. Do NOT ask the user for any IDs — you already have everything."
+      : "The user asked you something. You have tools available. Call update_expenses and update_concerns NOW with realistic data based on the CURRENT STATE provided. Do NOT ask the user for any IDs — you already have everything.";
+
+    result = await agent.invoke({
+      messages: [
+        new HumanMessage(enrichedMessage),
+        lastAiMessage,
+        new HumanMessage(forcePrompt),
+      ],
+      profileId: config.profileId,
+    });
+
+    aiMessages = result.messages.filter(
+      (m) => m.constructor.name === "AIMessage",
+    ) as AIMessage[];
+    lastAiMessage = aiMessages[aiMessages.length - 1];
+  }
+
   const responseText =
     typeof lastAiMessage?.content === "string"
       ? lastAiMessage.content
