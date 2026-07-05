@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import AgentChat from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ActivityCards from "@/components/workspace/ActivityCards";
 import FoodGuideCard from "@/components/workspace/FoodGuideCard";
+import EditPetModal from "@/components/workspace/EditPetModal";
+import DeletePetModal from "@/components/workspace/DeletePetModal";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
-import { EmptyState } from "@/components/layout/EmptyState";
-import { ArrowLeft, PawPrint, AlertTriangle } from "lucide-react";
+import { getPetLogo } from "@/lib/pet-logos";
+import { ArrowLeft, Edit, MoreVertical, MessageCircle, Home, PawPrint, Receipt, User } from "lucide-react";
 import type { ActivityCard, FoodCard } from "@/lib/types";
 
 interface OwnedData {
@@ -27,32 +29,31 @@ interface OwnedData {
   }>;
   activity_schedule: ActivityCard[] | null;
   food_guide: FoodCard[] | { brand?: string; amount?: string; frequency?: string; notes?: string } | null;
-  pet_type_profiles: { name: string; species: string; mbti_label: string };
+  pet_type_profiles: { id: string; name: string; species: string; mbti_label: string };
 }
 
 function ageLabel(stage: string) {
   switch (stage) {
-    case "puppy/kitten":
-      return "Puppy / Kitten";
-    case "young_adult":
-      return "Young Adult";
-    case "adult":
-      return "Adult";
-    case "senior":
-      return "Senior";
-    default:
-      return stage;
+    case "puppy/kitten": return "Puppy / Kitten";
+    case "young_adult": return "Young Adult";
+    case "adult": return "Adult";
+    case "senior": return "Senior";
+    default: return stage;
   }
 }
 
 export default function OwnedPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [data, setData] = useState<OwnedData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"expenses" | "activity" | "food">(
-    "expenses",
-  );
+  const [activeTab, setActiveTab] = useState<"expenses" | "activity" | "food">("expenses");
   const [error, setError] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -72,31 +73,30 @@ export default function OwnedPage() {
     load();
   }, [params.id]);
 
-  async function refreshData() {
+  const refreshData = useCallback(async () => {
     try {
       const res = await fetch(`/api/ownership/${params.id}`);
-      if (res.ok) {
-        setData(await res.json());
-      }
-    } catch {
-      // silent fail on refresh
-    }
-  }
+      if (res.ok) setData(await res.json());
+    } catch {}
+  }, [params.id]);
+
+  const handleEmbedToChat = useCallback((text: string) => {
+    setChatInput(text);
+    setChatOpen(true);
+  }, []);
 
   if (loading) {
     return (
       <div className="flex h-screen flex-col">
-        <div className="flex h-[52px] items-center border-b border-border px-5">
+        <div className="flex h-[52px] items-center border-b border-gray-200 bg-white px-5">
           <LoadingSkeleton variant="text" rows={1} />
         </div>
         <div className="flex flex-1">
           <div className="flex-1 overflow-auto p-6">
             <LoadingSkeleton variant="card" />
-            <div className="mt-6">
-              <LoadingSkeleton variant="table" rows={6} />
-            </div>
+            <div className="mt-6"><LoadingSkeleton variant="table" rows={6} /></div>
           </div>
-          <div className="w-[420px] border-l border-border bg-card" />
+          <div className="w-[380px] border-l border-gray-200 bg-white" />
         </div>
       </div>
     );
@@ -105,22 +105,17 @@ export default function OwnedPage() {
   if (error || !data) {
     return (
       <div className="flex h-screen flex-col items-center justify-center px-6">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-          <AlertTriangle className="h-8 w-8 text-destructive" />
-        </div>
         <h2 className="text-xl font-bold">Profile not found</h2>
-        <p className="mt-2 text-muted-foreground">
-          {error || "This pet profile may have been removed."}
-        </p>
-        <Link
-          href="/dashboard"
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
-        >
+        <p className="mt-2 text-gray-500">{error || "This pet profile may have been removed."}</p>
+        <Link href="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white">
           Back to Dashboard
         </Link>
       </div>
     );
   }
+
+  const logoSrc = getPetLogo(data.pet_type_profiles.id);
+  const totalCost = data.actual_expenses.reduce((sum, e) => sum + e.amount_thb, 0);
 
   const tabs = [
     { key: "expenses" as const, label: "Actual Expenses" },
@@ -129,62 +124,118 @@ export default function OwnedPage() {
   ];
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      {/* Nav */}
-      <nav className="flex h-[52px] shrink-0 items-center border-b border-border bg-card px-5">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-1.5 font-bold text-base">
-            <Image src="/assets/logo.png" alt="Lukluk" width={20} height={20} />
+    <div className="flex h-screen flex-col overflow-hidden bg-[#fafafa]">
+      {/* Desktop Nav */}
+      <nav className="hidden md:flex h-14 shrink-0 items-center border-b border-gray-200 bg-white px-6">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2 text-sm font-bold text-gray-900">
+            <Image src="/assets/logo.png" alt="Lukluk" width={24} height={24} />
             Lukluk
           </Link>
-          <span className="block h-5 w-px bg-border" />
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
+          <div className="h-5 w-px bg-gray-200" />
+          <Link href="/dashboard" className="flex items-center gap-1 text-[13px] text-gray-500 transition-colors hover:text-gray-900 rounded-full px-2.5 py-1 hover:bg-gray-100">
+            <ArrowLeft className="h-3.5 w-3.5" />
             Dashboard
           </Link>
         </div>
-        <div className="mx-auto flex items-center gap-2">
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full overflow-hidden bg-success/10">
-            <PawPrint className="h-3.5 w-3.5 text-success" />
-          </div>
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
+          {logoSrc && (
+            <div className="h-7 w-7 overflow-hidden rounded-full border-2 border-gray-200">
+              <Image src={logoSrc} alt={data.pet_name} width={28} height={28} className="object-cover" />
+            </div>
+          )}
           <span className="text-sm font-semibold">{data.pet_name}</span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-success/20 bg-success/5 px-2.5 py-0.5 text-[11px] font-semibold text-success">
+          <span className="inline-flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-2.5 py-0.5 text-[11px] font-semibold text-green-600">
+            <PawPrint className="h-3 w-3" fill="currentColor" />
             Owned
           </span>
         </div>
-        <div className="w-[100px]" />
+        <div className="ml-auto flex items-center gap-2">
+          <button className="h-9 w-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+            <Edit className="h-4 w-4" />
+          </button>
+          <button className="h-9 w-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+            <MoreVertical className="h-4 w-4" />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Nav */}
+      <nav className="flex md:hidden h-[52px] shrink-0 items-center border-b border-gray-200 bg-white px-4">
+        <Link href="/dashboard" className="flex items-center gap-1 text-sm text-orange-500 font-medium">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <div className="mx-auto flex items-center gap-2">
+          {logoSrc && (
+            <div className="h-7 w-7 overflow-hidden rounded-full border-2 border-gray-200">
+              <Image src={logoSrc} alt={data.pet_name} width={28} height={28} className="object-cover" />
+            </div>
+          )}
+          <span className="text-[15px] font-semibold">{data.pet_name}</span>
+          <span className="inline-flex items-center gap-0.5 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-600 border border-green-200">
+            <PawPrint className="h-2.5 w-2.5" fill="currentColor" />
+            Owned
+          </span>
+        </div>
+        <button className="h-9 w-9 rounded-full flex items-center justify-center text-gray-500">
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </button>
       </nav>
 
       {/* Body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Panel */}
-        <div className="flex-1 overflow-y-auto border-r border-border p-6">
-          {/* Header */}
-          <div className="flex items-center gap-3.5 mb-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-success/20 bg-success/5">
-              <PawPrint className="h-5 w-5 text-success" />
+        <div className="flex-1 overflow-y-auto">
+          {/* Pet Header */}
+          <div className="flex items-center gap-3.5 px-5 pt-5 pb-4 md:px-7 md:pt-7">
+            {logoSrc ? (
+              <div className="h-[52px] w-[52px] flex-shrink-0 overflow-hidden rounded-full border-3 border-white shadow-md">
+                <Image src={logoSrc} alt={data.pet_name} width={52} height={52} className="object-cover" />
+              </div>
+            ) : (
+              <div className="h-[52px] w-[52px] flex-shrink-0 rounded-full border-3 border-white shadow-md bg-gray-100 flex items-center justify-center">
+                <PawPrint className="h-6 w-6 text-gray-400" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="text-lg font-bold text-gray-900">{data.pet_name}</div>
+              <div className="text-[13px] text-gray-500">{data.pet_type_profiles.name} · {ageLabel(data.age_life_stage)}</div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold">{data.pet_name}</h1>
-              <p className="text-sm text-muted-foreground">
-                {data.pet_type_profiles.name} · {ageLabel(data.age_life_stage)}
-              </p>
+            <div className="flex gap-1.5">
+              <button onClick={() => setShowEditModal(true)} className="h-9 w-9 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors active:scale-95">
+                <Edit className="h-4 w-4" />
+              </button>
+              <button onClick={() => setShowMoreMenu(!showMoreMenu)} className="relative h-9 w-9 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors active:scale-95">
+                <MoreVertical className="h-4 w-4" />
+              </button>
+              {showMoreMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
+                  <div className="absolute right-0 top-full mt-1 z-50 w-48 rounded-xl border border-gray-200 bg-white py-1.5 shadow-lg">
+                    <button onClick={() => { setShowDeleteModal(true); setShowMoreMenu(false); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Delete Pet
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b-2 border-border mb-5">
+          <div className="flex border-b border-gray-200 px-5 md:px-7 sticky top-0 bg-[#fafafa] z-10">
             {tabs.map((t) => (
               <button
                 key={t.key}
                 onClick={() => setActiveTab(t.key)}
-                className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-0.5 ${
+                className={`px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
                   activeTab === t.key
-                    ? "border-success text-foreground font-semibold"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                    ? "border-orange-500 text-gray-900"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
                 {t.label}
@@ -192,63 +243,159 @@ export default function OwnedPage() {
             ))}
           </div>
 
-          {/* Tab content */}
-          {activeTab === "expenses" && (
-            <ExpenseTable
-              expenses={data.actual_expenses}
-              variant="ownership"
-            />
-          )}
-
-          {activeTab === "activity" && (
-            <ActivityCards
-              activities={data.activity_schedule}
-              petName={data.pet_name}
-              petSpecies={data.pet_type_profiles.name}
-              petImage={data.pet_image}
-              onReorder={refreshData}
-              onRemove={refreshData}
-            />
-          )}
-
-          {activeTab === "food" && (
-            <FoodGuideCard
-              cards={data.food_guide}
-              petName={data.pet_name}
-              petSpecies={data.pet_type_profiles.name}
-              petImage={data.pet_image}
-              onReorder={refreshData}
-              onRemove={refreshData}
-              onAdd={() => {/* TODO: Open add dialog */}}
-            />
-          )}
+          {/* Tab Content */}
+          <div className="p-5 pb-24 md:p-7 md:pb-7">
+            {activeTab === "expenses" && (
+              <ExpenseTable
+                expenses={data.actual_expenses}
+                variant="ownership"
+                onEmbedToChat={handleEmbedToChat}
+              />
+            )}
+            {activeTab === "activity" && (
+              <ActivityCards
+                activities={data.activity_schedule}
+                petName={data.pet_name}
+                petSpecies={data.pet_type_profiles.name}
+                petImage={data.pet_image}
+                onReorder={refreshData}
+                onRemove={refreshData}
+              />
+            )}
+            {activeTab === "food" && (
+              <FoodGuideCard
+                cards={data.food_guide}
+                petName={data.pet_name}
+                petSpecies={data.pet_type_profiles.name}
+                petImage={data.pet_image}
+                onReorder={refreshData}
+                onRemove={refreshData}
+                onAdd={() => {}}
+              />
+            )}
+          </div>
         </div>
 
-        {/* Right Panel — Care Chat */}
-        <div className="w-[420px] shrink-0 flex flex-col bg-card">
-          <div className="flex items-center gap-2.5 border-b border-border px-4 py-3.5">
-            <span className="h-2 w-2 rounded-full bg-success" />
-            <div>
-              <h3 className="text-sm font-semibold">Care Agent</h3>
-              <p className="text-xs text-muted-foreground">Always available</p>
+        {/* Right Panel — Care Chat (Desktop) */}
+        <div className="hidden md:flex w-[380px] shrink-0 flex-col bg-white border-l border-gray-200">
+          <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-3.5">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-900">Care Agent</h3>
+              <p className="text-xs text-gray-500">Helps with feeding, activities & expenses</p>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-green-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+              Available
             </div>
           </div>
           <AgentChat
             endpoint="/api/agent/care"
             bodyKey="ownedProfileId"
             profileId={params.id}
-            suggestions={[
-              "Track an expense",
-              "What activities are good for my pet?",
-              "What food should I buy?",
-            ]}
-            placeholder="Ask about feeding, schedules, expenses..."
-            emptyTitle="Hi! I'm your Care Agent"
-            emptyDescription="Ask me about feeding, activity routines, tracking expenses, or any care concerns."
+            suggestions={["Track an expense", "Feeding tips", "Activity ideas"]}
+            placeholder="Enter a prompt here"
+            emptyTitle="Hi, I'm Care Agent"
+            emptyDescription="I can help you with feeding schedules, activity routines, tracking expenses, or any care concerns."
             onMessageSent={refreshData}
+            externalInput={chatInput}
+            onExternalInputConsumed={() => setChatInput("")}
           />
         </div>
       </div>
+
+      {/* Mobile Chat FAB */}
+      <button
+        onClick={() => setChatOpen(true)}
+        className="md:hidden fixed bottom-20 right-4 z-30 h-14 w-14 rounded-full bg-gradient-to-br from-blue-500 to-green-500 text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+      >
+        <MessageCircle className="h-6 w-6" />
+      </button>
+
+      {/* Mobile Bottom Sheet Chat */}
+      {chatOpen && (
+        <>
+          <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setChatOpen(false)} />
+          <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[20px] flex flex-col" style={{ height: "85dvh" }}>
+            <div className="w-9 h-1 rounded-full bg-gray-300 mx-auto mt-2.5 flex-shrink-0" />
+            <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-gray-200 flex-shrink-0">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-[15px] font-semibold">Care Agent</h3>
+                <p className="text-xs text-gray-500">Always available</p>
+              </div>
+              <button onClick={() => setChatOpen(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <AgentChat
+                endpoint="/api/agent/care"
+                bodyKey="ownedProfileId"
+                profileId={params.id}
+                suggestions={["Track expense", "Feeding tips"]}
+                placeholder="Enter a prompt here"
+                emptyTitle="Hi, I'm Care Agent"
+                emptyDescription="I can help with feeding, expenses, and care tips."
+                onMessageSent={refreshData}
+                externalInput={chatInput}
+                onExternalInputConsumed={() => setChatInput("")}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Mobile Bottom Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 flex justify-around py-2 pb-[max(8px,env(safe-area-inset-bottom))]">
+        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
+          <Home className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Home</span>
+        </Link>
+        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-orange-500">
+          <PawPrint className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Pets</span>
+        </Link>
+        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
+          <Receipt className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Expenses</span>
+        </Link>
+        <Link href="/profile" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
+          <User className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Profile</span>
+        </Link>
+      </nav>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <EditPetModal
+          ownedId={params.id}
+          petName={data.pet_name}
+          ageLifeStage={data.age_life_stage}
+          onClose={() => setShowEditModal(false)}
+          onSaved={() => { setShowEditModal(false); refreshData(); }}
+        />
+      )}
+
+      {/* Delete Modal */}
+      {showDeleteModal && (
+        <DeletePetModal
+          ownedId={params.id}
+          petName={data.pet_name}
+          onClose={() => setShowDeleteModal(false)}
+          onDeleted={() => router.push("/dashboard")}
+        />
+      )}
     </div>
   );
 }
