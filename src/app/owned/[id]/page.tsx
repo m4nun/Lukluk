@@ -6,9 +6,10 @@ import Link from "next/link";
 import Image from "next/image";
 import AgentChat from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
+import ActivityCalendar from "@/components/workspace/ActivityCalendar";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
-import { ArrowLeft, PawPrint, AlertTriangle, Calendar, Utensils } from "lucide-react";
+import { ArrowLeft, PawPrint, AlertTriangle, Utensils } from "lucide-react";
 
 interface OwnedData {
   id: string;
@@ -25,16 +26,6 @@ interface OwnedData {
   food_guide: { brand?: string; amount?: string; frequency?: string; notes?: string };
   pet_type_profiles: { name: string; species: string; mbti_label: string };
 }
-
-const DAY_ORDER = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
 
 function ageLabel(stage: string) {
   switch (stage) {
@@ -207,44 +198,7 @@ export default function OwnedPage() {
           )}
 
           {activeTab === "activity" && (
-            <div>
-              {data.activity_schedule.length === 0 ? (
-                <EmptyState
-                  icon={<Calendar className="h-8 w-8" />}
-                  title="No schedule yet"
-                  description="The Care Agent can help build a daily routine for your pet."
-                  variant="accent"
-                />
-              ) : (
-                <div className="space-y-3">
-                  {DAY_ORDER.filter((day) =>
-                    data.activity_schedule.some((a) => a.day === day),
-                  ).map((day) => (
-                    <div
-                      key={day}
-                      className="overflow-hidden rounded-lg border border-border bg-card"
-                    >
-                      <div className="bg-muted/50 border-b border-border px-4 py-2.5 text-sm font-semibold">
-                        {day}
-                      </div>
-                      {data.activity_schedule
-                        .filter((a) => a.day === day)
-                        .map((a, i) => (
-                          <div
-                            key={i}
-                            className="flex items-baseline gap-3 border-b border-border px-4 py-2 text-sm last:border-b-0"
-                          >
-                            <span className="min-w-[60px] text-sm font-semibold text-primary tabular-nums">
-                              {a.time}
-                            </span>
-                            <span>{a.activity}</span>
-                          </div>
-                        ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ActivityCalendar schedule={data.activity_schedule} />
           )}
 
           {activeTab === "food" && (
