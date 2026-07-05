@@ -10,6 +10,9 @@ interface LoadingSkeletonProps {
   className?: string;
 }
 
+const CARD_WIDTHS = [75, 90, 82];
+const TEXT_WIDTHS = [85, 70, 95, 78, 88];
+
 export function LoadingSkeleton({
   variant = "text",
   rows = 3,
@@ -42,11 +45,11 @@ export function LoadingSkeleton({
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          {Array.from({ length: 3 }).map((_, i) => (
+          {CARD_WIDTHS.map((w, i) => (
             <div
               key={i}
               className="h-3 animate-pulse rounded-md bg-muted"
-              style={{ width: `${70 + Math.random() * 30}%` }}
+              style={{ width: `${w}%` }}
             />
           ))}
         </div>
@@ -70,11 +73,11 @@ export function LoadingSkeleton({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {Array.from({ length: rows }).map((_, i) => (
+      {TEXT_WIDTHS.slice(0, rows).map((w, i) => (
         <div
           key={i}
           className="h-4 animate-pulse rounded-md bg-muted"
-          style={{ width: `${60 + Math.random() * 40}%` }}
+          style={{ width: `${w}%` }}
         />
       ))}
     </div>
