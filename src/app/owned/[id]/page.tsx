@@ -11,21 +11,22 @@ import FoodGuideCard from "@/components/workspace/FoodGuideCard";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { ArrowLeft, PawPrint, AlertTriangle } from "lucide-react";
-import type { ActivityInterest } from "@/lib/types";
+import type { ActivityCard, FoodCard } from "@/lib/types";
 
 interface OwnedData {
   id: string;
   pet_name: string;
   age_life_stage: string;
   got_date: string | null;
+  pet_image?: string | null;
   actual_expenses: Array<{
     category: string;
     item: string;
     amount_thb: number;
     note?: string;
   }>;
-  activity_schedule: ActivityInterest[];
-  food_guide: { brand?: string; amount?: string; frequency?: string; notes?: string };
+  activity_schedule: ActivityCard[];
+  food_guide: FoodCard[];
   pet_type_profiles: { name: string; species: string; mbti_label: string };
 }
 
@@ -123,7 +124,7 @@ export default function OwnedPage() {
 
   const tabs = [
     { key: "expenses" as const, label: "Actual Expenses" },
-    { key: "activity" as const, label: "Activity Schedule" },
+    { key: "activity" as const, label: "Activities" },
     { key: "food" as const, label: "Food Guide" },
   ];
 
@@ -200,11 +201,26 @@ export default function OwnedPage() {
           )}
 
           {activeTab === "activity" && (
-            <ActivityCards activities={data.activity_schedule} />
+            <ActivityCards
+              activities={data.activity_schedule}
+              petName={data.pet_name}
+              petSpecies={data.pet_type_profiles.name}
+              petImage={data.pet_image}
+              onReorder={refreshData}
+              onRemove={refreshData}
+            />
           )}
 
           {activeTab === "food" && (
-            <FoodGuideCard guide={data.food_guide} />
+            <FoodGuideCard
+              cards={data.food_guide}
+              petName={data.pet_name}
+              petSpecies={data.pet_type_profiles.name}
+              petImage={data.pet_image}
+              onReorder={refreshData}
+              onRemove={refreshData}
+              onAdd={() => {/* TODO: Open add dialog */}}
+            />
           )}
         </div>
 
@@ -223,7 +239,7 @@ export default function OwnedPage() {
             profileId={params.id}
             suggestions={[
               "Track an expense",
-              "Build a daily routine",
+              "What activities are good for my pet?",
               "What food should I buy?",
             ]}
             placeholder="Ask about feeding, schedules, expenses..."

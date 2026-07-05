@@ -165,12 +165,29 @@ export interface ConcernChecklistItem {
 
 // ---- Activity Interest ----
 
-export interface ActivityInterest {
+export interface ActivityCard {
+  id: string;
   name: string;
   icon: string;
+  image?: string | null;
   difficulty: "easy" | "medium" | "hard";
   duration: string;
   frequency: string;
+  notes?: string | null;
+}
+
+// Keep for backward compatibility
+export type ActivityInterest = ActivityCard;
+
+// ---- Food Card ----
+
+export interface FoodCard {
+  id: string;
+  name: string;
+  brand: string;
+  amount: string;
+  frequency: string;
+  image?: string | null;
   notes?: string | null;
 }
 

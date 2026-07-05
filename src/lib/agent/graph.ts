@@ -39,6 +39,12 @@ When to use tools:
 - User discusses activities/exercise/routine and wants to add or change → use update_activity_schedule
 - User discusses food/diet/feeding and wants to update → use update_food_guide
 
+IMPORTANT: When creating activity or food cards, always:
+1. Search the web for information and images
+2. Include an image URL in the card if you find one (use search to find product/activity images)
+3. Generate a unique ID for each card (e.g., "activity-1", "breakfast-1")
+4. Create beautiful, descriptive cards with real details
+
 Be warm, practical, and creative. Give helpful advice with real examples. Search the web when you need current information like prices, availability, or recent news.`;
 
 export interface AgentOpts {

@@ -191,12 +191,14 @@ export function createCareTools(repo: PlanningRepository) {
     },
     {
       name: "update_activity_schedule",
-      description: `Update the activity interests for an owned pet. Call this when user wants to add, remove, or change activities their pet enjoys. The activities array replaces all existing entries. Each item must have: name (string like "Hiking"), icon (string like "mountain"), difficulty ("easy"|"medium"|"hard"), duration (string like "1-2 hours"), frequency (string like "2x/week"), and optional notes (string). Example: [{name:"Hiking", icon:"mountain", difficulty:"medium", duration:"1-2 hours", frequency:"2x/week", notes:"Mountain trails preferred"}]`,
+      description: `Update the activity interests for an owned pet. Call this when user wants to add, remove, or change activities their pet enjoys. The activities array replaces all existing entries. Each item must have: id (unique string), name (string like "Hiking"), icon (string like "mountain"), image (optional URL), difficulty ("easy"|"medium"|"hard"), duration (string like "1-2 hours"), frequency (string like "2x/week"), and optional notes (string). Example: [{id:"hiking-1", name:"Hiking", icon:"mountain", image:"https://...", difficulty:"medium", duration:"1-2 hours", frequency:"2x/week", notes:"Mountain trails preferred"}]`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         activities: z.array(z.object({
+          id: z.string(),
           name: z.string(),
           icon: z.string(),
+          image: z.string().optional().nullable(),
           difficulty: z.enum(["easy", "medium", "hard"]),
           duration: z.string(),
           frequency: z.string(),
@@ -207,24 +209,27 @@ export function createCareTools(repo: PlanningRepository) {
   );
 
   const updateFoodGuideTool = safeTool(
-    async ({ owned_profile_id, guide }) => {
-      await repo.replaceFoodGuide(owned_profile_id, guide);
-      return "Food guide updated.";
+    async ({ owned_profile_id, cards }) => {
+      await repo.replaceFoodGuide(owned_profile_id, cards);
+      return `Updated food guide with ${cards.length} food cards.`;
     },
     {
       name: "update_food_guide",
-      description: `Update the food guide for an owned pet. Call this when user asks about feeding, food, diet, what to feed, or feeding schedule. All fields are optional strings or null. Example: {brand:"Royal Canin Indoor", amount:"40g per meal", frequency:"2 times per day", notes:"No wet food - causes diarrhea"}`,
+      description: `Update the food guide for an owned pet. Call this when user asks about feeding, food, diet, what to feed, or feeding schedule. The cards array replaces all existing food cards. Each card must have: id (unique string), name (string like "Breakfast"), brand (string like "Royal Canin"), amount (string like "40g"), frequency (string like "Daily at 7am"), image (optional URL), and optional notes (string). Example: [{id:"breakfast-1", name:"Breakfast", brand:"Royal Canin Indoor", amount:"40g", frequency:"Daily at 7am", image:"https://...", notes:"Mix with warm water"}]`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
-        guide: z.object({
-          brand: z.string().optional().nullable(),
-          amount: z.string().optional().nullable(),
-          frequency: z.string().optional().nullable(),
+        cards: z.array(z.object({
+          id: z.string(),
+          name: z.string(),
+          brand: z.string(),
+          amount: z.string(),
+          frequency: z.string(),
+          image: z.string().optional().nullable(),
           notes: z.string().optional().nullable(),
-        }),
+        })),
       }),
     }
   );
 
-  return [getCareContextTool, updateActualExpensesTool, updateActivityScheduleTool, updateFoodGuideTool];
+  return [webSearchTool, getCareContextTool, updateActualExpensesTool, updateActivityScheduleTool, updateFoodGuideTool];
 }

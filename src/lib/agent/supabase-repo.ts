@@ -1,6 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
-import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow, FoodGuide } from "./repository";
-import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, ActivityInterest } from "@/lib/types";
+import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow } from "./repository";
+import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, ActivityCard, FoodCard } from "@/lib/types";
 
 export class SupabasePlanningRepository implements PlanningRepository {
   async getProfile(id: string): Promise<PlanningProfileWithPetType | null> {
@@ -151,7 +151,7 @@ export class SupabasePlanningRepository implements PlanningRepository {
     return (profile?.actual_expenses || []) as ExpenseItem[];
   }
 
-  async getActivitySchedule(ownedProfileId: string): Promise<ActivityInterest[]> {
+  async getActivitySchedule(ownedProfileId: string): Promise<ActivityCard[]> {
     const supabase = getSupabaseAdmin();
     const { data: profile } = await supabase
       .from("owned_pet_profiles")
@@ -159,10 +159,10 @@ export class SupabasePlanningRepository implements PlanningRepository {
       .eq("id", ownedProfileId)
       .single();
 
-    return (profile?.activity_schedule || []) as ActivityInterest[];
+    return (profile?.activity_schedule || []) as ActivityCard[];
   }
 
-  async getFoodGuide(ownedProfileId: string): Promise<FoodGuide> {
+  async getFoodGuide(ownedProfileId: string): Promise<FoodCard[]> {
     const supabase = getSupabaseAdmin();
     const { data: profile } = await supabase
       .from("owned_pet_profiles")
@@ -170,7 +170,7 @@ export class SupabasePlanningRepository implements PlanningRepository {
       .eq("id", ownedProfileId)
       .single();
 
-    return (profile?.food_guide || {}) as FoodGuide;
+    return (profile?.food_guide || []) as FoodCard[];
   }
 
   async replaceActualExpenses(ownedProfileId: string, expenses: ExpenseItem[]): Promise<void> {
@@ -183,7 +183,7 @@ export class SupabasePlanningRepository implements PlanningRepository {
     if (error) throw new Error(`replaceActualExpenses: ${error.message}`);
   }
 
-  async replaceActivitySchedule(ownedProfileId: string, activities: ActivityInterest[]): Promise<void> {
+  async replaceActivitySchedule(ownedProfileId: string, activities: ActivityCard[]): Promise<void> {
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("owned_pet_profiles")
@@ -193,11 +193,11 @@ export class SupabasePlanningRepository implements PlanningRepository {
     if (error) throw new Error(`replaceActivitySchedule: ${error.message}`);
   }
 
-  async replaceFoodGuide(ownedProfileId: string, guide: FoodGuide): Promise<void> {
+  async replaceFoodGuide(ownedProfileId: string, cards: FoodCard[]): Promise<void> {
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("owned_pet_profiles")
-      .update({ food_guide: guide })
+      .update({ food_guide: cards })
       .eq("id", ownedProfileId);
 
     if (error) throw new Error(`replaceFoodGuide: ${error.message}`);

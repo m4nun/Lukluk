@@ -68,12 +68,14 @@ export function createCareTools(repo: PlanningRepository) {
     },
     {
       name: "update_activity_schedule",
-      description: "Update the activity interests for an owned pet.",
+      description: "Update the activity interests for an owned pet. Call this when user wants to add, remove, or change activities their pet enjoys. The activities array replaces all existing entries. Each item must have: id (unique string), name (string like \"Hiking\"), icon (string like \"mountain\"), image (optional URL), difficulty (\"easy\"|\"medium\"|\"hard\"), duration (string like \"1-2 hours\"), frequency (string like \"2x/week\"), and optional notes (string).",
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         activities: z.array(z.object({
+          id: z.string(),
           name: z.string(),
           icon: z.string(),
+          image: z.string().optional().nullable(),
           difficulty: z.enum(["easy", "medium", "hard"]),
           duration: z.string(),
           frequency: z.string(),
@@ -84,21 +86,24 @@ export function createCareTools(repo: PlanningRepository) {
   );
 
   const updateFoodGuideTool = safeTool(
-    async ({ owned_profile_id, food_guide }) => {
-      await repo.replaceFoodGuide(owned_profile_id, food_guide);
-      return `Food guide updated.`;
+    async ({ owned_profile_id, cards }) => {
+      await repo.replaceFoodGuide(owned_profile_id, cards);
+      return `Updated food guide with ${cards.length} food cards.`;
     },
     {
       name: "update_food_guide",
-      description: "Update the food guide for an owned pet.",
+      description: "Update the food guide for an owned pet. Call this when user asks about feeding, food, diet, what to feed, or feeding schedule. The cards array replaces all existing food cards. Each card must have: id (unique string), name (string like \"Breakfast\"), brand (string like \"Royal Canin\"), amount (string like \"40g\"), frequency (string like \"Daily at 7am\"), image (optional URL), and optional notes (string).",
       schema: z.object({
         owned_profile_id: z.string().uuid(),
-        food_guide: z.object({
-          brand: z.string().optional(),
-          amount: z.string().optional(),
-          frequency: z.string().optional(),
-          notes: z.string().optional(),
-        }),
+        cards: z.array(z.object({
+          id: z.string(),
+          name: z.string(),
+          brand: z.string(),
+          amount: z.string(),
+          frequency: z.string(),
+          image: z.string().optional().nullable(),
+          notes: z.string().optional().nullable(),
+        })),
       }),
     }
   );
