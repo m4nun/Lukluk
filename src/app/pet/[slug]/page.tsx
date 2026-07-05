@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
 import { getPetLogo } from "@/lib/pet-logos";
+import { ExploreCTA } from "@/components/pet/ExploreCTA";
 import {
   PawPrint,
   Check,
@@ -260,13 +261,8 @@ export default async function PetDetailPage({ params }: { params: Promise<{ slug
         {/* CTA */}
         <section className="mt-7 rounded-2xl bg-purple-500 p-6 text-center text-white anim anim-d5">
           <h2 className="mb-1.5 text-lg font-bold" style={{ fontFamily: "var(--font-display)" }}>Ready to meet your {profile.name}?</h2>
-          <p className="mb-4 text-[13px] opacity-90">Sign in and take the Fit Quiz to see if this breed matches your lifestyle.</p>
-          <Link href="/auth/google" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-purple-500 transition-all hover:-translate-y-0.5 hover:shadow-lg" style={{ fontFamily: "var(--font-display)" }}>
-            Sign in with Google
-            <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Link>
+          <p className="mb-4 text-[13px] opacity-90">Explore this pet and get AI-powered guidance for your decision.</p>
+          <ExploreCTA petTypeId={profile.id} petName={profile.name} />
         </section>
       </main>
 
