@@ -22,6 +22,7 @@ import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import CardWrapper from "./CardWrapper";
 import type { FoodCard } from "@/lib/types";
 import { Utensils, Scale, Clock, StickyNote, Plus } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 interface FoodGuideCardProps {
   cards: FoodCard[] | { brand?: string; amount?: string; frequency?: string; notes?: string } | null;
@@ -60,6 +61,7 @@ export default function FoodGuideCard({
   onRemove,
   onAdd,
 }: FoodGuideCardProps) {
+  const { t } = useI18n();
   const [localCards, setLocalCards] = useState<FoodCard[]>(() => normalizeCards(cards));
 
   useEffect(() => {
@@ -77,8 +79,8 @@ export default function FoodGuideCard({
     return (
       <EmptyState
         icon={<Utensils className="h-6 w-6" />}
-        title="No food guide yet"
-        description="Ask the Care Agent for feeding recommendations."
+        title={t.food.noFoodGuide}
+        description={t.food.noFoodGuideDesc}
         variant="accent"
       />
     );
@@ -170,7 +172,7 @@ export default function FoodGuideCard({
                 className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-6 text-gray-400 hover:border-amber-300 hover:text-amber-600 transition-colors min-h-[200px]"
               >
                 <Plus className="h-8 w-8" />
-                <span className="text-sm font-medium">Add Food Card</span>
+                <span className="text-sm font-medium">{t.food.addFoodCard}</span>
               </button>
             )}
           </div>

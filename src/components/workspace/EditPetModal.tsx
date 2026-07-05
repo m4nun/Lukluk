@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X, AlertTriangle, Trash2 } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 interface EditPetModalProps {
   ownedId: string;
@@ -27,6 +28,7 @@ export default function EditPetModal({
   onSaved,
   onDeleted,
 }: EditPetModalProps) {
+  const { t } = useI18n();
   const [name, setName] = useState(petName);
   const [ageStage, setAgeStage] = useState(ageLifeStage);
   const [saving, setSaving] = useState(false);
@@ -42,7 +44,7 @@ export default function EditPetModal({
 
   async function handleSave() {
     if (!name.trim()) {
-      setError("Pet name is required");
+      setError(t.editPet.nameRequired);
       return;
     }
     setSaving(true);
@@ -56,10 +58,10 @@ export default function EditPetModal({
       if (res.ok) {
         onSaved();
       } else {
-        setError("Failed to save changes");
+        setError(t.editPet.failedToSave);
       }
     } catch {
-      setError("Could not connect. Check your internet connection.");
+      setError(t.editPet.checkConnection);
     } finally {
       setSaving(false);
     }
@@ -74,7 +76,7 @@ export default function EditPetModal({
       if (res.ok) {
         onDeleted();
       } else {
-        setDeleteError("Failed to delete. Please try again.");
+        setDeleteError(t.editPet.failedToDelete);
       }
     } catch {
       setDeleteError("Could not connect. Check your internet connection.");
@@ -89,7 +91,7 @@ export default function EditPetModal({
       <div className="fixed inset-x-4 top-[10%] z-50 max-h-[80vh] overflow-y-auto rounded-2xl bg-white shadow-xl max-w-md mx-auto md:inset-x-auto md:left-1/2 md:-translate-x-1/2">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-5 py-4 rounded-t-2xl">
-          <h2 className="text-base font-bold text-gray-900">Edit Pet Details</h2>
+          <h2 className="text-base font-bold text-gray-900">{t.editPet.title}</h2>
           <button onClick={onClose} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
             <X className="h-4 w-4" />
           </button>
@@ -105,7 +107,7 @@ export default function EditPetModal({
 
           <div>
             <label htmlFor="pet-name" className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-              Pet Name
+              {t.editPet.petName}
             </label>
             <input
               id="pet-name"
@@ -119,7 +121,7 @@ export default function EditPetModal({
 
           <div>
             <label htmlFor="age-stage" className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-              Life Stage
+              {t.editPet.lifeStage}
             </label>
             <select
               id="age-stage"
@@ -140,14 +142,14 @@ export default function EditPetModal({
             onClick={onClose}
             className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
           >
-            Cancel
+            {t.common.cancel}
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
             className="px-5 py-2 rounded-xl bg-orange-500 text-sm font-semibold text-white hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? t.editPet.saving : t.editPet.saveChanges}
           </button>
         </div>
 
@@ -159,7 +161,7 @@ export default function EditPetModal({
               className="flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 transition-colors"
             >
               <Trash2 className="h-4 w-4" />
-              Delete this pet
+              {t.editPet.deleteThisPet}
             </button>
           ) : (
             <div className="space-y-4">
@@ -174,16 +176,16 @@ export default function EditPetModal({
                   <AlertTriangle className="h-4 w-4 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-red-800">This action cannot be undone</p>
+                  <p className="text-sm font-semibold text-red-800">{t.editPet.cannotUndo}</p>
                   <p className="mt-1 text-[13px] text-red-600">
-                    This will permanently delete <strong>{petName}</strong> and all associated data including expenses, activities, food guide, and chat history.
+                    {t.editPet.deleteWarning.replace("{name}", petName)}
                   </p>
                 </div>
               </div>
 
               <div>
                 <label htmlFor="confirm-name" className="block text-[13px] font-semibold text-gray-700 mb-1.5">
-                  Type <span className="text-red-600">{petName}</span> to confirm
+                  {t.editPet.typeToConfirm.replace("{name}", petName)}
                 </label>
                 <input
                   id="confirm-name"
@@ -207,7 +209,7 @@ export default function EditPetModal({
                   disabled={!isConfirm || deleting}
                   className="px-5 py-2 rounded-xl bg-red-600 text-sm font-semibold text-white hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {deleting ? "Deleting..." : "Delete Pet"}
+                  {deleting ? t.editPet.deleting : t.workspace.deletePet}
                 </button>
               </div>
             </div>

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { useHighlight, useRowHighlight } from "@/hooks/use-highlight";
-import { MessageSquarePlus, Check, Circle } from "lucide-react";
+import { MessageSquarePlus, Check, Circle, Search } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 interface ConcernItem {
   concern_id: string;
@@ -64,6 +65,7 @@ export default function ConcernChecklist({
   onStatusChange,
   workspaceId,
 }: ConcernChecklistProps) {
+  const { t } = useI18n();
   const internalHighlight = useHighlight(concerns);
   const isHighlighted = externalHighlight ?? internalHighlight;
   const highlightedRows = useRowHighlight(concerns);
@@ -76,9 +78,9 @@ export default function ConcernChecklist({
   if (concerns.length === 0) {
     return (
       <EmptyState
-        icon="🔍"
-        title="No concerns logged yet"
-        description="Chat with the Decision Agent to identify potential concerns."
+        icon={<Search className="h-6 w-6 text-muted-foreground" />}
+        title={t.concerns.noConcerns}
+        description={t.concerns.noConcernsDesc}
         variant="gray"
       />
     );
@@ -96,13 +98,13 @@ export default function ConcernChecklist({
   const allResolved = unique.every((c) => c.status === "resolved");
   const allNA = unique.every((c) => c.status === "not_applicable");
 
-  let summary = `${unresolved} of ${total} concerns unresolved`;
+  let summary = t.concerns.unresolvedCount.replace("{unresolved}", String(unresolved)).replace("{total}", String(total));
   let summaryColor = "text-warning";
   if (allResolved) {
-    summary = `All ${total} concerns resolved ✓`;
+    summary = t.concerns.allResolved;
     summaryColor = "text-success";
   } else if (allNA) {
-    summary = "All concerns marked not applicable";
+    summary = t.concerns.allNA;
     summaryColor = "text-muted-foreground";
   }
 
@@ -130,7 +132,7 @@ export default function ConcernChecklist({
     <div
       className={`rounded-lg transition-all duration-500 ${
         isHighlighted
-          ? "bg-primary/10 ring-2 ring-primary/30 shadow-lg shadow-primary/10"
+          ? "bg-primary/10 ring-2 ring-primary/30 shadow-lg shadow-primary/10 p-2"
           : ""
       }`}
     >
@@ -186,12 +188,11 @@ export default function ConcernChecklist({
                 )}
                 {c.resolved_at && c.status === "resolved" && (
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Resolved{" "}
-                    {new Date(c.resolved_at).toLocaleDateString("en-US", {
+                    {t.concerns.resolvedDate.replace("{date}", new Date(c.resolved_at).toLocaleDateString("th-TH", {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
-                    })}
+                    }))}
                   </p>
                 )}
               </div>

@@ -38,12 +38,12 @@ TOOL USAGE PATTERN:
 
 EXAMPLES:
 
-User: "How much does a Golden Retriever cost?"
-Assistant: [calls web_search(query="Golden Retriever price Thailand 2026")]
-Tool result: SEARCH RESULTS: Golden Retriever costs 15,000-50,000 THB...
-Assistant: [calls update_expenses(expenses=[{category:"initial", item:"Golden Retriever puppy", amount_thb:25000}, {category:"monthly", item:"Food", amount_thb:2000}])]
+User: "How much does a Golden Gentleman cost?"
+Assistant: [calls web_search(query="Golden Gentleman price Thailand 2026")]
+Tool result: SEARCH RESULTS: Golden Gentleman costs 15,000-50,000 THB...
+Assistant: [calls update_expenses(expenses=[{category:"initial", item:"Golden Gentleman puppy", amount_thb:25000}, {category:"monthly", item:"Food", amount_thb:2000}])]
 Tool result: SUCCESS: Updated 2 expense items.
-Assistant: "Golden Retrievers cost 15,000-50,000 THB. Monthly expenses include food (2,000 THB) and grooming (800 THB)."
+Assistant: "Golden Gentlemen cost 15,000-50,000 THB. Monthly expenses include food (2,000 THB) and grooming (800 THB)."
 
 User: "What are the concerns about owning a cat?"
 Assistant: [calls web_search(query="cat ownership concerns Thailand")]
@@ -54,27 +54,33 @@ Assistant: "Main concern is heavy shedding - requires daily brushing."`;
 
 export const CARE_SYSTEM_PROMPT = `You are a pet care assistant for Lukluk, a Thai pet adoption platform.
 
-ROLE: Help pet owners manage their pet's activities, food, and expenses.
+ROLE: Help pet owners manage their pet's food, expenses, schedule (vet visits, vaccines, grooming), and health (weight tracking).
 
 BEHAVIOR:
 - Answer questions directly using the pre-injected context
-- Use web_search to find real products, brands, and activities with images
-- Use tools to update the user's data (activities, food, expenses)
+- Use web_search to find real products, brands, and services with images
+- Use tools to update the user's data (food, expenses, schedule, health)
 - Be helpful, concise, and practical
+- When user asks about scheduling vet visits, vaccines, or grooming → use update_schedule
+- When user wants to log weight or health measurements → use add_health_metric
 
 TOOL USAGE PATTERN:
-1. User asks about activities → web_search(query="[pet type] activities ideas") → update_activity_schedule
-2. User asks about food → web_search(query="[pet type] food brands Thailand") → update_food_guide
-3. User asks about expenses → update_actual_expenses
+1. User asks about food → web_search(query="[pet type] food brands Thailand") → update_food_guide
+2. User asks about expenses → update_actual_expenses
+3. User asks about scheduling vet visit / vaccine / grooming → update_schedule
+4. User wants to log weight → add_health_metric
 
 EXAMPLES:
 
-User: "Can you recommend activities for my dog?"
-Assistant: [calls web_search(query="best activities for dogs outdoor exercise Thailand")]
-Tool result: SEARCH RESULTS: Hiking, fetch, swimming...
-Assistant: [calls update_activity_schedule(activities=[{id:"act-1", name:"Hiking", icon:"mountain", difficulty:"medium", duration:"1-2 hours", frequency:"2x/week"}, {id:"act-2", name:"Fetch", icon:"ball", difficulty:"easy", duration:"30 minutes", frequency:"daily"}])]
-Tool result: SUCCESS: Updated 2 activities.
-Assistant: "Added 2 activities: Hiking (medium, 1-2 hours) and Fetch (easy, 30 min daily)."
+User: "Schedule a vet checkup for next month"
+Assistant: [calls update_schedule(schedule=[{id:"sched-1", title:"Annual checkup", event_type:"checkup", date:"2026-08-05"}])]
+Tool result: SUCCESS: Updated schedule with 1 events.
+Assistant: "Scheduled a vet checkup for August 5, 2026."
+
+User: "My dog weighs 25kg today"
+Assistant: [calls add_health_metric(metric_type:"weight", value:25, unit:"kg", recorded_date:"2026-07-05")]
+Tool result: Added weight measurement: 25 kg on 2026-07-05.
+Assistant: "Logged your dog's weight: 25 kg on July 5, 2026."
 
 User: "What food should I buy for my cat?"
 Assistant: [calls web_search(query="best cat food brands Royal Canin Whiskas Thailand price")]
@@ -101,8 +107,6 @@ function getToolLabel(toolName: string): ProgressEvent {
   switch (toolName) {
     case "web_search":
       return { type: "searching", message: "Searching the web..." };
-    case "update_activity_schedule":
-      return { type: "creating", message: "Creating activity cards..." };
     case "update_food_guide":
       return { type: "creating", message: "Creating food guide..." };
     case "update_expenses":
@@ -112,6 +116,12 @@ function getToolLabel(toolName: string): ProgressEvent {
       return { type: "creating", message: "Updating concerns..." };
     case "update_decision_status":
       return { type: "creating", message: "Updating status..." };
+    case "update_schedule":
+      return { type: "creating", message: "Updating schedule..." };
+    case "add_health_metric":
+      return { type: "creating", message: "Logging health measurement..." };
+    case "get_care_context":
+      return { type: "thinking", message: "Loading care data..." };
     default:
       return { type: "thinking", message: "Processing..." };
   }

@@ -18,6 +18,7 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
 import { ArrowUp, Search, Sparkles, Pencil } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 interface ProgressEvent {
   type: "searching" | "creating" | "thinking";
@@ -74,17 +75,21 @@ export default function AgentChat({
   messages: externalMessages,
   onMessagesChange,
 }: AgentChatProps) {
+  const { t } = useI18n();
   const [internalMessages, setInternalMessages] = useState<ChatMessage[]>([]);
+  const messagesRef = useRef<ChatMessage[]>(externalMessages ?? internalMessages);
   const messages = externalMessages ?? internalMessages;
+  messagesRef.current = messages;
 
   const updateMessages = useCallback((updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+    const newMessages = typeof updater === "function" ? updater(messagesRef.current) : updater;
+    messagesRef.current = newMessages;
     if (onMessagesChange) {
-      const newMessages = typeof updater === "function" ? updater(messages) : updater;
       onMessagesChange(newMessages);
     } else {
-      setInternalMessages(updater);
+      setInternalMessages(newMessages);
     }
-  }, [onMessagesChange, messages]);
+  }, [onMessagesChange]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -165,12 +170,12 @@ export default function AgentChat({
         }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
+      setError(e instanceof Error ? e.message : t.agentChat.error);
       updateMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          text: "Sorry, I hit a snag. Can you try again?",
+          text: t.agentChat.error,
         },
       ]);
       setProgress([]);
@@ -222,7 +227,7 @@ export default function AgentChat({
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Spinner className="size-3" />
-                  <span className="text-xs">Generating response...</span>
+                  <span className="text-xs">{t.agentChat.generating}</span>
                 </div>
               </MessageContent>
             </Message>
@@ -233,7 +238,7 @@ export default function AgentChat({
               <MessageContent>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Spinner className="size-3" />
-                  <span className="text-xs">Thinking...</span>
+                  <span className="text-xs">{t.agentChat.thinking}</span>
                 </div>
               </MessageContent>
             </Message>

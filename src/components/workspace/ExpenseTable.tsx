@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { useHighlight, useRowHighlight } from "@/hooks/use-highlight";
 import { CircleDollarSign, MessageSquarePlus } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 interface ExpenseItem {
   category: string;
@@ -40,6 +41,7 @@ export default function ExpenseTable({
   highlight: externalHighlight,
   onEmbedToChat,
 }: ExpenseTableProps) {
+  const { t } = useI18n();
   const internalHighlight = useHighlight(expenses);
   const isHighlighted = externalHighlight ?? internalHighlight;
   const highlightedRows = useRowHighlight(expenses);
@@ -52,8 +54,8 @@ export default function ExpenseTable({
     return (
       <EmptyState
         icon={<CircleDollarSign className="h-8 w-8" />}
-        title="No expense estimates yet"
-        description="Chat with the Decision Agent to get started with cost estimates."
+        title={t.expenses.noExpenses}
+        description={t.expenses.noExpensesDesc}
         variant="gray"
       />
     );
@@ -67,7 +69,7 @@ export default function ExpenseTable({
     <div
       className={`space-y-4 rounded-lg transition-all duration-500 ${
         isHighlighted
-          ? "bg-primary/10 ring-2 ring-primary/30 shadow-lg shadow-primary/10"
+          ? "bg-primary/10 ring-2 ring-primary/30 shadow-lg shadow-primary/10 p-2"
           : ""
       }`}
     >
@@ -129,7 +131,7 @@ export default function ExpenseTable({
       })}
 
       <div className="flex items-center justify-between border-t-2 border-border px-4 pt-3">
-        <span className="text-sm font-bold">Total Estimated Cost</span>
+        <span className="text-sm font-bold">{t.expenses.totalEstimatedCost}</span>
         <span className="text-sm font-bold tabular-nums">
           {grandTotal.toLocaleString()} THB
         </span>

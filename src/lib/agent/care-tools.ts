@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { safeTool } from "./safe-tool";
 import type { PlanningRepository } from "./repository";
+import type { ScheduleCard, HealthMetric } from "@/lib/types";
 
 export function createCareTools(repo: PlanningRepository) {
   const webSearchTool = safeTool(
@@ -61,30 +62,6 @@ export function createCareTools(repo: PlanningRepository) {
     }
   );
 
-  const updateActivityScheduleTool = safeTool(
-    async ({ owned_profile_id, activities }) => {
-      await repo.replaceActivitySchedule(owned_profile_id, activities);
-      return `Updated activity interests with ${activities.length} activities.`;
-    },
-    {
-      name: "update_activity_schedule",
-      description: "Update the activity interests for an owned pet. Call this when user wants to add, remove, or change activities their pet enjoys. The activities array replaces all existing entries. Each item must have: id (unique string), name (string like \"Hiking\"), icon (string like \"mountain\"), image (optional URL), difficulty (\"easy\"|\"medium\"|\"hard\"), duration (string like \"1-2 hours\"), frequency (string like \"2x/week\"), and optional notes (string).",
-      schema: z.object({
-        owned_profile_id: z.string().uuid(),
-        activities: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          icon: z.string(),
-          image: z.string().optional().nullable(),
-          difficulty: z.enum(["easy", "medium", "hard"]),
-          duration: z.string(),
-          frequency: z.string(),
-          notes: z.string().optional().nullable(),
-        })),
-      }),
-    }
-  );
-
   const updateFoodGuideTool = safeTool(
     async ({ owned_profile_id, cards }) => {
       await repo.replaceFoodGuide(owned_profile_id, cards);
@@ -113,22 +90,87 @@ export function createCareTools(repo: PlanningRepository) {
       const owned = await repo.getOwnedProfile(owned_profile_id);
       if (!owned) return "Owned profile not found.";
 
-      const [expenses, schedule, foodGuide] = await Promise.all([
+      const [expenses, foodGuide, schedule, healthMetrics] = await Promise.all([
         repo.getActualExpenses(owned_profile_id),
-        repo.getActivitySchedule(owned_profile_id),
         repo.getFoodGuide(owned_profile_id),
+        repo.getSchedule(owned_profile_id),
+        repo.getHealthMetrics(owned_profile_id),
       ]);
 
-      return JSON.stringify({ owned, expenses, schedule, foodGuide });
+      return JSON.stringify({ owned, expenses, foodGuide, schedule, healthMetrics });
     },
     {
       name: "get_care_context",
-      description: "Get the full care context — owned pet details, actual expenses, activity schedule, and food guide.",
+      description: "Get the full care context — owned pet details, actual expenses, food guide, schedule (vaccine/checkup/grooming dates), and health metrics (weight history).",
       schema: z.object({
         owned_profile_id: z.string().uuid(),
       }),
     }
   );
 
-  return [webSearchTool, updateActualExpensesTool, updateActivityScheduleTool, updateFoodGuideTool, getCareContextTool];
+  const updateScheduleTool = safeTool(
+    async ({ owned_profile_id, schedule }) => {
+      await repo.replaceSchedule(owned_profile_id, schedule);
+      return `Updated schedule with ${schedule.length} events.`;
+    },
+    {
+      name: "update_schedule",
+      description: `WHEN TO CALL: User asks to schedule a vet visit, vaccine, grooming, checkup, or any appointment. Also call when user wants to add, remove, or change schedule items.
+
+The schedule array replaces all existing entries. Each item must have:
+- id: unique string (e.g. "sched-1")
+- title: string (e.g. "Annual vaccination")
+- event_type: one of "vaccine", "checkup", "grooming", "medication", "boarding", "emergency", "other"
+- date: string in YYYY-MM-DD format
+- recurring: boolean (optional, default false)
+- recurrence_days: number (optional, days between recurrences)
+- notes: string (optional)
+
+TRIGGERS: "schedule vet visit", "book grooming", "when is the next checkup", "remind me to vaccinate", "add appointment"`,
+      schema: z.object({
+        owned_profile_id: z.string().uuid(),
+        schedule: z.array(z.object({
+          id: z.string(),
+          title: z.string(),
+          event_type: z.enum(["vaccine", "checkup", "grooming", "medication", "boarding", "emergency", "other"]),
+          date: z.string(),
+          completed_date: z.string().optional().nullable(),
+          recurring: z.boolean().optional(),
+          recurrence_days: z.number().int().optional().nullable(),
+          notes: z.string().optional().nullable(),
+        })),
+      }),
+    }
+  );
+
+  const addHealthMetricTool = safeTool(
+    async ({ owned_profile_id, metric_type, value, unit, recorded_date, notes }) => {
+      const metric: HealthMetric = {
+        id: `health-${Date.now()}`,
+        metric_type: metric_type as "weight",
+        value,
+        unit,
+        recorded_date,
+        notes: notes || undefined,
+      };
+      await repo.addHealthMetric(owned_profile_id, metric);
+      return `Added ${metric_type} measurement: ${value} ${unit} on ${recorded_date}.`;
+    },
+    {
+      name: "add_health_metric",
+      description: `WHEN TO CALL: User wants to log a health measurement like weight. Currently supports weight tracking.
+
+TRIGGERS: "log weight", "record weight", "my pet weighs", "update weight", "add weight measurement"`,
+      schema: z.object({
+        owned_profile_id: z.string().uuid(),
+        metric_type: z.enum(["weight"]),
+        value: z.number(),
+        unit: z.string(),
+        recorded_date: z.string(),
+        notes: z.string().optional().nullable(),
+      }),
+    }
+  );
+
+  return [webSearchTool, updateActualExpensesTool, updateFoodGuideTool, updateScheduleTool, addHealthMetricTool, getCareContextTool];
 }

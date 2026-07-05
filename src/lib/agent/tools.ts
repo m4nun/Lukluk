@@ -65,7 +65,7 @@ TRIGGERS: "how much does X cost", "what brands", "is X available", "recent news 
 
 DO NOT CALL: For general pet care advice you already know, or when updating existing data without needing new information.`,
       schema: z.object({
-        query: z.string().describe("Specific search query. Include location if relevant (e.g., 'Golden Retriever price Thailand 2026')"),
+        query: z.string().describe("Specific search query. Include location if relevant (e.g., 'Golden Gentleman price Thailand 2026')"),
       }),
     }
   );
@@ -198,33 +198,41 @@ export function createCareTools(repo: PlanningRepository) {
 
   const getCareContextTool = safeTool(
     async ({ owned_profile_id }) => {
-      const owned = await repo.getOwnedProfile(owned_profile_id);
-      if (!owned) return "ERROR: Owned pet profile not found.";
+      try {
+        const owned = await repo.getOwnedProfile(owned_profile_id);
+        if (!owned) return "ERROR: Owned pet profile not found.";
 
-      const [expenses, schedule, foodGuide] = await Promise.all([
-        repo.getActualExpenses(owned_profile_id),
-        repo.getActivitySchedule(owned_profile_id),
-        repo.getFoodGuide(owned_profile_id),
-      ]);
+        const [expenses, foodGuide, schedule, healthMetrics] = await Promise.all([
+          repo.getActualExpenses(owned_profile_id),
+          repo.getFoodGuide(owned_profile_id),
+          repo.getSchedule(owned_profile_id),
+          repo.getHealthMetrics(owned_profile_id),
+        ]);
 
-      return JSON.stringify({
-        owned_profile: {
-          id: owned.id,
-          pet_name: owned.pet_name,
-          age_life_stage: owned.age_life_stage,
-          got_date: owned.got_date,
-          pet_type: owned.pet_type,
-        },
-        actual_expenses: expenses,
-        activity_schedule: schedule,
-        food_guide: foodGuide,
-      });
+        return JSON.stringify({
+          owned_profile: {
+            id: owned.id,
+            pet_name: owned.pet_name,
+            age_life_stage: owned.age_life_stage,
+            got_date: owned.got_date,
+            pet_type: owned.pet_type,
+          },
+          actual_expenses: expenses,
+          food_guide: foodGuide,
+          schedule,
+          health_metrics: healthMetrics,
+        });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("get_care_context error:", msg);
+        return `ERROR loading care context: ${msg}`;
+      }
     },
     {
       name: "get_care_context",
       description: `WHEN TO CALL: You need to understand the current state before making updates. Usually NOT needed because context is pre-injected.
 
-WHAT IT DOES: Returns full context including pet details, expenses, activities, and food guide.
+WHAT IT DOES: Returns full context including pet details, expenses, activities, food guide, schedule (vet visits, vaccines, grooming), and health metrics (weight history).
 
 TRIGGERS: Rarely needed. Context is usually pre-injected into the conversation.`,
       schema: z.object({
@@ -262,39 +270,6 @@ IMPORTANT: This REPLACES all existing expenses. Include ALL items, not just new 
     }
   );
 
-  const updateActivityScheduleTool = safeTool(
-    async ({ owned_profile_id, activities }) => {
-      await repo.replaceActivitySchedule(owned_profile_id, activities);
-      const summary = activities.map((a) => `${a.name} (${a.difficulty})`).join(", ");
-      return `SUCCESS: Updated ${activities.length} activities. ${summary}`;
-    },
-    {
-      name: "update_activity_schedule",
-      description: `WHEN TO CALL: User wants to add, remove, or change activities for their pet. Call AFTER web_search to find suitable activities.
-
-WHAT IT DOES: Replaces the activity list. Each activity needs: unique ID, name, icon, difficulty, duration, frequency, optional image and notes.
-
-DIFFICULTIES: "easy" (beginner), "medium" (moderate), "hard" (advanced)
-
-TRIGGERS: "recommend activities", "what can I do with my pet", "exercise ideas", "activities for"
-
-IMPORTANT: This REPLACES all existing activities. Include ALL activities, not just new ones. Use web_search first to find real activities with images.`,
-      schema: z.object({
-        owned_profile_id: z.string().uuid(),
-        activities: z.array(z.object({
-          id: z.string().describe("Unique ID like 'hiking-1', 'fetch-daily'"),
-          name: z.string().describe("Activity name like 'Hiking'"),
-          icon: z.string().describe("Emoji or icon name like 'mountain', 'ball', 'paw'"),
-          image: z.string().optional().nullable().describe("URL to activity image from web search"),
-          difficulty: z.enum(["easy", "medium", "hard"]),
-          duration: z.string().describe("Duration like '1-2 hours', '30 minutes'"),
-          frequency: z.string().describe("Frequency like '2x/week', 'daily'"),
-          notes: z.string().optional().nullable().describe("Tips or instructions"),
-        })),
-      }),
-    }
-  );
-
   const updateFoodGuideTool = safeTool(
     async ({ owned_profile_id, cards }) => {
       await repo.replaceFoodGuide(owned_profile_id, cards);
@@ -325,5 +300,83 @@ IMPORTANT: This REPLACES all existing food cards. Include ALL cards, not just ne
     }
   );
 
-  return [webSearchTool, getCareContextTool, updateActualExpensesTool, updateActivityScheduleTool, updateFoodGuideTool];
+  const updateScheduleTool = safeTool(
+    async ({ owned_profile_id, schedule }) => {
+      try {
+        await repo.replaceSchedule(owned_profile_id, schedule);
+        const summary = schedule.map((s) => `${s.title} (${s.event_type}, ${s.date})`).join(", ");
+        return `SUCCESS: Updated ${schedule.length} schedule events. ${summary}`;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("update_schedule error:", msg);
+        return `ERROR updating schedule: ${msg}`;
+      }
+    },
+    {
+      name: "update_schedule",
+      description: `WHEN TO CALL: User asks to schedule a vet visit, vaccine, grooming, checkup, or any appointment. Also call when user wants to add, remove, or change schedule items.
+
+WHAT IT DOES: Replaces the schedule with new events. Each event needs: unique ID, title, event_type, date, optional recurring settings and notes.
+
+EVENT_TYPES: "vaccine", "checkup", "grooming", "medication", "boarding", "emergency", "other"
+
+TRIGGERS: "schedule vet visit", "book grooming", "when is the next checkup", "remind me to vaccinate", "add appointment"
+
+IMPORTANT: This REPLACES all existing schedule events. Include ALL events, not just new ones.`,
+      schema: z.object({
+        owned_profile_id: z.string().uuid(),
+        schedule: z.array(z.object({
+          id: z.string().describe("Unique ID like 'vacc-1', 'checkup-2'"),
+          title: z.string().describe("Event title like 'Annual vaccination', 'Dental cleaning'"),
+          event_type: z.enum(["vaccine", "checkup", "grooming", "medication", "boarding", "emergency", "other"]),
+          date: z.string().describe("Date in YYYY-MM-DD format"),
+          completed_date: z.string().optional().nullable().describe("Date when completed, if done"),
+          recurring: z.boolean().optional().describe("Whether this event repeats"),
+          recurrence_days: z.number().int().optional().nullable().describe("Days between recurrences if recurring"),
+          notes: z.string().optional().nullable().describe("Additional notes"),
+        })),
+      }),
+    }
+  );
+
+  const addHealthMetricTool = safeTool(
+    async ({ owned_profile_id, metric_type, value, unit, recorded_date, notes }) => {
+      try {
+        const metric = {
+          id: `health-${Date.now()}`,
+          metric_type,
+          value,
+          unit,
+          recorded_date,
+          notes: notes || undefined,
+        };
+        await repo.addHealthMetric(owned_profile_id, metric);
+        return `SUCCESS: Logged ${metric_type} measurement: ${value} ${unit} on ${recorded_date}.`;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("add_health_metric error:", msg);
+        return `ERROR logging health metric: ${msg}`;
+      }
+    },
+    {
+      name: "add_health_metric",
+      description: `WHEN TO CALL: User wants to log a health measurement like weight. Currently supports weight tracking.
+
+WHAT IT DOES: Adds a new health measurement to the pet's health history.
+
+TRIGGERS: "log weight", "record weight", "my pet weighs", "update weight", "add weight measurement"
+
+IMPORTANT: Include the value, unit (e.g., "kg", "lbs"), and date.`,
+      schema: z.object({
+        owned_profile_id: z.string().uuid(),
+        metric_type: z.enum(["weight"]),
+        value: z.number().describe("Measurement value"),
+        unit: z.string().describe("Unit like 'kg', 'lbs'"),
+        recorded_date: z.string().describe("Date in YYYY-MM-DD format"),
+        notes: z.string().optional().nullable().describe("Additional notes"),
+      }),
+    }
+  );
+
+  return [webSearchTool, getCareContextTool, updateActualExpensesTool, updateFoodGuideTool, updateScheduleTool, addHealthMetricTool];
 }

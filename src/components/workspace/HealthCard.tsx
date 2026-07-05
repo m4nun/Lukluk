@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import type { HealthMetric } from "@/lib/types";
 import { TrendingUp, TrendingDown, Minus, Plus, X } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 interface HealthCardProps {
   metrics: HealthMetric[] | null;
@@ -60,6 +61,7 @@ function formatFullDate(dateStr: string): string {
 }
 
 export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps) {
+  const { t } = useI18n();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newWeight, setNewWeight] = useState("");
   const [newDate, setNewDate] = useState(new Date().toISOString().split("T")[0]);
@@ -87,10 +89,10 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
     return (
       <EmptyState
         icon={<TrendingUp className="h-6 w-6" />}
-        title="No weight data yet"
-        description="Track your pet's weight over time. Ask the Care Agent or add manually."
+        title={t.health.noWeightData}
+        description={t.health.noWeightDataDesc}
         variant="accent"
-        ctaLabel={onAdd ? "Add First Measurement" : undefined}
+        ctaLabel={onAdd ? t.health.addFirstMeasurement : undefined}
         onCta={onAdd ? () => setShowAddForm(true) : undefined}
       />
     );
@@ -121,7 +123,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
         <div className="rounded-2xl border-2 border-emerald-300 bg-white p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Current Weight</p>
+              <p className="text-sm text-gray-500">{t.health.currentWeight}</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-gray-900">{latestWeight.value}</span>
                 <span className="text-sm text-gray-500">{latestWeight.unit}</span>
@@ -137,7 +139,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
               {trend.direction === "down" && <TrendingDown className="h-4 w-4" />}
               {trend.direction === "stable" && <Minus className="h-4 w-4" />}
               {trend.direction !== "stable" && `${trend.value.toFixed(1)} kg`}
-              {trend.direction === "stable" && "Stable"}
+              {t.health.stable}
             </div>
           </div>
         </div>
@@ -146,7 +148,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
       {/* Weight Chart */}
       {chartData.length > 1 && (
         <div className="rounded-2xl border-2 border-emerald-300 bg-white p-5">
-          <h4 className="text-sm font-bold text-gray-900 mb-4">Weight Trend</h4>
+          <h4 className="text-sm font-bold text-gray-900 mb-4">{t.health.weightTrend}</h4>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
@@ -202,7 +204,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
       {/* Weight History */}
       {weightMetrics.length > 0 && (
         <div className="rounded-2xl border-2 border-emerald-300 bg-white p-5">
-          <h4 className="text-sm font-bold text-gray-900 mb-3">History</h4>
+          <h4 className="text-sm font-bold text-gray-900 mb-3">{t.health.history}</h4>
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {[...weightMetrics]
               .sort((a, b) => new Date(b.recorded_date).getTime() - new Date(a.recorded_date).getTime())
@@ -233,7 +235,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
           className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white p-4 text-gray-400 hover:border-emerald-300 hover:text-emerald-600 transition-colors"
         >
           <Plus className="h-5 w-5" />
-          <span className="text-sm font-medium">Add Weight Measurement</span>
+          <span className="text-sm font-medium">{t.health.addWeightMeasurement}</span>
         </button>
       )}
 
@@ -244,7 +246,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
           <div className="fixed inset-x-4 top-[15%] z-50 rounded-2xl bg-white shadow-xl max-w-md mx-auto md:inset-x-auto md:left-1/2 md:-translate-x-1/2">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-              <h2 className="text-base font-bold text-gray-900">Add Weight Measurement</h2>
+              <h2 className="text-base font-bold text-gray-900">{t.health.addWeightMeasurement}</h2>
               <button onClick={() => setShowAddForm(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
                 <X className="h-4 w-4" />
               </button>
@@ -254,7 +256,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
             <div className="px-5 py-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Weight (kg)</label>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">{t.health.weightKg}</label>
                   <input
                     type="number"
                     step="0.1"
@@ -266,7 +268,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Date</label>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">{t.health.date}</label>
                   <input
                     type="date"
                     value={newDate}
@@ -277,7 +279,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
               </div>
 
               <div>
-                <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Notes (optional)</label>
+                <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">{t.health.notesOptional}</label>
                 <input
                   type="text"
                   value={newNotes}
@@ -294,14 +296,14 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
                 onClick={() => setShowAddForm(false)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
               >
-                Cancel
+                {t.health.cancel}
               </button>
               <button
                 onClick={handleAdd}
                 disabled={!newWeight || !newDate}
                 className="px-5 py-2 rounded-xl bg-emerald-500 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Measurement
+                {t.health.saveMeasurement}
               </button>
             </div>
           </div>

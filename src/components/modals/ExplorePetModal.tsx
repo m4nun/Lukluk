@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { X, Search, PawPrint } from "lucide-react";
+import { X, Search, PawPrint, Dog, Cat, Bird, Fish, Bug, Squirrel } from "lucide-react";
 import { getPetLogo } from "@/lib/pet-logos";
+import { useI18n } from "@/lib/i18n/provider";
 
 interface PetType {
   id: string;
@@ -18,18 +19,19 @@ interface ExplorePetModalProps {
   onSelect: (slug: string) => void;
 }
 
-const SPECIES_EMOJI: Record<string, string> = {
-  dog: "🐕",
-  cat: "🐈",
-  rabbit: "🐇",
-  bird: "🐦",
-  fish: "🐟",
-  reptile: "🦎",
-  small_mammal: "🐹",
-  other: "🐾",
+const SPECIES_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  dog: Dog,
+  cat: Cat,
+  rabbit: Squirrel,
+  bird: Bird,
+  fish: Fish,
+  reptile: Bug,
+  small_mammal: Squirrel,
+  other: PawPrint,
 };
 
 export function ExplorePetModal({ onClose, onSelect }: ExplorePetModalProps) {
+  const { t } = useI18n();
   const [pets, setPets] = useState<PetType[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -82,7 +84,7 @@ export function ExplorePetModal({ onClose, onSelect }: ExplorePetModalProps) {
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
           <div className="flex items-center gap-2">
             <PawPrint className="h-5 w-5 text-orange-500" />
-            <span className="font-bold text-gray-900">Explore Pets</span>
+            <span className="font-bold text-gray-900">{t.modals.explorePets}</span>
           </div>
           <button
             onClick={onClose}
@@ -98,7 +100,7 @@ export function ExplorePetModal({ onClose, onSelect }: ExplorePetModalProps) {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by name, species, or breed..."
+              placeholder={t.modals.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
@@ -116,7 +118,7 @@ export function ExplorePetModal({ onClose, onSelect }: ExplorePetModalProps) {
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              All
+              {t.modals.all}
             </button>
             {speciesList.map((species) => (
               <button
@@ -128,7 +130,10 @@ export function ExplorePetModal({ onClose, onSelect }: ExplorePetModalProps) {
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                {SPECIES_EMOJI[species] || "🐾"} {species.replace("_", " ")}
+                {(() => {
+                  const IconComp = SPECIES_ICONS[species] || PawPrint;
+                  return <IconComp className="h-3 w-3 inline" />;
+                })()} {species.replace("_", " ")}
               </button>
             ))}
           </div>
@@ -139,13 +144,13 @@ export function ExplorePetModal({ onClose, onSelect }: ExplorePetModalProps) {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
-              <p className="mt-3 text-sm text-gray-500">Loading pets...</p>
+              <p className="mt-3 text-sm text-gray-500">{t.modals.loadingPets}</p>
             </div>
           ) : filteredPets.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <PawPrint className="h-10 w-10 text-gray-300" />
-              <p className="mt-3 text-sm font-medium text-gray-900">No pets found</p>
-              <p className="mt-1 text-xs text-gray-500">Try a different search term</p>
+              <p className="mt-3 text-sm font-medium text-gray-900">{t.modals.noPetsFound}</p>
+              <p className="mt-1 text-xs text-gray-500">{t.modals.tryDifferent}</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
@@ -188,7 +193,7 @@ export function ExplorePetModal({ onClose, onSelect }: ExplorePetModalProps) {
         {/* Footer */}
         <div className="border-t border-gray-100 px-5 py-3 text-center">
           <p className="text-xs text-gray-500">
-            {filteredPets.length} pet{filteredPets.length !== 1 ? "s" : ""} available
+            {t.modals.petsAvailable.replace("{count}", String(filteredPets.length))}
           </p>
         </div>
       </div>

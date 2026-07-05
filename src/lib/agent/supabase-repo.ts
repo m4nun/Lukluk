@@ -1,6 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow } from "./repository";
-import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, ActivityCard, FoodCard } from "@/lib/types";
+import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, FoodCard, ScheduleCard, HealthMetric } from "@/lib/types";
 
 export class SupabasePlanningRepository implements PlanningRepository {
   async getProfile(id: string): Promise<PlanningProfileWithPetType | null> {
@@ -151,17 +151,6 @@ export class SupabasePlanningRepository implements PlanningRepository {
     return (profile?.actual_expenses || []) as ExpenseItem[];
   }
 
-  async getActivitySchedule(ownedProfileId: string): Promise<ActivityCard[]> {
-    const supabase = getSupabaseAdmin();
-    const { data: profile } = await supabase
-      .from("owned_pet_profiles")
-      .select("activity_schedule")
-      .eq("id", ownedProfileId)
-      .single();
-
-    return (profile?.activity_schedule || []) as ActivityCard[];
-  }
-
   async getFoodGuide(ownedProfileId: string): Promise<FoodCard[]> {
     const supabase = getSupabaseAdmin();
     const { data: profile } = await supabase
@@ -183,16 +172,6 @@ export class SupabasePlanningRepository implements PlanningRepository {
     if (error) throw new Error(`replaceActualExpenses: ${error.message}`);
   }
 
-  async replaceActivitySchedule(ownedProfileId: string, activities: ActivityCard[]): Promise<void> {
-    const supabase = getSupabaseAdmin();
-    const { error } = await supabase
-      .from("owned_pet_profiles")
-      .update({ activity_schedule: activities })
-      .eq("id", ownedProfileId);
-
-    if (error) throw new Error(`replaceActivitySchedule: ${error.message}`);
-  }
-
   async replaceFoodGuide(ownedProfileId: string, cards: FoodCard[]): Promise<void> {
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
@@ -201,5 +180,75 @@ export class SupabasePlanningRepository implements PlanningRepository {
       .eq("id", ownedProfileId);
 
     if (error) throw new Error(`replaceFoodGuide: ${error.message}`);
+  }
+
+  async getSchedule(ownedProfileId: string): Promise<ScheduleCard[]> {
+    const supabase = getSupabaseAdmin();
+    const { data: profile } = await supabase
+      .from("owned_pet_profiles")
+      .select("schedule")
+      .eq("id", ownedProfileId)
+      .single();
+
+    return (profile?.schedule || []) as ScheduleCard[];
+  }
+
+  async getHealthMetrics(ownedProfileId: string): Promise<HealthMetric[]> {
+    const supabase = getSupabaseAdmin();
+    const { data: profile } = await supabase
+      .from("owned_pet_profiles")
+      .select("health_metrics")
+      .eq("id", ownedProfileId)
+      .single();
+
+    return (profile?.health_metrics || []) as HealthMetric[];
+  }
+
+  async replaceSchedule(ownedProfileId: string, schedule: ScheduleCard[]): Promise<void> {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("owned_pet_profiles")
+      .update({ schedule })
+      .eq("id", ownedProfileId);
+
+    if (error) throw new Error(`replaceSchedule: ${error.message}`);
+  }
+
+  async addHealthMetric(ownedProfileId: string, metric: HealthMetric): Promise<void> {
+    const supabase = getSupabaseAdmin();
+    const { data: profile } = await supabase
+      .from("owned_pet_profiles")
+      .select("health_metrics")
+      .eq("id", ownedProfileId)
+      .single();
+
+    const existing = (profile?.health_metrics || []) as HealthMetric[];
+    const updated = [...existing, metric];
+
+    const { error } = await supabase
+      .from("owned_pet_profiles")
+      .update({ health_metrics: updated })
+      .eq("id", ownedProfileId);
+
+    if (error) throw new Error(`addHealthMetric: ${error.message}`);
+  }
+
+  async deleteHealthMetric(ownedProfileId: string, metricId: string): Promise<void> {
+    const supabase = getSupabaseAdmin();
+    const { data: profile } = await supabase
+      .from("owned_pet_profiles")
+      .select("health_metrics")
+      .eq("id", ownedProfileId)
+      .single();
+
+    const existing = (profile?.health_metrics || []) as HealthMetric[];
+    const updated = existing.filter(m => m.id !== metricId);
+
+    const { error } = await supabase
+      .from("owned_pet_profiles")
+      .update({ health_metrics: updated })
+      .eq("id", ownedProfileId);
+
+    if (error) throw new Error(`deleteHealthMetric: ${error.message}`);
   }
 }

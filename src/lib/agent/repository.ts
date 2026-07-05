@@ -1,4 +1,4 @@
-import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, PetTypeProfile, ActivityCard, FoodCard } from "@/lib/types";
+import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, PetTypeProfile, FoodCard, ScheduleCard, HealthMetric } from "@/lib/types";
 
 // -- Domain types for repository --
 
@@ -40,9 +40,12 @@ export interface PlanningRepository {
   // Ownership (Care Agent)
   getOwnedProfile(ownedProfileId: string): Promise<OwnedProfile | null>;
   getActualExpenses(ownedProfileId: string): Promise<ExpenseItem[]>;
-  getActivitySchedule(ownedProfileId: string): Promise<ActivityCard[]>;
   getFoodGuide(ownedProfileId: string): Promise<FoodCard[]>;
+  getSchedule(ownedProfileId: string): Promise<ScheduleCard[]>;
+  getHealthMetrics(ownedProfileId: string): Promise<HealthMetric[]>;
   replaceActualExpenses(ownedProfileId: string, expenses: ExpenseItem[]): Promise<void>;
-  replaceActivitySchedule(ownedProfileId: string, activities: ActivityCard[]): Promise<void>;
   replaceFoodGuide(ownedProfileId: string, cards: FoodCard[]): Promise<void>;
+  replaceSchedule(ownedProfileId: string, schedule: ScheduleCard[]): Promise<void>;
+  addHealthMetric(ownedProfileId: string, metric: HealthMetric): Promise<void>;
+  deleteHealthMetric(ownedProfileId: string, metricId: string): Promise<void>;
 }

@@ -185,3 +185,63 @@
     display: none;
   }
 }
+
+/* Onboarding animations */
+@keyframes ring-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes badge-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes particle-drift {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.25; }
+  25% { transform: translateY(-12px) translateX(6px); opacity: 0.5; }
+  50% { transform: translateY(-6px) translateX(-4px); opacity: 0.35; }
+  75% { transform: translateY(-14px) translateX(3px); opacity: 0.55; }
+}
+
+@utility animate-ring-spin {
+  animation: ring-spin 12s linear infinite;
+}
+
+@utility animate-badge-float {
+  animation: badge-float 2s ease-in-out infinite;
+}
+
+/* Onboarding particles */
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  opacity: 0.25;
+  will-change: transform, opacity;
+}
+.particle-1 {
+  left: 12%;
+  top: 25%;
+  background: var(--primary);
+  animation: particle-drift 4s ease-in-out infinite;
+}
+.particle-2 {
+  left: 85%;
+  top: 35%;
+  background: #8b5cf6;
+  animation: particle-drift 5s ease-in-out infinite 0.5s;
+}
+.particle-3 {
+  left: 18%;
+  top: 75%;
+  background: #06b6d4;
+  animation: particle-drift 4.5s ease-in-out infinite 1s;
+}
+.particle-4 {
+  left: 75%;
+  top: 85%;
+  background: #84cc16;
+  animation: particle-drift 5.5s ease-in-out infinite 1.5s;
+}

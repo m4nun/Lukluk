@@ -46,24 +46,29 @@ async function fetchCareContext(repo: PlanningRepository, profileId: string): Pr
     const owned = await repo.getOwnedProfile(profileId);
     if (!owned) return "";
 
-    const [expenses, schedule, foodGuide] = await Promise.all([
+    const [expenses, foodGuide, schedule, healthMetrics] = await Promise.all([
       repo.getActualExpenses(profileId),
-      repo.getActivitySchedule(profileId),
       repo.getFoodGuide(profileId),
+      repo.getSchedule(profileId),
+      repo.getHealthMetrics(profileId),
     ]);
 
-    return `\n\n--- CURRENT STATE (auto-loaded, DO NOT ask user for IDs) ---\nPet: ${owned.pet_name} (${owned.pet_type.name}, ${owned.age_life_stage})\nExpenses (${expenses.length} items): ${JSON.stringify(expenses)}\nActivity schedule (${schedule.length} entries): ${JSON.stringify(schedule)}\nFood guide: ${JSON.stringify(foodGuide)}\n--- END STATE ---`;
+    return `\n\n--- CURRENT STATE (auto-loaded, DO NOT ask user for IDs) ---\nPet: ${owned.pet_name} (${owned.pet_type.name}, ${owned.age_life_stage})\nExpenses (${expenses.length} items): ${JSON.stringify(expenses)}\nFood guide: ${JSON.stringify(foodGuide)}\nSchedule (${schedule.length} events): ${JSON.stringify(schedule)}\nHealth metrics (${healthMetrics.length} records): ${JSON.stringify(healthMetrics)}\n--- END STATE ---`;
   } catch {
     return "";
   }
 }
 
-function extractSteps(messages: AIMessage[]): AgentStep[] {
+function extractSteps(messages: (AIMessage | ToolMessage)[]): AgentStep[] {
   const steps: AgentStep[] = [];
 
   for (const msg of messages) {
-    if (msg.tool_calls?.length) {
-      for (const call of msg.tool_calls) {
+    const isAi = msg.constructor.name === "AIMessage";
+    const isTool = msg.constructor.name === "ToolMessage";
+
+    if (isAi && "tool_calls" in msg && (msg as AIMessage).tool_calls?.length) {
+      const aiMsg = msg as AIMessage;
+      for (const call of aiMsg.tool_calls ?? []) {
         steps.push({
           type: "tool_call",
           content: `Calling ${call.name}`,
@@ -73,8 +78,8 @@ function extractSteps(messages: AIMessage[]): AgentStep[] {
       }
     }
 
-    if (msg.constructor.name === "ToolMessage") {
-      const toolMsg = msg as ToolMessage;
+    if (isTool) {
+      const toolMsg = msg as unknown as ToolMessage;
       steps.push({
         type: "tool_result",
         content: typeof toolMsg.content === "string" ? toolMsg.content : JSON.stringify(toolMsg.content),
@@ -82,7 +87,7 @@ function extractSteps(messages: AIMessage[]): AgentStep[] {
       });
     }
 
-    if (msg.content && !msg.tool_calls?.length && msg.constructor.name !== "ToolMessage") {
+    if (msg.content && !(isAi && "tool_calls" in msg && (msg as AIMessage).tool_calls?.length) && !isTool) {
       const text = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
       if (text.trim()) {
         steps.push({

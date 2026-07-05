@@ -32,6 +32,7 @@ import {
   Check,
   Plus,
 } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 interface ScheduleCardsProps {
   schedules: ScheduleCardType[] | null;
@@ -101,6 +102,7 @@ export default function ScheduleCards({
   onComplete,
   onAdd,
 }: ScheduleCardsProps) {
+  const { t } = useI18n();
   const [localSchedules, setLocalSchedules] = useState<ScheduleCardType[]>(schedules || []);
 
   const sensors = useSensors(
@@ -116,8 +118,8 @@ export default function ScheduleCards({
     return (
       <EmptyState
         icon={<Calendar className="h-6 w-6" />}
-        title="No schedules yet"
-        description="Ask the Care Agent to set up vaccine appointments, grooming sessions, or checkups."
+        title={t.schedule.noSchedules}
+        description={t.schedule.noSchedulesDesc}
         variant="accent"
       />
     );
@@ -221,7 +223,7 @@ export default function ScheduleCards({
                         className="mt-3 w-full flex items-center justify-center gap-1.5 rounded-lg bg-green-50 border border-green-200 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-100 transition-colors"
                       >
                         <Check className="h-3.5 w-3.5" />
-                        Mark Done
+                        {t.schedule.markDone}
                       </button>
                     )}
                   </div>
@@ -236,7 +238,7 @@ export default function ScheduleCards({
                 className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-6 text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors min-h-[200px]"
               >
                 <Plus className="h-8 w-8" />
-                <span className="text-sm font-medium">Add Schedule</span>
+                <span className="text-sm font-medium">{t.schedule.addSchedule}</span>
               </button>
             )}
           </div>

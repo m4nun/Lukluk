@@ -8,14 +8,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown, Loader2, Search, HelpCircle, CheckCircle, XCircle } from "lucide-react";
+import { useI18n } from "@/lib/i18n/provider";
 
 const statuses = [
-  { value: "exploring", label: "🔍 Exploring" },
-  { value: "considering", label: "🤔 Considering seriously" },
-  { value: "ready_to_buy", label: "✅ Ready to buy/adopt" },
-  { value: "not_a_fit", label: "❌ Not a fit" },
-  { value: "already_have", label: "Already have this pet" },
+  { value: "exploring", label: "Exploring", icon: Search },
+  { value: "considering", label: "Considering", icon: HelpCircle },
+  { value: "ready_to_buy", label: "Ready to adopt", icon: CheckCircle },
+  { value: "not_a_fit", label: "Not a fit", icon: XCircle },
+  { value: "already_have", label: "Already have", icon: CheckCircle },
 ] as const;
 
 type DecisionStatusValue = (typeof statuses)[number]["value"];
@@ -47,6 +48,7 @@ export default function DecisionStatus({
   onUpdate,
   disabled,
 }: DecisionStatusProps) {
+  const { t } = useI18n();
   const [updating, setUpdating] = useState(false);
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(false);
@@ -76,7 +78,7 @@ export default function DecisionStatus({
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground">Status:</span>
+      <span className="text-sm text-muted-foreground">{t.status.statusLabel}</span>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger
           disabled={disabled || updating}
@@ -90,10 +92,11 @@ export default function DecisionStatus({
           {updating ? (
             <>
               <Loader2 className="h-3 w-3 animate-spin" />
-              Updating...
+              {t.status.updating}
             </>
           ) : (
             <>
+              <current.icon className="h-3 w-3" />
               {current.label}
               <ChevronDown className="h-3 w-3 opacity-60" />
             </>
@@ -109,12 +112,7 @@ export default function DecisionStatus({
                 s.value === status && "bg-accent font-semibold",
               )}
             >
-              <span
-                className={cn(
-                  "h-2 w-2 rounded-full",
-                  dotStyles[s.value] || "bg-gray-400",
-                )}
-              />
+              <s.icon className="h-3.5 w-3.5" />
               {s.label}
             </DropdownMenuItem>
           ))}

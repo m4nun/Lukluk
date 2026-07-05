@@ -1,5 +1,5 @@
 import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow } from "./repository";
-import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, ActivityCard, FoodCard } from "@/lib/types";
+import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, FoodCard, ScheduleCard, HealthMetric } from "@/lib/types";
 import { SupabasePlanningRepository } from "./supabase-repo";
 import type { DraftStore } from "./draft-store";
 
@@ -66,17 +66,6 @@ export class DraftPlanningRepository implements PlanningRepository {
     });
   }
 
-  async replaceActivitySchedule(ownedProfileId: string, activities: ActivityCard[]): Promise<void> {
-    const current = await this.real.getActivitySchedule(ownedProfileId);
-    await this.drafts.create({
-      planning_pet_profile_id: ownedProfileId,
-      user_id: this.userId,
-      target: "activity_schedule",
-      current_value: current,
-      proposed_value: activities,
-    });
-  }
-
   async replaceFoodGuide(ownedProfileId: string, cards: FoodCard[]): Promise<void> {
     const current = await this.real.getFoodGuide(ownedProfileId);
     await this.drafts.create({
@@ -91,8 +80,20 @@ export class DraftPlanningRepository implements PlanningRepository {
   // ---- Care reads (pass through) ----
   async getOwnedProfile(id: string) { return this.real.getOwnedProfile(id); }
   async getActualExpenses(id: string) { return this.real.getActualExpenses(id); }
-  async getActivitySchedule(id: string) { return this.real.getActivitySchedule(id); }
   async getFoodGuide(id: string) { return this.real.getFoodGuide(id); }
+  async getSchedule(id: string) { return this.real.getSchedule(id); }
+  async getHealthMetrics(id: string) { return this.real.getHealthMetrics(id); }
+
+  // ---- Care schedule/health writes (pass through, no draft needed) ----
+  async replaceSchedule(ownedProfileId: string, schedule: ScheduleCard[]): Promise<void> {
+    await this.real.replaceSchedule(ownedProfileId, schedule);
+  }
+  async addHealthMetric(ownedProfileId: string, metric: HealthMetric): Promise<void> {
+    await this.real.addHealthMetric(ownedProfileId, metric);
+  }
+  async deleteHealthMetric(ownedProfileId: string, metricId: string): Promise<void> {
+    await this.real.deleteHealthMetric(ownedProfileId, metricId);
+  }
 }
 
 // ---- Draft lifecycle: confirm / reject / query ----
@@ -119,9 +120,6 @@ export async function confirmDraft(draftId: string, drafts: DraftStore): Promise
       break;
     case "actual_expenses":
       await repo.replaceActualExpenses(draft.planning_pet_profile_id, draft.proposed_value as ExpenseItem[]);
-      break;
-    case "activity_schedule":
-      await repo.replaceActivitySchedule(draft.planning_pet_profile_id, draft.proposed_value as ActivityCard[]);
       break;
     case "food_guide":
       await repo.replaceFoodGuide(draft.planning_pet_profile_id, draft.proposed_value as FoodCard[]);

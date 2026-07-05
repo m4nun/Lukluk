@@ -6,7 +6,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { AppNav } from "@/components/layout/AppNav";
 import { getPetLogo } from "@/lib/pet-logos";
-import { ClipboardList, BarChart3, MessageSquare, Shield, Brain, Camera } from "lucide-react";
+import { ClipboardList, BarChart3, MessageSquare, Shield, Brain, Camera, Check, Sparkles } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 export default function Home() {
@@ -107,16 +107,16 @@ export default function Home() {
                     <Image src="/assets/PetLogo/golden-retriever/1.png" alt="" width={40} height={40} className="object-cover" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold">Golden Retriever</h4>
+                    <h4 className="text-sm font-semibold">Golden Gentleman</h4>
                     <span className="text-xs text-muted-foreground">Canis familiaris · ENFP</span>
                   </div>
                   <span className="ml-auto rounded-full bg-success/10 px-2 py-0.5 text-[9px] font-semibold text-success">Top Match</span>
                 </div>
                 <div className="space-y-2.5">
                   {[
-                    { name: "Golden Retriever", fit: 92, img: "golden-retriever" },
-                    { name: "Siamese Cat", fit: 85, img: "siamese-cat" },
-                    { name: "Bulldog", fit: 78, img: "bulldog" },
+                    { name: "Golden Gentleman", fit: 92, img: "golden-retriever" },
+                    { name: "Sassy Siamese", fit: 85, img: "siamese-cat" },
+                    { name: "Buff Bulldog", fit: 78, img: "bulldog" },
                   ].map((p) => (
                     <div
                       key={p.name}
@@ -204,25 +204,25 @@ export default function Home() {
           </h2>
           <div className="mt-12 grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
             {[
-              { name: "Golden Retriever", slug: "golden-retriever" },
-              { name: "Siamese Cat", slug: "siamese-cat" },
-              { name: "Persian Cat", slug: "persian-cat" },
-              { name: "American Shorthair", slug: "american-shorthair" },
-              { name: "Sphynx Cat", slug: "sphynx" },
-              { name: "Bulldog", slug: "bulldog" },
-              { name: "Pug", slug: "pug" },
-              { name: "Siberian Husky", slug: "siberian-husky" },
-              { name: "Welsh Corgi", slug: "welsh-corgi" },
-              { name: "Hamster", slug: "hamster" },
-              { name: "Gerbil", slug: "gerbil" },
-              { name: "Rabbit", slug: "rabbit" },
-              { name: "Chinchilla", slug: "chinchilla" },
-              { name: "Ferret", slug: "ferret" },
-              { name: "Hedgehog", slug: "hedgehog" },
-              { name: "Sugar Glider", slug: "sugar-glider" },
-              { name: "Fennec Fox", slug: "fennec-fox" },
-              { name: "Green Iguana", slug: "green-iguana" },
-              { name: "Axolotl", slug: "axolotl" },
+              { name: "Golden Gentleman", slug: "golden-retriever" },
+              { name: "Sassy Siamese", slug: "siamese-cat" },
+              { name: "Fluffy Persian", slug: "persian-cat" },
+              { name: "Cool Cat Shorthair", slug: "american-shorthair" },
+              { name: "Naked Noble", slug: "sphynx" },
+              { name: "Buff Bulldog", slug: "bulldog" },
+              { name: "Party Pug", slug: "pug" },
+              { name: "Snow Explorer", slug: "siberian-husky" },
+              { name: "Royal Corgi", slug: "welsh-corgi" },
+              { name: "Pocket Rocket", slug: "hamster" },
+              { name: "Gerbil Ninja", slug: "gerbil" },
+              { name: "Hop Star", slug: "rabbit" },
+              { name: "Cloud Chinchilla", slug: "chinchilla" },
+              { name: "Ferret Ninja", slug: "ferret" },
+              { name: "Spikestar", slug: "hedgehog" },
+              { name: "Sugar Glider Ace", slug: "sugar-glider" },
+              { name: "Fennec Flash", slug: "fennec-fox" },
+              { name: "Iguana King", slug: "green-iguana" },
+              { name: "Axolotl Angel", slug: "axolotl" },
             ].map((p) => (
               <Link
                 key={p.slug}
@@ -287,9 +287,9 @@ export default function Home() {
           </h2>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {[
-              { quote: "Lukluk helped me realize a Husky wasn't right for my apartment. Now I have a perfect Siamese cat.", name: "Tan", pet: "Siamese Cat" },
-              { quote: "The agent helped me budget properly before getting my Golden. No surprises, just joy.", name: "Mint", pet: "Golden Retriever" },
-              { quote: "I thought I wanted a rabbit but the quiz matched me with a hamster — best decision ever.", name: "Ploy", pet: "Hamster" },
+              { quote: "Lukluk helped me realize a Husky wasn't right for my apartment. Now I have a perfect Sassy Siamese.", name: "Tan", pet: "Sassy Siamese" },
+              { quote: "The agent helped me budget properly before getting my Golden. No surprises, just joy.", name: "Mint", pet: "Golden Gentleman" },
+              { quote: "I thought I wanted a rabbit but the quiz matched me with a Pocket Rocket — best decision ever.", name: "Ploy", pet: "Pocket Rocket" },
             ].map((t) => (
               <div key={t.name} className="rounded-xl border border-border/20 bg-card/10 backdrop-blur-sm p-6">
                 <p className="text-sm text-background/80 leading-relaxed italic">
@@ -306,6 +306,61 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="bg-background py-24">
+        <div className="mx-auto max-w-[1200px] px-6">
+          <span className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-primary">
+            Pricing
+          </span>
+          <h2 className="mt-4 text-[clamp(32px,4.5vw,48px)] font-bold tracking-[-0.025em] leading-[1.1]">
+            One plan,{" "}
+            <span className="text-primary">full access</span>
+          </h2>
+          <div className="mt-16 mx-auto max-w-[480px]">
+            <div className="relative rounded-2xl border-2 border-primary bg-card p-8 shadow-xl shadow-primary/10">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary-foreground shadow-sm">
+                  <Sparkles className="h-3 w-3" />
+                  Most Popular
+                </span>
+              </div>
+              <div className="mt-4 text-center">
+                <h3 className="text-2xl font-bold tracking-tight">Lukluk Pro</h3>
+                <div className="mt-4 flex items-baseline justify-center gap-1">
+                  <span className="text-[48px] font-bold tracking-tight">{"\u0E3F"}299</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Cancel anytime. No long-term commitment.
+                </p>
+              </div>
+              <ul className="mt-8 space-y-3.5">
+                {[
+                  "AI Decision Agent for costs, concerns & fit",
+                  "Unlimited planning workspaces",
+                  "Expense tables & concern checklists",
+                  "AI Care Agent for owned pets",
+                  "Access owner experiences",
+                  "Export & share Match Cards",
+                ].map((feat) => (
+                  <li key={feat} className="flex items-start gap-3 text-sm">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                    <span>{feat}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/pricing"
+                className="mt-8 flex w-full items-center justify-center gap-2.5 rounded-full bg-primary px-6 py-4 text-base font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30"
+              >
+                <Sparkles className="h-5 w-5" />
+                View Pricing
+              </Link>
+            </div>
           </div>
         </div>
       </section>

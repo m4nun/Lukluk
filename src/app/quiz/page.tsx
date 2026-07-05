@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FIXED_QUESTIONS } from "@/lib/quiz/questions";
 import Image from "next/image";
@@ -23,6 +23,28 @@ interface FollowUpQuestion {
 }
 
 export default function QuizPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen flex-col bg-background">
+        <nav className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
+          <div className="mx-auto flex h-14 max-w-[640px] items-center px-6">
+            <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
+              <Image src="/assets/logo.png" alt="Lukluk" width={28} height={28} />
+              Lukluk
+            </Link>
+          </div>
+        </nav>
+        <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+          <Loader2 className="h-16 w-16 text-primary animate-spin" />
+        </div>
+      </div>
+    }>
+      <QuizContent />
+    </Suspense>
+  );
+}
+
+function QuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isRetake = searchParams.get("retake") === "true";
