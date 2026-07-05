@@ -317,7 +317,7 @@ CREATE TABLE public.agent_drafts (
 -- ============================================================
 CREATE TABLE public.agent_threads (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  planning_pet_profile_id UUID NOT NULL REFERENCES public.planning_pet_profiles(id) ON DELETE CASCADE,
+  planning_pet_profile_id UUID REFERENCES public.planning_pet_profiles(id) ON DELETE CASCADE,
   thread_id             TEXT NOT NULL UNIQUE,               -- LangGraph checkpoint thread_id
 
   -- For Care Agent (ownership mode)
