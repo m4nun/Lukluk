@@ -10,7 +10,7 @@ export async function GET() {
 
   const { data: profiles } = await supabase
     .from("planning_pet_profiles")
-    .select("*, pet_type_profiles(name, species, mbti_label)")
+    .select("*, pet_type_profiles(id, name, species, mbti_label)")
     .eq("user_id", userData.user.id)
     .eq("is_active", true)
     .order("created_at", { ascending: false });

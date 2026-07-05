@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import AgentChat from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ConcernChecklist from "@/components/workspace/ConcernChecklist";
@@ -10,7 +11,8 @@ import DecisionStatus from "@/components/workspace/DecisionStatus";
 import DraftPanel from "@/components/workspace/DraftPanel";
 import OwnershipForm from "@/components/workspace/OwnershipForm";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
-import { ArrowLeft, AlertTriangle, PawPrint } from "lucide-react";
+import { getPetLogo } from "@/lib/pet-logos";
+import { ArrowLeft, PawPrint, MessageCircle, Home, Receipt, User } from "lucide-react";
 
 interface WorkspaceData {
   id: string;
@@ -30,6 +32,7 @@ interface WorkspaceData {
     resolved_at?: string;
   }>;
   pet_type_profiles: {
+    id: string;
     name: string;
     species: string;
     mbti_label: string;
@@ -37,6 +40,14 @@ interface WorkspaceData {
   };
   has_ownership: boolean;
 }
+
+const STATUS_LABELS: Record<string, string> = {
+  exploring: "Exploring",
+  considering: "Considering",
+  ready_to_buy: "Ready to Buy",
+  not_a_fit: "Not a Fit",
+  already_have: "Already Have",
+};
 
 export default function WorkspacePage() {
   const params = useParams<{ id: string }>();
@@ -48,9 +59,11 @@ export default function WorkspacePage() {
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [transitionError, setTransitionError] = useState("");
   const [chatInput, setChatInput] = useState("");
+  const [chatOpen, setChatOpen] = useState(false);
 
   const handleEmbedToChat = useCallback((text: string) => {
     setChatInput(text);
+    setChatOpen(true);
   }, []);
 
   function handleConcernStatusChange(concernId: string, newStatus: string) {
@@ -72,19 +85,13 @@ export default function WorkspacePage() {
       data.concern_checklist.every((c) => c.status === "resolved" || c.status === "not_applicable")
     : false;
 
-  function switchTab(tab: "expenses" | "concerns") {
-    setActiveTab(tab);
-  }
-
   useEffect(() => {
     async function load() {
       try {
         const res = await fetch("/api/planning");
         if (!res.ok) throw new Error("Failed to load");
         const profiles = await res.json();
-        const profile = profiles.find(
-          (p: { id: string }) => p.id === params.id,
-        );
+        const profile = profiles.find((p: { id: string }) => p.id === params.id);
         if (!profile) throw new Error("Workspace not found");
         setData(profile);
       } catch (e) {
@@ -96,20 +103,16 @@ export default function WorkspacePage() {
     load();
   }, [params.id]);
 
-  async function refreshData() {
+  const refreshData = useCallback(async () => {
     try {
       const res = await fetch("/api/planning");
       if (res.ok) {
         const profiles = await res.json();
-        const profile = profiles.find(
-          (p: { id: string }) => p.id === params.id,
-        );
+        const profile = profiles.find((p: { id: string }) => p.id === params.id);
         if (profile) setData(profile);
       }
-    } catch {
-      // silent fail on refresh
-    }
-  }
+    } catch {}
+  }, [params.id]);
 
   async function handleStatusUpdate(newStatus: string) {
     if (!data) return;
@@ -121,15 +124,10 @@ export default function WorkspacePage() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
-        setData((prev) =>
-          prev ? { ...prev, decision_status: newStatus } : null,
-        );
+        setData((prev) => prev ? { ...prev, decision_status: newStatus } : null);
       }
-    } catch {
-      // optimistic update failed, keep current status
-    } finally {
-      setStatusUpdating(false);
-    }
+    } catch {}
+    finally { setStatusUpdating(false); }
   }
 
   async function handleOwnership(petName: string, ageLifeStage: string) {
@@ -138,11 +136,7 @@ export default function WorkspacePage() {
       const res = await fetch("/api/ownership/transition", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planningProfileId: params.id,
-          petName,
-          ageLifeStage,
-        }),
+        body: JSON.stringify({ planningProfileId: params.id, petName, ageLifeStage }),
       });
       if (res.ok) {
         const result = await res.json();
@@ -159,17 +153,15 @@ export default function WorkspacePage() {
   if (loading) {
     return (
       <div className="flex h-screen flex-col">
-        <div className="flex h-[52px] items-center border-b border-border px-5">
+        <div className="flex h-14 items-center border-b border-gray-200 bg-white px-5">
           <LoadingSkeleton variant="text" rows={1} />
         </div>
         <div className="flex flex-1">
           <div className="flex-1 overflow-auto p-6">
             <LoadingSkeleton variant="card" />
-            <div className="mt-6">
-              <LoadingSkeleton variant="table" rows={6} />
-            </div>
+            <div className="mt-6"><LoadingSkeleton variant="table" rows={6} /></div>
           </div>
-          <div className="w-[400px] border-l border-border bg-card" />
+          <div className="w-[380px] border-l border-gray-200 bg-white" />
         </div>
       </div>
     );
@@ -178,102 +170,120 @@ export default function WorkspacePage() {
   if (error || !data) {
     return (
       <div className="flex h-screen flex-col items-center justify-center px-6">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-          <AlertTriangle className="h-8 w-8 text-destructive" />
-        </div>
         <h2 className="text-xl font-bold">Workspace not found</h2>
-        <p className="mt-2 max-w-sm text-center text-muted-foreground">
-          {error || "This workspace may have been deleted."}
-        </p>
-        <Link
-          href="/dashboard"
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
-        >
+        <p className="mt-2 text-gray-500">{error || "This workspace may have been deleted."}</p>
+        <Link href="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white">
           Back to Dashboard
         </Link>
       </div>
     );
   }
 
+  const logoSrc = getPetLogo(data.pet_type_profiles.id);
+  const displayName = data.planning_name || data.pet_type_profiles.name;
+
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      {/* Nav */}
-      <nav className="flex h-[52px] shrink-0 items-center border-b border-border bg-card px-5">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Dashboard
-        </Link>
-        <div className="mx-auto flex items-center gap-2">
-          <PawPrint className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-semibold">
-            {data.planning_name || data.pet_type_profiles.name}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            · {data.pet_type_profiles.species}
+    <div className="flex h-screen flex-col overflow-hidden bg-[#fafafa]">
+      {/* Desktop Nav */}
+      <nav className="hidden md:flex h-14 shrink-0 items-center border-b border-gray-200 bg-white px-6">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2 text-sm font-bold text-gray-900">
+            <Image src="/assets/logo.png" alt="Lukluk" width={24} height={24} />
+            Lukluk
+          </Link>
+          <div className="h-5 w-px bg-gray-200" />
+          <Link href="/dashboard" className="flex items-center gap-1 text-[13px] text-gray-500 transition-colors hover:text-gray-900 rounded-full px-2.5 py-1 hover:bg-gray-100">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Dashboard
+          </Link>
+        </div>
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
+          {logoSrc && (
+            <div className="h-7 w-7 overflow-hidden rounded-full border-2 border-gray-200">
+              <Image src={logoSrc} alt={displayName} width={28} height={28} className="object-cover" />
+            </div>
+          )}
+          <span className="text-sm font-semibold">{displayName}</span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-0.5 text-[11px] font-semibold text-orange-600">
+            <PawPrint className="h-3 w-3" fill="currentColor" />
+            {STATUS_LABELS[data.decision_status] || data.decision_status}
           </span>
         </div>
-        <div className="w-[80px]" />
+        <div className="w-[100px]" />
       </nav>
 
-      {/* Workspace body */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* Left Panel */}
-        <div className="flex-1 min-w-0 overflow-y-auto border-r border-border bg-background">
-          {/* Header */}
-          <div className="px-6 pt-5">
-            <div className="flex items-center gap-3 mb-1">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-primary/5">
-                <PawPrint className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold">
-                  {data.planning_name || data.pet_type_profiles.name}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {data.pet_type_profiles.species} ·{" "}
-                  {data.pet_type_profiles.mbti_label}
-                </p>
-              </div>
+      {/* Mobile Nav */}
+      <nav className="flex md:hidden h-[52px] shrink-0 items-center border-b border-gray-200 bg-white px-4">
+        <Link href="/dashboard" className="flex items-center gap-1 text-sm text-orange-500 font-medium">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <div className="mx-auto flex items-center gap-2">
+          {logoSrc && (
+            <div className="h-7 w-7 overflow-hidden rounded-full border-2 border-gray-200">
+              <Image src={logoSrc} alt={displayName} width={28} height={28} className="object-cover" />
             </div>
+          )}
+          <span className="text-[15px] font-semibold">{displayName}</span>
+        </div>
+        <div className="w-9" />
+      </nav>
 
-            <div className="mt-3">
-              <DecisionStatus
-                status={data.decision_status}
-                onUpdate={handleStatusUpdate}
-                disabled={statusUpdating}
-              />
+      {/* Body */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Panel */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Pet Header */}
+          <div className="flex items-center gap-3.5 px-5 pt-5 pb-4 md:px-7 md:pt-7">
+            {logoSrc ? (
+              <div className="h-[52px] w-[52px] flex-shrink-0 overflow-hidden rounded-full border-3 border-white shadow-md">
+                <Image src={logoSrc} alt={displayName} width={52} height={52} className="object-cover" />
+              </div>
+            ) : (
+              <div className="h-[52px] w-[52px] flex-shrink-0 rounded-full border-3 border-white shadow-md bg-gray-100 flex items-center justify-center">
+                <PawPrint className="h-6 w-6 text-gray-400" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="text-lg font-bold text-gray-900">{displayName}</div>
+              <div className="text-[13px] text-gray-500">{data.pet_type_profiles.species} · {data.pet_type_profiles.mbti_label}</div>
             </div>
           </div>
 
+          {/* Decision Status */}
+          <div className="px-5 md:px-7 pb-4">
+            <DecisionStatus
+              status={data.decision_status}
+              onUpdate={handleStatusUpdate}
+              disabled={statusUpdating}
+            />
+          </div>
+
           {/* Tabs */}
-          <div className="mt-4 flex border-b border-border px-6">
+          <div className="flex border-b border-gray-200 px-5 md:px-7 sticky top-0 bg-[#fafafa] z-10">
             <button
-              onClick={() => switchTab("expenses")}
-              className={`px-4 py-2.5 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+              onClick={() => setActiveTab("expenses")}
+              className={`px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
                 activeTab === "expenses"
-                  ? "border-primary text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "border-orange-500 text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
               Estimated Expenses
             </button>
             <button
-              onClick={() => switchTab("concerns")}
-              className={`px-4 py-2.5 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+              onClick={() => setActiveTab("concerns")}
+              className={`px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
                 activeTab === "concerns"
-                  ? "border-primary text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "border-orange-500 text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
               Concern Checklist
             </button>
           </div>
 
-          {/* Content */}
-          <div className="px-6 py-5">
+          {/* Tab Content */}
+          <div className="p-5 pb-24 md:p-7 md:pb-7">
             {activeTab === "expenses" ? (
               <ExpenseTable expenses={data.estimated_expenses} onEmbedToChat={handleEmbedToChat} />
             ) : (
@@ -281,6 +291,7 @@ export default function WorkspacePage() {
                 concerns={data.concern_checklist}
                 onEmbedToChat={handleEmbedToChat}
                 onStatusChange={handleConcernStatusChange}
+                workspaceId={params.id}
               />
             )}
           </div>
@@ -290,7 +301,7 @@ export default function WorkspacePage() {
 
           {/* Ownership form */}
           {!data.has_ownership && (
-            <div className="px-6 pb-6">
+            <div className="px-5 pb-6 md:px-7">
               {allConcernsResolved ? (
                 <OwnershipForm
                   onSubmit={handleOwnership}
@@ -298,44 +309,113 @@ export default function WorkspacePage() {
                   petTypeName={data.pet_type_profiles.name}
                 />
               ) : (
-                <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Resolve all concerns in the checklist to switch to ownership.
-                  </p>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-center">
+                  <p className="text-sm text-gray-500">Resolve all concerns in the checklist to switch to ownership.</p>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* Right Panel — Agent Chat */}
-        <div className="w-[380px] shrink-0 flex flex-col bg-card overflow-hidden border-l border-border">
-          <div className="flex items-center gap-2.5 border-b border-border px-4 py-3 shrink-0">
-            <span className="h-2 w-2 rounded-full bg-primary" />
-            <div>
-              <h3 className="text-sm font-semibold">Decision Agent</h3>
-              <p className="text-xs text-muted-foreground">Always available</p>
+        {/* Right Panel — Decision Chat (Desktop) */}
+        <div className="hidden md:flex w-[380px] shrink-0 flex-col bg-white border-l border-gray-200">
+          <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-3.5">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-900">Decision Agent</h3>
+              <p className="text-xs text-gray-500">Helps with costs, concerns & lifestyle fit</p>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-green-600">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+              Available
             </div>
           </div>
           <AgentChat
             endpoint="/api/agent/chat"
             bodyKey="planningProfileId"
             profileId={params.id}
-            suggestions={[
-              "Show me the costs",
-              "What are the main concerns?",
-              "Does this pet fit my lifestyle?",
-              "How much time does this pet need?",
-            ]}
-            placeholder="Ask about costs, concerns, lifestyle fit..."
-            emptyTitle="Hi! I'm your Decision Agent"
-            emptyDescription="Ask me anything about this pet type — costs, concerns, whether it fits your lifestyle."
+            suggestions={["Show me the costs", "What are the main concerns?", "Does this pet fit my lifestyle?"]}
+            placeholder="Enter a prompt here"
+            emptyTitle="Hi, I'm Decision Agent"
+            emptyDescription="Ask me about costs, concerns, or whether this pet fits your lifestyle."
             onMessageSent={refreshData}
             externalInput={chatInput}
             onExternalInputConsumed={() => setChatInput("")}
           />
         </div>
       </div>
+
+      {/* Mobile Chat FAB */}
+      <button
+        onClick={() => setChatOpen(true)}
+        className="md:hidden fixed bottom-20 right-4 z-30 h-14 w-14 rounded-full bg-gradient-to-br from-blue-500 to-green-500 text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+      >
+        <MessageCircle className="h-6 w-6" />
+      </button>
+
+      {/* Mobile Bottom Sheet Chat */}
+      {chatOpen && (
+        <>
+          <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setChatOpen(false)} />
+          <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[20px] flex flex-col" style={{ height: "85dvh" }}>
+            <div className="w-9 h-1 rounded-full bg-gray-300 mx-auto mt-2.5 flex-shrink-0" />
+            <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-gray-200 flex-shrink-0">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-[15px] font-semibold">Decision Agent</h3>
+                <p className="text-xs text-gray-500">Always available</p>
+              </div>
+              <button onClick={() => setChatOpen(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <AgentChat
+                endpoint="/api/agent/chat"
+                bodyKey="planningProfileId"
+                profileId={params.id}
+                suggestions={["Show costs", "Main concerns?"]}
+                placeholder="Enter a prompt here"
+                emptyTitle="Hi, I'm Decision Agent"
+                emptyDescription="Ask about costs, concerns, or lifestyle fit."
+                onMessageSent={refreshData}
+                externalInput={chatInput}
+                onExternalInputConsumed={() => setChatInput("")}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Mobile Bottom Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 flex justify-around py-2 pb-[max(8px,env(safe-area-inset-bottom))]">
+        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
+          <Home className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Home</span>
+        </Link>
+        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-orange-500">
+          <PawPrint className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Pets</span>
+        </Link>
+        <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
+          <Receipt className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Expenses</span>
+        </Link>
+        <Link href="/profile" className="flex flex-col items-center gap-0.5 px-4 py-1 text-gray-500">
+          <User className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Profile</span>
+        </Link>
+      </nav>
     </div>
   );
 }
