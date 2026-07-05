@@ -8,6 +8,7 @@ import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { ErrorAlert } from "@/components/layout/ErrorAlert";
 import { ChevronRight, RefreshCw, PawPrint, Home } from "lucide-react";
+import { getPetLogo } from "@/lib/pet-logos";
 
 interface PlanningProfile {
   id: string;
@@ -18,28 +19,6 @@ interface PlanningProfile {
   pet_type_profiles: { name: string; species: string; mbti_label: string };
   pet_type_profile_id?: string;
 }
-
-const PET_LOGOS: Record<string, string> = {
-  "golden-retriever": "/assets/PetLogo/golden-retriever/1.png",
-  "siamese-cat": "/assets/PetLogo/siamese-cat/1.png",
-  "persian-cat": "/assets/PetLogo/persian-cat/1.png",
-  "american-shorthair-cat": "/assets/PetLogo/american-shorthair-cat/1.png",
-  "welsh-corgi": "/assets/PetLogo/welsh-corgi/1.png",
-  "siberian-husky": "/assets/PetLogo/siberian-husky/1.png",
-  "pug": "/assets/PetLogo/pug/1.png",
-  "bulldog": "/assets/PetLogo/bulldog/1.png",
-  "sphynx-cat": "/assets/PetLogo/sphynx-cat/1.png",
-  "hamster": "/assets/PetLogo/hamster/1.png",
-  "chinchilla": "/assets/PetLogo/chinchilla/1.png",
-  "ferret": "/assets/PetLogo/ferret/1.png",
-  "hedgehog": "/assets/PetLogo/hedgehog/1.png",
-  "fennec-fox": "/assets/PetLogo/fennec-fox/1.png",
-  "green-iguana": "/assets/PetLogo/green-iguana/1.png",
-  "axolotl": "/assets/PetLogo/axolotl/1.png",
-  "gerbil": "/assets/PetLogo/gerbil/1.png",
-  "sugar-glider": "/assets/PetLogo/sugar-glider/1.png",
-  "rabbit": "/assets/PetLogo/rabbit/1.png",
-};
 
 const statusBadgeStyles: Record<string, string> = {
   exploring: "bg-blue-50 text-blue-500",
@@ -61,8 +40,7 @@ function guessSlug(name: string): string {
   return name.toLowerCase().replace(/\s+/g, "-");
 }
 
-export default function DashboardPage() {
-  const router = useRouter();
+export default function DashboardPage() {  const router = useRouter();
   const [profiles, setProfiles] = useState<PlanningProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -161,8 +139,9 @@ export default function DashboardPage() {
         {!loading && !error && profiles.length > 0 && (
           <div className="mt-8 grid gap-5 pb-12 sm:grid-cols-2">
             {profiles.map((prof) => {
-              const slug = guessSlug(prof.pet_type_profiles.name);
-              const logoSrc = PET_LOGOS[slug];
+              const logoSrc = prof.pet_type_profile_id
+                ? getPetLogo(prof.pet_type_profile_id)
+                : null;
               return (
                 <div
                   key={prof.id}

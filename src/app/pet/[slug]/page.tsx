@@ -1,29 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
+import { getPetLogo } from "@/lib/pet-logos";
 import { ArrowLeft, Clock, Home, PiggyBank, AlertTriangle, PawPrint } from "lucide-react";
-
-const PET_LOGOS: Record<string, string> = {
-  "golden-retriever": "/assets/PetLogo/golden-retriever/1.png",
-  "siamese-cat": "/assets/PetLogo/siamese-cat/1.png",
-  "persian-cat": "/assets/PetLogo/persian-cat/1.png",
-  "american-shorthair-cat": "/assets/PetLogo/american-shorthair-cat/1.png",
-  "welsh-corgi": "/assets/PetLogo/welsh-corgi/1.png",
-  "siberian-husky": "/assets/PetLogo/siberian-husky/1.png",
-  "pug": "/assets/PetLogo/pug/1.png",
-  "bulldog": "/assets/PetLogo/bulldog/1.png",
-  "sphynx-cat": "/assets/PetLogo/sphynx-cat/1.png",
-  "hamster": "/assets/PetLogo/hamster/1.png",
-  "chinchilla": "/assets/PetLogo/chinchilla/1.png",
-  "ferret": "/assets/PetLogo/ferret/1.png",
-  "hedgehog": "/assets/PetLogo/hedgehog/1.png",
-  "fennec-fox": "/assets/PetLogo/fennec-fox/1.png",
-  "green-iguana": "/assets/PetLogo/green-iguana/1.png",
-  "axolotl": "/assets/PetLogo/axolotl/1.png",
-  "gerbil": "/assets/PetLogo/gerbil/1.png",
-  "sugar-glider": "/assets/PetLogo/sugar-glider/1.png",
-  "rabbit": "/assets/PetLogo/rabbit/1.png",
-};
 
 const BUDGET_LABELS: Record<string, string> = {
   low: "Low",
@@ -170,7 +149,7 @@ export default async function PetDetailPage({
     .limit(20);
 
   const profile = { ...pet, experiences: experiences || [] } as PetProfile;
-  const logoSrc = PET_LOGOS[slug];
+  const logoSrc = getPetLogo(slug);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">

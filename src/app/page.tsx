@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AppNav } from "@/components/layout/AppNav";
+import { getPetLogo } from "@/lib/pet-logos";
 import { ClipboardList, BarChart3, MessageSquare, Shield, Brain, Camera } from "lucide-react";
 
 export default function Home() {
@@ -175,8 +176,8 @@ export default function Home() {
               { name: "Golden Retriever", slug: "golden-retriever" },
               { name: "Siamese Cat", slug: "siamese-cat" },
               { name: "Persian Cat", slug: "persian-cat" },
-              { name: "American Shorthair", slug: "american-shorthair-cat" },
-              { name: "Sphynx Cat", slug: "sphynx-cat" },
+              { name: "American Shorthair", slug: "american-shorthair" },
+              { name: "Sphynx Cat", slug: "sphynx" },
               { name: "Bulldog", slug: "bulldog" },
               { name: "Pug", slug: "pug" },
               { name: "Siberian Husky", slug: "siberian-husky" },
@@ -199,7 +200,7 @@ export default function Home() {
               >
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/5 overflow-hidden">
                   <Image
-                    src={`/assets/PetLogo/${p.slug}/1.png`}
+                    src={getPetLogo(p.slug) || `/assets/PetLogo/${p.slug}/1.png`}
                     alt={p.name}
                     width={56}
                     height={56}
