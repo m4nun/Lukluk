@@ -8,7 +8,6 @@ import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ConcernChecklist from "@/components/workspace/ConcernChecklist";
 import DecisionStatus from "@/components/workspace/DecisionStatus";
 import DraftPanel from "@/components/workspace/DraftPanel";
-import GuidanceGate from "@/components/workspace/GuidanceGate";
 import OwnershipForm from "@/components/workspace/OwnershipForm";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { ArrowLeft, AlertTriangle, PawPrint } from "lucide-react";
@@ -46,15 +45,11 @@ export default function WorkspacePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"expenses" | "concerns">("expenses");
-  const [seenExpenses, setSeenExpenses] = useState(false);
-  const [seenConcerns, setSeenConcerns] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [transitionError, setTransitionError] = useState("");
 
   function switchTab(tab: "expenses" | "concerns") {
     setActiveTab(tab);
-    if (tab === "expenses") setSeenExpenses(true);
-    if (tab === "concerns") setSeenConcerns(true);
   }
 
   useEffect(() => {
@@ -96,13 +91,10 @@ export default function WorkspacePage() {
     if (!data) return;
     setStatusUpdating(true);
     try {
-      const res = await fetch("/api/agent/chat", {
+      const res = await fetch(`/api/planning/${params.id}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planningProfileId: params.id,
-          message: `[system: update decision status to ${newStatus}]`,
-        }),
+        body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
         setData((prev) =>
@@ -268,16 +260,6 @@ export default function WorkspacePage() {
           {/* Drafts */}
           <DraftPanel planningProfileId={params.id} />
 
-          {/* Guidance */}
-          <div className="px-6 mt-4 pb-4">
-            <GuidanceGate
-              hasSeenExpenses={seenExpenses}
-              hasSeenConcerns={seenConcerns}
-              expenseCount={data.estimated_expenses?.length}
-              concernCount={data.concern_checklist?.length}
-            />
-          </div>
-
           {/* Ownership form */}
           {!data.has_ownership && (
             <div className="px-6 pb-6">
@@ -291,29 +273,31 @@ export default function WorkspacePage() {
         </div>
 
         {/* Right Panel — Agent Chat */}
-        <div className="w-[400px] shrink-0 flex flex-col bg-card">
-          <div className="flex items-center gap-2.5 border-b border-border px-4 py-3.5">
+        <div className="w-[400px] shrink-0 flex flex-col bg-card overflow-hidden">
+          <div className="flex items-center gap-2.5 border-b border-border px-4 py-3.5 shrink-0">
             <span className="h-2 w-2 rounded-full bg-primary" />
             <div>
               <h3 className="text-sm font-semibold">Decision Agent</h3>
               <p className="text-xs text-muted-foreground">Always available</p>
             </div>
           </div>
-          <AgentChat
-            endpoint="/api/agent/chat"
-            bodyKey="planningProfileId"
-            profileId={params.id}
-            suggestions={[
-              "Show me the costs",
-              "What are the main concerns?",
-              "Does this pet fit my lifestyle?",
-              "How much time does this pet need?",
-            ]}
-            placeholder="Ask about costs, concerns, lifestyle fit..."
-            emptyTitle="Hi! I'm your Decision Agent"
-            emptyDescription="Ask me anything about this pet type — costs, concerns, whether it fits your lifestyle."
-            onMessageSent={refreshData}
-          />
+          <div className="flex flex-1 overflow-hidden">
+            <AgentChat
+              endpoint="/api/agent/chat"
+              bodyKey="planningProfileId"
+              profileId={params.id}
+              suggestions={[
+                "Show me the costs",
+                "What are the main concerns?",
+                "Does this pet fit my lifestyle?",
+                "How much time does this pet need?",
+              ]}
+              placeholder="Ask about costs, concerns, lifestyle fit..."
+              emptyTitle="Hi! I'm your Decision Agent"
+              emptyDescription="Ask me anything about this pet type — costs, concerns, whether it fits your lifestyle."
+              onMessageSent={refreshData}
+            />
+          </div>
         </div>
       </div>
     </div>
