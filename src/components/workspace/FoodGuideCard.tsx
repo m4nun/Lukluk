@@ -19,7 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
-import DeskCard from "./DeskCard";
+import CardWrapper from "./CardWrapper";
 import type { FoodCard } from "@/lib/types";
 import { Utensils, Scale, Clock, StickyNote, Plus } from "lucide-react";
 
@@ -108,78 +108,71 @@ export default function FoodGuideCard({
         <SortableContext items={localCards.map((c) => c.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {localCards.map((card) => (
-            <DeskCard
-              key={card.id}
-              id={card.id}
-              petName={petName}
-              petSpecies={petSpecies}
-              petImage={petImage}
-              accentColor="amber"
-              onRemove={() => handleRemove(card.id)}
-            >
-              <div className="space-y-2.5">
-                {/* Food Image */}
+              <CardWrapper
+                key={card.id}
+                id={card.id}
+                accentColor="amber"
+                onRemove={() => handleRemove(card.id)}
+              >
+                {/* Illustration / Icon */}
                 {card.image ? (
-                  <div className="relative h-28 w-full overflow-hidden rounded-xl border border-gray-100">
+                  <div className="relative h-32 w-full">
                     <Image
                       src={card.image}
                       alt={card.brand || card.name}
                       fill
-                      className="object-cover"
+                      className="object-cover rounded-t-xl"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                   </div>
                 ) : (
-                  <div className="flex h-20 w-full items-center justify-center rounded-xl bg-amber-50 border border-amber-100">
-                    <Utensils className="h-8 w-8 text-amber-500" />
+                  <div className="flex h-28 w-full items-center justify-center rounded-t-xl bg-amber-50 border-b border-amber-100">
+                    <Utensils className="h-10 w-10 text-amber-400" />
                   </div>
                 )}
 
-                {/* Food Info */}
-                <div>
+                {/* Content */}
+                <div className="px-4 py-3">
                   <h4 className="text-sm font-bold text-gray-900 truncate">{card.name}</h4>
                   {card.brand && (
                     <p className="text-xs text-gray-500 truncate">{card.brand}</p>
                   )}
-                </div>
 
-                {/* Details */}
-                <div className="space-y-1.5">
-                  {card.amount && (
-                    <div className="flex items-center gap-2 text-xs">
-                      <Scale className="h-3.5 w-3.5 text-gray-400" />
-                      <span className="text-gray-500">Amount:</span>
-                      <span className="font-medium text-gray-700">{card.amount}</span>
-                    </div>
-                  )}
-                  {card.frequency && (
-                    <div className="flex items-center gap-2 text-xs">
-                      <Clock className="h-3.5 w-3.5 text-gray-400" />
-                      <span className="text-gray-500">Schedule:</span>
-                      <span className="font-medium text-gray-700">{card.frequency}</span>
-                    </div>
-                  )}
-                  {card.notes && (
-                    <div className="flex items-start gap-2 text-xs pt-1.5 mt-1.5 border-t border-gray-100">
-                      <StickyNote className="h-3.5 w-3.5 text-gray-400 shrink-0 mt-0.5" />
-                      <span className="text-gray-500 leading-relaxed">{card.notes}</span>
-                    </div>
-                  )}
+                  <div className="mt-2 space-y-1.5">
+                    {card.amount && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <Scale className="h-3.5 w-3.5 text-gray-400" />
+                        <span className="text-gray-500">Amount:</span>
+                        <span className="font-medium text-gray-700">{card.amount}</span>
+                      </div>
+                    )}
+                    {card.frequency && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <Clock className="h-3.5 w-3.5 text-gray-400" />
+                        <span className="text-gray-500">Schedule:</span>
+                        <span className="font-medium text-gray-700">{card.frequency}</span>
+                      </div>
+                    )}
+                    {card.notes && (
+                      <div className="flex items-start gap-2 text-xs pt-1.5 mt-1.5 border-t border-gray-100">
+                        <StickyNote className="h-3.5 w-3.5 text-gray-400 shrink-0 mt-0.5" />
+                        <span className="text-gray-500 leading-relaxed">{card.notes}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </DeskCard>
-          ))}
+              </CardWrapper>
+            ))}
 
-          {/* Add Card Button */}
-          {onAdd && (
-            <button
-              onClick={onAdd}
-              className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-6 text-gray-400 hover:border-amber-300 hover:text-amber-600 transition-colors min-h-[200px]"
-            >
-              <Plus className="h-8 w-8" />
-              <span className="text-sm font-medium">Add Food Card</span>
-            </button>
-          )}
+            {/* Add Card Button */}
+            {onAdd && (
+              <button
+                onClick={onAdd}
+                className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-6 text-gray-400 hover:border-amber-300 hover:text-amber-600 transition-colors min-h-[200px]"
+              >
+                <Plus className="h-8 w-8" />
+                <span className="text-sm font-medium">Add Food Card</span>
+              </button>
+            )}
           </div>
         </SortableContext>
       </DndContext>

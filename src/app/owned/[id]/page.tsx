@@ -8,11 +8,13 @@ import AgentChat from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ActivityCards from "@/components/workspace/ActivityCards";
 import FoodGuideCard from "@/components/workspace/FoodGuideCard";
+import ScheduleCards from "@/components/workspace/ScheduleCards";
+import HealthCard from "@/components/workspace/HealthCard";
 import EditPetModal from "@/components/workspace/EditPetModal";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { getPetLogo } from "@/lib/pet-logos";
-import { ArrowLeft, Edit, MoreVertical, MessageCircle, Home, PawPrint, Receipt, User } from "lucide-react";
-import type { ActivityCard, FoodCard } from "@/lib/types";
+import { ArrowLeft, Edit, MoreVertical, MessageCircle, Home, PawPrint, Receipt, User, Calendar, Heart } from "lucide-react";
+import type { ActivityCard, FoodCard, ScheduleCard, HealthMetric } from "@/lib/types";
 
 interface OwnedData {
   id: string;
@@ -28,6 +30,8 @@ interface OwnedData {
   }>;
   activity_schedule: ActivityCard[] | null;
   food_guide: FoodCard[] | { brand?: string; amount?: string; frequency?: string; notes?: string } | null;
+  schedule: ScheduleCard[] | null;
+  health_metrics: HealthMetric[] | null;
   pet_type_profiles: { id: string; name: string; species: string; mbti_label: string };
 }
 
@@ -46,7 +50,7 @@ export default function OwnedPage() {
   const router = useRouter();
   const [data, setData] = useState<OwnedData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"expenses" | "activity" | "food">("expenses");
+  const [activeTab, setActiveTab] = useState<"expenses" | "activity" | "food" | "schedule" | "health">("expenses");
   const [error, setError] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
@@ -119,6 +123,8 @@ export default function OwnedPage() {
     { key: "expenses" as const, label: "Actual Expenses" },
     { key: "activity" as const, label: "Activities" },
     { key: "food" as const, label: "Food Guide" },
+    { key: "schedule" as const, label: "Schedule" },
+    { key: "health" as const, label: "Health" },
   ];
 
   return (
@@ -269,6 +275,36 @@ export default function OwnedPage() {
                 onReorder={refreshData}
                 onRemove={refreshData}
                 onAdd={() => {}}
+              />
+            )}
+            {activeTab === "schedule" && (
+              <ScheduleCards
+                schedules={data.schedule}
+                onReorder={refreshData}
+                onRemove={refreshData}
+                onComplete={refreshData}
+                onAdd={() => {}}
+              />
+            )}
+            {activeTab === "health" && (
+              <HealthCard
+                metrics={data.health_metrics}
+                onAdd={async (metric) => {
+                  await fetch(`/api/ownership/${params.id}/health`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(metric),
+                  });
+                  refreshData();
+                }}
+                onRemove={async (metricId) => {
+                  await fetch(`/api/ownership/${params.id}/health`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ metric_id: metricId }),
+                  });
+                  refreshData();
+                }}
               />
             )}
           </div>

@@ -277,6 +277,12 @@ CREATE TABLE public.owned_pet_profiles (
   -- Left panel: food guide
   food_guide          JSONB NOT NULL DEFAULT '{}',
 
+  -- Left panel: schedule (vaccine, checkup, grooming, etc.)
+  schedule            JSONB NOT NULL DEFAULT '[]',
+
+  -- Left panel: health metrics (weight tracking, etc.)
+  health_metrics      JSONB NOT NULL DEFAULT '[]',
+
   -- Metadata
   is_active           BOOLEAN NOT NULL DEFAULT true,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),

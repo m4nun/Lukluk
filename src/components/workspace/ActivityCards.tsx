@@ -19,7 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
-import DeskCard from "./DeskCard";
+import CardWrapper from "./CardWrapper";
 import type { ActivityCard } from "@/lib/types";
 import {
   Mountain,
@@ -70,9 +70,9 @@ function getActivityIcon(icon: string) {
 }
 
 const DIFFICULTY_STYLES: Record<string, string> = {
-  easy: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  medium: "bg-amber-100 text-amber-700 border-amber-200",
-  hard: "bg-rose-100 text-rose-700 border-rose-200",
+  easy: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+  medium: "bg-amber-100 text-amber-700 border border-amber-200",
+  hard: "bg-rose-100 text-rose-700 border border-rose-200",
 };
 
 export default function ActivityCards({
@@ -129,42 +129,37 @@ export default function ActivityCards({
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={localActivities.map((a) => a.id)} strategy={rectSortingStrategy}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {localActivities.map((activity) => {
-            const IconComp = getActivityIcon(activity.icon);
-            return (
-              <DeskCard
-                key={activity.id}
-                id={activity.id}
-                petName={petName}
-                petSpecies={petSpecies}
-                petImage={petImage}
-                accentColor="emerald"
-                onRemove={() => handleRemove(activity.id)}
-              >
-                <div className="space-y-2.5">
-                  {/* Activity Image */}
+            {localActivities.map((activity) => {
+              const IconComp = getActivityIcon(activity.icon);
+              return (
+                <CardWrapper
+                  key={activity.id}
+                  id={activity.id}
+                  accentColor="emerald"
+                  onRemove={() => handleRemove(activity.id)}
+                >
+                  {/* Illustration / Icon */}
                   {activity.image ? (
-                    <div className="relative h-28 w-full overflow-hidden rounded-xl border border-gray-100">
+                    <div className="relative h-32 w-full overflow-t-xl">
                       <Image
                         src={activity.image}
                         alt={activity.name}
                         fill
-                        className="object-cover"
+                        className="object-cover rounded-t-xl"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
                   ) : (
-                    <div className="flex h-20 w-full items-center justify-center rounded-xl bg-emerald-50 border border-emerald-100">
-                      <IconComp className="h-8 w-8 text-emerald-500" />
+                    <div className="flex h-28 w-full items-center justify-center rounded-t-xl bg-emerald-50 border-b border-emerald-100">
+                      <IconComp className="h-10 w-10 text-emerald-400" />
                     </div>
                   )}
 
-                  {/* Activity Info */}
-                  <div>
+                  {/* Content */}
+                  <div className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <h4 className="text-sm font-bold text-gray-900 truncate">{activity.name}</h4>
                       <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${DIFFICULTY_STYLES[activity.difficulty] || ""}`}
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${DIFFICULTY_STYLES[activity.difficulty] || ""}`}
                       >
                         {activity.difficulty}
                       </span>
@@ -178,10 +173,9 @@ export default function ActivityCards({
                       </p>
                     )}
                   </div>
-                </div>
-              </DeskCard>
-            );
-          })}
+                </CardWrapper>
+              );
+            })}
           </div>
         </SortableContext>
       </DndContext>

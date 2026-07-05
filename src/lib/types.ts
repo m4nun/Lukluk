@@ -191,6 +191,36 @@ export interface FoodCard {
   notes?: string | null;
 }
 
+// ---- Schedule Card ----
+
+export type ScheduleEventType = "vaccine" | "checkup" | "grooming" | "medication" | "boarding" | "emergency" | "other";
+export type ScheduleStatus = "upcoming" | "done" | "overdue";
+
+export interface ScheduleCard {
+  id: string;
+  title: string;
+  event_type: ScheduleEventType;
+  date: string;
+  completed_date?: string | null;
+  recurring?: boolean;
+  recurrence_days?: number | null;
+  illustration?: string | null;
+  notes?: string | null;
+}
+
+// ---- Health Metric ----
+
+export type HealthMetricType = "weight";
+
+export interface HealthMetric {
+  id: string;
+  metric_type: HealthMetricType;
+  value: number;
+  unit: string;
+  recorded_date: string;
+  notes?: string | null;
+}
+
 // ---- Owner Experience ----
 
 export interface OwnerExperience {
