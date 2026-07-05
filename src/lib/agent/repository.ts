@@ -1,4 +1,4 @@
-import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, PetTypeProfile } from "@/lib/types";
+import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, PetTypeProfile, ActivityInterest } from "@/lib/types";
 
 // -- Domain types for repository --
 
@@ -16,12 +16,6 @@ export interface OwnedProfile {
   age_life_stage: string;
   got_date: string | null;
   pet_type: PetTypeProfile;
-}
-
-export interface ActivityEntry {
-  day: string;
-  activity: string;
-  time: string;
 }
 
 export interface FoodGuide {
@@ -53,9 +47,9 @@ export interface PlanningRepository {
   // Ownership (Care Agent)
   getOwnedProfile(ownedProfileId: string): Promise<OwnedProfile | null>;
   getActualExpenses(ownedProfileId: string): Promise<ExpenseItem[]>;
-  getActivitySchedule(ownedProfileId: string): Promise<ActivityEntry[]>;
+  getActivitySchedule(ownedProfileId: string): Promise<ActivityInterest[]>;
   getFoodGuide(ownedProfileId: string): Promise<FoodGuide>;
   replaceActualExpenses(ownedProfileId: string, expenses: ExpenseItem[]): Promise<void>;
-  replaceActivitySchedule(ownedProfileId: string, schedule: ActivityEntry[]): Promise<void>;
+  replaceActivitySchedule(ownedProfileId: string, activities: ActivityInterest[]): Promise<void>;
   replaceFoodGuide(ownedProfileId: string, guide: FoodGuide): Promise<void>;
 }

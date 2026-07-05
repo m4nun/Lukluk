@@ -163,6 +163,17 @@ export interface ConcernChecklistItem {
   note?: string | null;
 }
 
+// ---- Activity Interest ----
+
+export interface ActivityInterest {
+  name: string;
+  icon: string;
+  difficulty: "easy" | "medium" | "hard";
+  duration: string;
+  frequency: string;
+  notes?: string | null;
+}
+
 // ---- Owner Experience ----
 
 export interface OwnerExperience {

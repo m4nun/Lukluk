@@ -130,8 +130,8 @@ export async function runAgent(config: RunAgentConfig) {
 
   if (!calledTools) {
     const forcePrompt = config.agentType === "care"
-      ? "The user asked you something. You have tools available. Call update_actual_expenses, update_activity_schedule, or update_food_guide NOW with realistic data based on the CURRENT STATE provided. Do NOT ask the user for any IDs — you already have everything."
-      : "The user asked you something. You have tools available. Call update_expenses and update_concerns NOW with realistic data based on the CURRENT STATE provided. Do NOT ask the user for any IDs — you already have everything.";
+      ? "If the user asked about expenses, activities, or food, you have tools available — use update_actual_expenses, update_activity_schedule, or update_food_guide as appropriate."
+      : "If the user asked about costs or concerns, you have tools available — use update_expenses or update_concerns as appropriate.";
 
     result = await agent.invoke({
       messages: [

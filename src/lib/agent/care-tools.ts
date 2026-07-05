@@ -24,19 +24,22 @@ export function createCareTools(repo: PlanningRepository) {
   );
 
   const updateActivityScheduleTool = safeTool(
-    async ({ owned_profile_id, schedule }) => {
-      await repo.replaceActivitySchedule(owned_profile_id, schedule);
-      return `Updated activity schedule with ${schedule.length} entries.`;
+    async ({ owned_profile_id, activities }) => {
+      await repo.replaceActivitySchedule(owned_profile_id, activities);
+      return `Updated activity interests with ${activities.length} activities.`;
     },
     {
       name: "update_activity_schedule",
-      description: "Update the daily activity schedule for an owned pet.",
+      description: "Update the activity interests for an owned pet.",
       schema: z.object({
         owned_profile_id: z.string().uuid(),
-        schedule: z.array(z.object({
-          day: z.string(),
-          activity: z.string(),
-          time: z.string(),
+        activities: z.array(z.object({
+          name: z.string(),
+          icon: z.string(),
+          difficulty: z.enum(["easy", "medium", "hard"]),
+          duration: z.string(),
+          frequency: z.string(),
+          notes: z.string().optional().nullable(),
         })),
       }),
     }

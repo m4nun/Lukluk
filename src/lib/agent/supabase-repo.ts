@@ -1,6 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
-import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow, ActivityEntry, FoodGuide } from "./repository";
-import type { ExpenseItem, ConcernChecklistItem, DecisionStatus } from "@/lib/types";
+import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow, FoodGuide } from "./repository";
+import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, ActivityInterest } from "@/lib/types";
 
 export class SupabasePlanningRepository implements PlanningRepository {
   async getProfile(id: string): Promise<PlanningProfileWithPetType | null> {
@@ -151,7 +151,7 @@ export class SupabasePlanningRepository implements PlanningRepository {
     return (profile?.actual_expenses || []) as ExpenseItem[];
   }
 
-  async getActivitySchedule(ownedProfileId: string): Promise<ActivityEntry[]> {
+  async getActivitySchedule(ownedProfileId: string): Promise<ActivityInterest[]> {
     const supabase = getSupabaseAdmin();
     const { data: profile } = await supabase
       .from("owned_pet_profiles")
@@ -159,7 +159,7 @@ export class SupabasePlanningRepository implements PlanningRepository {
       .eq("id", ownedProfileId)
       .single();
 
-    return (profile?.activity_schedule || []) as ActivityEntry[];
+    return (profile?.activity_schedule || []) as ActivityInterest[];
   }
 
   async getFoodGuide(ownedProfileId: string): Promise<FoodGuide> {
@@ -183,11 +183,11 @@ export class SupabasePlanningRepository implements PlanningRepository {
     if (error) throw new Error(`replaceActualExpenses: ${error.message}`);
   }
 
-  async replaceActivitySchedule(ownedProfileId: string, schedule: ActivityEntry[]): Promise<void> {
+  async replaceActivitySchedule(ownedProfileId: string, activities: ActivityInterest[]): Promise<void> {
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("owned_pet_profiles")
-      .update({ activity_schedule: schedule })
+      .update({ activity_schedule: activities })
       .eq("id", ownedProfileId);
 
     if (error) throw new Error(`replaceActivitySchedule: ${error.message}`);

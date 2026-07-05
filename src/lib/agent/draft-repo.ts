@@ -1,5 +1,5 @@
-import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow, ActivityEntry, FoodGuide } from "./repository";
-import type { ExpenseItem, ConcernChecklistItem, DecisionStatus } from "@/lib/types";
+import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow, FoodGuide } from "./repository";
+import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, ActivityInterest } from "@/lib/types";
 import { SupabasePlanningRepository } from "./supabase-repo";
 import type { DraftStore } from "./draft-store";
 
@@ -66,14 +66,14 @@ export class DraftPlanningRepository implements PlanningRepository {
     });
   }
 
-  async replaceActivitySchedule(ownedProfileId: string, schedule: ActivityEntry[]): Promise<void> {
+  async replaceActivitySchedule(ownedProfileId: string, activities: ActivityInterest[]): Promise<void> {
     const current = await this.real.getActivitySchedule(ownedProfileId);
     await this.drafts.create({
       planning_pet_profile_id: ownedProfileId,
       user_id: this.userId,
       target: "activity_schedule",
       current_value: current,
-      proposed_value: schedule,
+      proposed_value: activities,
     });
   }
 
@@ -121,7 +121,7 @@ export async function confirmDraft(draftId: string, drafts: DraftStore): Promise
       await repo.replaceActualExpenses(draft.planning_pet_profile_id, draft.proposed_value as ExpenseItem[]);
       break;
     case "activity_schedule":
-      await repo.replaceActivitySchedule(draft.planning_pet_profile_id, draft.proposed_value as ActivityEntry[]);
+      await repo.replaceActivitySchedule(draft.planning_pet_profile_id, draft.proposed_value as ActivityInterest[]);
       break;
     case "food_guide":
       await repo.replaceFoodGuide(draft.planning_pet_profile_id, draft.proposed_value as FoodGuide);

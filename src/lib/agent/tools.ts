@@ -147,19 +147,22 @@ export function createCareTools(repo: PlanningRepository) {
   );
 
   const updateActivityScheduleTool = safeTool(
-    async ({ owned_profile_id, schedule }) => {
-      await repo.replaceActivitySchedule(owned_profile_id, schedule);
-      return `Updated activity schedule with ${schedule.length} entries.`;
+    async ({ owned_profile_id, activities }) => {
+      await repo.replaceActivitySchedule(owned_profile_id, activities);
+      return `Updated activity interests with ${activities.length} activities.`;
     },
     {
       name: "update_activity_schedule",
-      description: `Update the daily activity schedule for an owned pet. Call this when user asks about routine, schedule, daily activities, exercise, playtime, or wants to build a care routine. The schedule array replaces all existing entries. Each item must have: day (string like "Monday"), activity (string like "Morning walk"), time (string like "07:00"). Include entries for every day of the week.`,
+      description: `Update the activity interests for an owned pet. Call this when user wants to add, remove, or change activities their pet enjoys. The activities array replaces all existing entries. Each item must have: name (string like "Hiking"), icon (string like "mountain"), difficulty ("easy"|"medium"|"hard"), duration (string like "1-2 hours"), frequency (string like "2x/week"), and optional notes (string). Example: [{name:"Hiking", icon:"mountain", difficulty:"medium", duration:"1-2 hours", frequency:"2x/week", notes:"Mountain trails preferred"}]`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
-        schedule: z.array(z.object({
-          day: z.string(),
-          activity: z.string(),
-          time: z.string(),
+        activities: z.array(z.object({
+          name: z.string(),
+          icon: z.string(),
+          difficulty: z.enum(["easy", "medium", "hard"]),
+          duration: z.string(),
+          frequency: z.string(),
+          notes: z.string().optional().nullable(),
         })),
       }),
     }

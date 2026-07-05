@@ -6,10 +6,12 @@ import Link from "next/link";
 import Image from "next/image";
 import AgentChat from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
-import ActivityCalendar from "@/components/workspace/ActivityCalendar";
+import ActivityCards from "@/components/workspace/ActivityCards";
+import FoodGuideCard from "@/components/workspace/FoodGuideCard";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
-import { ArrowLeft, PawPrint, AlertTriangle, Utensils } from "lucide-react";
+import { ArrowLeft, PawPrint, AlertTriangle } from "lucide-react";
+import type { ActivityInterest } from "@/lib/types";
 
 interface OwnedData {
   id: string;
@@ -22,7 +24,7 @@ interface OwnedData {
     amount_thb: number;
     note?: string;
   }>;
-  activity_schedule: Array<{ day: string; activity: string; time: string }>;
+  activity_schedule: ActivityInterest[];
   food_guide: { brand?: string; amount?: string; frequency?: string; notes?: string };
   pet_type_profiles: { name: string; species: string; mbti_label: string };
 }
@@ -198,46 +200,11 @@ export default function OwnedPage() {
           )}
 
           {activeTab === "activity" && (
-            <ActivityCalendar schedule={data.activity_schedule} />
+            <ActivityCards activities={data.activity_schedule} />
           )}
 
           {activeTab === "food" && (
-            <div>
-              {!data.food_guide.brand ? (
-                <EmptyState
-                  icon={<Utensils className="h-8 w-8" />}
-                  title="No food guide yet"
-                  description="Chat with the Care Agent for personalized feeding recommendations."
-                  variant="accent"
-                />
-              ) : (
-                <div className="rounded-xl border border-border bg-card p-5">
-                  <h4 className="text-sm font-semibold mb-3">
-                    Feeding Guide
-                  </h4>
-                  <div className="space-y-0">
-                    {[
-                      { label: "Brand", value: data.food_guide.brand },
-                      { label: "Amount per serving", value: data.food_guide.amount },
-                      { label: "Frequency", value: data.food_guide.frequency },
-                      { label: "Notes", value: data.food_guide.notes },
-                    ]
-                      .filter((r) => r.value)
-                      .map((r) => (
-                        <div
-                          key={r.label}
-                          className="flex justify-between border-b border-border py-2 text-sm last:border-b-0"
-                        >
-                          <span className="text-muted-foreground">
-                            {r.label}
-                          </span>
-                          <span className="font-medium">{r.value}</span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <FoodGuideCard guide={data.food_guide} />
           )}
         </div>
 
