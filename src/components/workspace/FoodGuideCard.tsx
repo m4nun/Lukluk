@@ -15,7 +15,7 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  rectSortingStrategy,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
@@ -37,7 +37,6 @@ interface FoodGuideCardProps {
 function normalizeCards(input: FoodGuideCardProps["cards"]): FoodCard[] {
   if (!input) return [];
   if (Array.isArray(input)) return input;
-  // Old format: single object
   if (input.brand || input.amount || input.frequency || input.notes) {
     return [{
       id: "food-1",
@@ -104,75 +103,82 @@ export default function FoodGuideCard({
   }
 
   return (
-    <div className="bg-gradient-to-br from-amber-50/50 via-stone-50/30 to-neutral-50/50 rounded-xl p-4 min-h-[200px]">
+    <div className="space-y-3">
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={localCards.map((c) => c.id)} strategy={rectSortingStrategy}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {localCards.map((card) => (
-              <DeskCard
-                key={card.id}
-                id={card.id}
-                petName={petName}
-                petSpecies={petSpecies}
-                petImage={petImage}
-                accentColor="amber"
-                onRemove={() => handleRemove(card.id)}
-              >
-                {/* Card Title */}
-                <div className="flex items-center gap-2 mb-3">
-                  {card.image ? (
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border">
-                      <Image
-                        src={card.image}
-                        alt={card.brand}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-100">
-                      <Utensils className="h-5 w-5 text-amber-600" />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-semibold truncate">{card.name}</h4>
-                    <p className="text-xs text-muted-foreground truncate">{card.brand}</p>
+        <SortableContext items={localCards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+          {localCards.map((card) => (
+            <DeskCard
+              key={card.id}
+              id={card.id}
+              petName={petName}
+              petSpecies={petSpecies}
+              petImage={petImage}
+              accentColor="amber"
+              onRemove={() => handleRemove(card.id)}
+            >
+              <div className="space-y-2.5">
+                {/* Food Image */}
+                {card.image ? (
+                  <div className="relative h-28 w-full overflow-hidden rounded-xl border border-gray-100">
+                    <Image
+                      src={card.image}
+                      alt={card.brand || card.name}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                   </div>
+                ) : (
+                  <div className="flex h-20 w-full items-center justify-center rounded-xl bg-amber-50 border border-amber-100">
+                    <Utensils className="h-8 w-8 text-amber-500" />
+                  </div>
+                )}
+
+                {/* Food Info */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 truncate">{card.name}</h4>
+                  {card.brand && (
+                    <p className="text-xs text-gray-500 truncate">{card.brand}</p>
+                  )}
                 </div>
 
-                {/* Card Details */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs">
-                    <Scale className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-muted-foreground">Amount:</span>
-                    <span className="font-medium">{card.amount}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-muted-foreground">Schedule:</span>
-                    <span className="font-medium">{card.frequency}</span>
-                  </div>
+                {/* Details */}
+                <div className="space-y-1.5">
+                  {card.amount && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <Scale className="h-3.5 w-3.5 text-gray-400" />
+                      <span className="text-gray-500">Amount:</span>
+                      <span className="font-medium text-gray-700">{card.amount}</span>
+                    </div>
+                  )}
+                  {card.frequency && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <Clock className="h-3.5 w-3.5 text-gray-400" />
+                      <span className="text-gray-500">Schedule:</span>
+                      <span className="font-medium text-gray-700">{card.frequency}</span>
+                    </div>
+                  )}
                   {card.notes && (
-                    <div className="flex items-start gap-2 text-xs pt-2 border-t border-border/50">
-                      <StickyNote className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">{card.notes}</span>
+                    <div className="flex items-start gap-2 text-xs pt-1.5 mt-1.5 border-t border-gray-100">
+                      <StickyNote className="h-3.5 w-3.5 text-gray-400 shrink-0 mt-0.5" />
+                      <span className="text-gray-500 leading-relaxed">{card.notes}</span>
                     </div>
                   )}
                 </div>
-              </DeskCard>
-            ))}
+              </div>
+            </DeskCard>
+          ))}
 
-            {/* Add Card Button */}
-            {onAdd && (
-              <button
-                onClick={onAdd}
-                className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-white/50 p-6 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors min-h-[180px]"
-              >
-                <Plus className="h-8 w-8" />
-                <span className="text-sm font-medium">Add Food Card</span>
-              </button>
-            )}
-          </div>
+          {/* Add Card Button */}
+          {onAdd && (
+            <button
+              onClick={onAdd}
+              className="w-full flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 p-6 text-gray-400 hover:border-amber-300 hover:text-amber-600 transition-colors"
+            >
+              <Plus className="h-8 w-8" />
+              <span className="text-sm font-medium">Add Food Card</span>
+            </button>
+          )}
         </SortableContext>
       </DndContext>
     </div>
