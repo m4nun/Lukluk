@@ -10,7 +10,7 @@ export const concernSchema = z.object({
 export const petTypeProfileYamlSchema = z.object({
   id: z.string().min(1).regex(/^[a-z0-9-]+$/, "must be kebab-case slug"),
   name: z.string().min(1),
-  species: z.enum(["dog", "cat", "rabbit", "bird", "fish", "reptile", "small_mammal", "other"]),
+  species: z.enum(["dog", "cat", "rabbit", "bird", "fish", "reptile", "other"]),
   breed_or_category: z.string().min(1),
   description: z.string().min(1),
 

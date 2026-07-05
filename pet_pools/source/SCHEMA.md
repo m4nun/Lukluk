@@ -7,7 +7,7 @@
 # ---- Identity ----
 id: string              # unique slug, e.g. "golden-retriever"
 name: string            # display name, e.g. "Golden Retriever"
-species: string         # "dog" | "cat" | "rabbit" | "bird" | "fish" | "reptile" | "small_mammal" | "other"
+species: string         # "dog" | "cat" | "rabbit" | "bird" | "fish" | "reptile" | "other"
 breed_or_category: string  # breed name or general category
 description: string     # 1-2 sentence overview for match results
 

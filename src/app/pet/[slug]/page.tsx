@@ -15,11 +15,34 @@ import {
   Heart,
 } from "lucide-react";
 
-const MBTI_WORDS: Record<string, string[]> = {
-  R: ["Reserved", "Outgoing"],
-  C: ["Calm", "Energetic"],
-  A: ["Affectionate", "Independent"],
-  S: ["Sophisticated", "Playful"],
+const MBTI_WORDS: Record<string, string> = {
+  I: "Introverted",
+  N: "Intuitive",
+  F: "Feeling",
+  J: "Judging",
+  E: "Extraverted",
+  S: "Sensing",
+  T: "Thinking",
+  P: "Perceiving",
+};
+
+const MBTI_DESCRIPTIONS: Record<string, string> = {
+  INFJ: "The Advocate",
+  INTJ: "The Architect",
+  INFP: "The Mediator",
+  INTP: "The Logician",
+  ISFJ: "The Defender",
+  ISTJ: "The Logistician",
+  ISFP: "The Adventurer",
+  ISTP: "The Virtuoso",
+  ENFJ: "The Protagonist",
+  ENTJ: "The Commander",
+  ENFP: "The Campaigner",
+  ENTP: "The Debater",
+  ESFJ: "The Consul",
+  ESTJ: "The Executive",
+  ESFP: "The Entertainer",
+  ESTP: "The Entrepreneur",
 };
 
 const TRAIT_COLORS = [
@@ -223,8 +246,9 @@ export default async function PetDetailPage({
 
   const mbtiLetters = profile.mbti_label.split("");
   const personalityWords = mbtiLetters.map(
-    (letter) => MBTI_WORDS[letter]?.[0] || letter
+    (letter) => MBTI_WORDS[letter] || letter
   );
+  const mbtiTitle = MBTI_DESCRIPTIONS[profile.mbti_label] || profile.mbti_label;
 
   const careCards = [
     {
@@ -348,14 +372,14 @@ export default async function PetDetailPage({
             {/* Personality Type Badge */}
             <div className="mb-6 inline-flex items-center gap-4 rounded-[20px] bg-purple-500 px-6 py-4 shadow-md animate-scale-in delay-1">
               <span
-                className="text-3xl font-bold tracking-widest text-white"
+                className="text-3xl font-bold text-white"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 {profile.mbti_label}
               </span>
               <div className="text-sm leading-snug text-white/90">
                 <strong className="block font-bold text-white">
-                  {personalityWords.join(" · ")}
+                  {mbtiTitle} — {personalityWords.join(" · ")}
                 </strong>
                 Personality archetype based on 8 lifestyle dimensions
               </div>

@@ -3,7 +3,7 @@ export interface Database {}
 
 // ---- Domain Types ----
 
-export type Species = "dog" | "cat" | "rabbit" | "bird" | "fish" | "reptile" | "small_mammal" | "other";
+export type Species = "dog" | "cat" | "rabbit" | "bird" | "fish" | "reptile" | "other";
 
 export type BudgetTier = "low" | "medium" | "high" | "very_high";
 export type TimeTier = "low" | "medium" | "high";
