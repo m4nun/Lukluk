@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import AgentChat from "@/components/agent/AgentChat";
+import type { ChatMessage } from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ActivityCards from "@/components/workspace/ActivityCards";
 import FoodGuideCard from "@/components/workspace/FoodGuideCard";
@@ -54,6 +55,7 @@ export default function OwnedPage() {
   const [error, setError] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
@@ -338,6 +340,8 @@ export default function OwnedPage() {
             onMessageSent={refreshData}
             externalInput={chatInput}
             onExternalInputConsumed={() => setChatInput("")}
+            messages={chatMessages}
+            onMessagesChange={setChatMessages}
           />
         </div>
       </div>
@@ -384,6 +388,8 @@ export default function OwnedPage() {
                 onMessageSent={refreshData}
                 externalInput={chatInput}
                 onExternalInputConsumed={() => setChatInput("")}
+                messages={chatMessages}
+                onMessagesChange={setChatMessages}
               />
             </div>
           </div>

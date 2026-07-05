@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import AgentChat from "@/components/agent/AgentChat";
+import type { ChatMessage } from "@/components/agent/AgentChat";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ConcernChecklist from "@/components/workspace/ConcernChecklist";
 import DecisionStatus from "@/components/workspace/DecisionStatus";
@@ -60,6 +61,7 @@ export default function WorkspacePage() {
   const [transitionError, setTransitionError] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -370,6 +372,8 @@ export default function WorkspacePage() {
             onMessageSent={refreshData}
             externalInput={chatInput}
             onExternalInputConsumed={() => setChatInput("")}
+            messages={chatMessages}
+            onMessagesChange={setChatMessages}
           />
         </div>
       </div>
@@ -416,6 +420,8 @@ export default function WorkspacePage() {
                 onMessageSent={refreshData}
                 externalInput={chatInput}
                 onExternalInputConsumed={() => setChatInput("")}
+                messages={chatMessages}
+                onMessagesChange={setChatMessages}
               />
             </div>
           </div>

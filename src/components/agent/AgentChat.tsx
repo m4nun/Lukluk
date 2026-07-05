@@ -24,7 +24,7 @@ interface ProgressEvent {
   message: string;
 }
 
-interface ChatMessage {
+export interface ChatMessage {
   role: "user" | "assistant";
   text: string;
   progress?: ProgressEvent[];
@@ -41,6 +41,8 @@ interface AgentChatProps {
   onMessageSent?: () => void;
   externalInput?: string;
   onExternalInputConsumed?: () => void;
+  messages?: ChatMessage[];
+  onMessagesChange?: (messages: ChatMessage[]) => void;
 }
 
 function ProgressIndicator({ event }: { event: ProgressEvent }) {
@@ -69,8 +71,20 @@ export default function AgentChat({
   onMessageSent,
   externalInput,
   onExternalInputConsumed,
+  messages: externalMessages,
+  onMessagesChange,
 }: AgentChatProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [internalMessages, setInternalMessages] = useState<ChatMessage[]>([]);
+  const messages = externalMessages ?? internalMessages;
+
+  const updateMessages = useCallback((updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+    if (onMessagesChange) {
+      const newMessages = typeof updater === "function" ? updater(messages) : updater;
+      onMessagesChange(newMessages);
+    } else {
+      setInternalMessages(updater);
+    }
+  }, [onMessagesChange, messages]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -89,7 +103,7 @@ export default function AgentChat({
     if (!messageText || loading) return;
 
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", text: messageText }]);
+    updateMessages((prev) => [...prev, { role: "user", text: messageText }]);
     setError("");
     setLoading(true);
     setProgress([]);
@@ -133,7 +147,7 @@ export default function AgentChat({
               progressRef.current = [...progressRef.current, event];
               setProgress([...progressRef.current]);
             } else if (eventType === "done") {
-              setMessages((prev) => [
+              updateMessages((prev) => [
                 ...prev,
                 {
                   role: "assistant",
@@ -152,7 +166,7 @@ export default function AgentChat({
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
-      setMessages((prev) => [
+      updateMessages((prev) => [
         ...prev,
         {
           role: "assistant",
