@@ -1,6 +1,6 @@
 import { createAgent } from "./graph";
 import { createClient } from "@/lib/supabase/server";
-import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import { HumanMessage, AIMessage, ToolMessage } from "@langchain/core/messages";
 import type { StructuredTool } from "@langchain/core/tools";
 import type { PlanningRepository } from "./repository";
 
@@ -14,6 +14,13 @@ interface RunAgentConfig {
   repo: PlanningRepository;
   idParam: string;
   message: string;
+}
+
+export interface AgentStep {
+  type: "thinking" | "tool_call" | "tool_result" | "response";
+  content: string;
+  toolName?: string;
+  toolArgs?: Record<string, unknown>;
 }
 
 async function fetchDecisionContext(repo: PlanningRepository, profileId: string): Promise<string> {
@@ -48,6 +55,44 @@ async function fetchCareContext(repo: PlanningRepository, profileId: string): Pr
   } catch {
     return "";
   }
+}
+
+function extractSteps(messages: AIMessage[]): AgentStep[] {
+  const steps: AgentStep[] = [];
+
+  for (const msg of messages) {
+    if (msg.tool_calls?.length) {
+      for (const call of msg.tool_calls) {
+        steps.push({
+          type: "tool_call",
+          content: `Calling ${call.name}`,
+          toolName: call.name,
+          toolArgs: call.args as Record<string, unknown>,
+        });
+      }
+    }
+
+    if (msg.constructor.name === "ToolMessage") {
+      const toolMsg = msg as ToolMessage;
+      steps.push({
+        type: "tool_result",
+        content: typeof toolMsg.content === "string" ? toolMsg.content : JSON.stringify(toolMsg.content),
+        toolName: toolMsg.name,
+      });
+    }
+
+    if (msg.content && !msg.tool_calls?.length && msg.constructor.name !== "ToolMessage") {
+      const text = typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
+      if (text.trim()) {
+        steps.push({
+          type: "response",
+          content: text,
+        });
+      }
+    }
+  }
+
+  return steps;
 }
 
 export async function runAgent(config: RunAgentConfig) {
@@ -169,8 +214,13 @@ Call web_search NOW with a relevant query.`;
       ? lastAiMessage.content
       : JSON.stringify(lastAiMessage?.content);
 
+  const steps = extractSteps(result.messages.filter(
+    (m) => m.constructor.name === "AIMessage" || m.constructor.name === "ToolMessage",
+  ) as (AIMessage | ToolMessage)[]);
+
   return {
     response: responseText,
+    steps,
     thread_id: thread?.thread_id || "",
   };
 }
