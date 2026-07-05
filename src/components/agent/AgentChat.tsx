@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   Conversation,
   ConversationContent,
@@ -39,6 +39,8 @@ interface AgentChatProps {
   emptyTitle: string;
   emptyDescription: string;
   onMessageSent?: () => void;
+  externalInput?: string;
+  onExternalInputConsumed?: () => void;
 }
 
 function ProgressIndicator({ event }: { event: ProgressEvent }) {
@@ -65,6 +67,8 @@ export default function AgentChat({
   emptyTitle,
   emptyDescription,
   onMessageSent,
+  externalInput,
+  onExternalInputConsumed,
 }: AgentChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -72,6 +76,13 @@ export default function AgentChat({
   const [error, setError] = useState("");
   const [progress, setProgress] = useState<ProgressEvent[]>([]);
   const progressRef = useRef<ProgressEvent[]>([]);
+
+  useEffect(() => {
+    if (externalInput) {
+      setInput(externalInput);
+      onExternalInputConsumed?.();
+    }
+  }, [externalInput, onExternalInputConsumed]);
 
   const handleSend = useCallback(async (text?: string) => {
     const messageText = (text ?? input).trim();

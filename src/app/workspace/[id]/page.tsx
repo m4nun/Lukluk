@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AgentChat from "@/components/agent/AgentChat";
@@ -47,6 +47,30 @@ export default function WorkspacePage() {
   const [activeTab, setActiveTab] = useState<"expenses" | "concerns">("expenses");
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [transitionError, setTransitionError] = useState("");
+  const [chatInput, setChatInput] = useState("");
+
+  const handleEmbedToChat = useCallback((text: string) => {
+    setChatInput(text);
+  }, []);
+
+  function handleConcernStatusChange(concernId: string, newStatus: string) {
+    setData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        concern_checklist: prev.concern_checklist.map((c) =>
+          c.concern_id === concernId
+            ? { ...c, status: newStatus, resolved_at: newStatus === "resolved" ? new Date().toISOString() : c.resolved_at }
+            : c
+        ),
+      };
+    });
+  }
+
+  const allConcernsResolved = data
+    ? data.concern_checklist.length > 0 &&
+      data.concern_checklist.every((c) => c.status === "resolved" || c.status === "not_applicable")
+    : false;
 
   function switchTab(tab: "expenses" | "concerns") {
     setActiveTab(tab);
@@ -251,9 +275,13 @@ export default function WorkspacePage() {
           {/* Content */}
           <div className="px-6 py-5">
             {activeTab === "expenses" ? (
-              <ExpenseTable expenses={data.estimated_expenses} />
+              <ExpenseTable expenses={data.estimated_expenses} onEmbedToChat={handleEmbedToChat} />
             ) : (
-              <ConcernChecklist concerns={data.concern_checklist} />
+              <ConcernChecklist
+                concerns={data.concern_checklist}
+                onEmbedToChat={handleEmbedToChat}
+                onStatusChange={handleConcernStatusChange}
+              />
             )}
           </div>
 
@@ -263,11 +291,19 @@ export default function WorkspacePage() {
           {/* Ownership form */}
           {!data.has_ownership && (
             <div className="px-6 pb-6">
-              <OwnershipForm
-                onSubmit={handleOwnership}
-                error={transitionError}
-                petTypeName={data.pet_type_profiles.name}
-              />
+              {allConcernsResolved ? (
+                <OwnershipForm
+                  onSubmit={handleOwnership}
+                  error={transitionError}
+                  petTypeName={data.pet_type_profiles.name}
+                />
+              ) : (
+                <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Resolve all concerns in the checklist to switch to ownership.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -295,6 +331,8 @@ export default function WorkspacePage() {
             emptyTitle="Hi! I'm your Decision Agent"
             emptyDescription="Ask me anything about this pet type — costs, concerns, whether it fits your lifestyle."
             onMessageSent={refreshData}
+            externalInput={chatInput}
+            onExternalInputConsumed={() => setChatInput("")}
           />
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { useHighlight, useRowHighlight } from "@/hooks/use-highlight";
-import { CircleDollarSign } from "lucide-react";
+import { CircleDollarSign, MessageSquarePlus } from "lucide-react";
 
 interface ExpenseItem {
   category: string;
@@ -16,6 +16,7 @@ interface ExpenseTableProps {
   expenses: ExpenseItem[] | null;
   variant?: "planning" | "ownership";
   highlight?: boolean;
+  onEmbedToChat?: (text: string) => void;
 }
 
 const planningLabels: Record<string, string> = {
@@ -37,6 +38,7 @@ export default function ExpenseTable({
   expenses,
   variant = "planning",
   highlight: externalHighlight,
+  onEmbedToChat,
 }: ExpenseTableProps) {
   const internalHighlight = useHighlight(expenses);
   const isHighlighted = externalHighlight ?? internalHighlight;
@@ -109,6 +111,15 @@ export default function ExpenseTable({
                     <span className="ml-3 max-w-[160px] truncate text-xs text-muted-foreground">
                       {e.note}
                     </span>
+                  )}
+                  {onEmbedToChat && (
+                    <button
+                      onClick={() => onEmbedToChat(`Tell me more about the "${e.item}" expense (${e.amount_thb} THB)`)}
+                      className="ml-2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                      title="Ask agent about this"
+                    >
+                      <MessageSquarePlus className="h-3.5 w-3.5" />
+                    </button>
                   )}
                 </div>
               );

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { useHighlight, useRowHighlight } from "@/hooks/use-highlight";
+import { MessageSquarePlus, Check, Circle } from "lucide-react";
 
 interface ConcernItem {
   concern_id: string;
@@ -16,6 +18,8 @@ interface ConcernChecklistProps {
   concerns: ConcernItem[] | null;
   readonly?: boolean;
   highlight?: boolean;
+  onEmbedToChat?: (text: string) => void;
+  onStatusChange?: (concernId: string, status: string) => void;
 }
 
 function statusDot(status: string) {
@@ -55,10 +59,13 @@ export default function ConcernChecklist({
   concerns,
   readonly = false,
   highlight: externalHighlight,
+  onEmbedToChat,
+  onStatusChange,
 }: ConcernChecklistProps) {
   const internalHighlight = useHighlight(concerns);
   const isHighlighted = externalHighlight ?? internalHighlight;
   const highlightedRows = useRowHighlight(concerns);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   if (concerns === null) {
     return <LoadingSkeleton variant="table" rows={5} />;
@@ -75,7 +82,6 @@ export default function ConcernChecklist({
     );
   }
 
-  // Deduplicate by concern_id
   const seen = new Set<string>();
   const unique = concerns.filter((c) => {
     if (seen.has(c.concern_id)) return false;
@@ -96,6 +102,26 @@ export default function ConcernChecklist({
   } else if (allNA) {
     summary = "All concerns marked not applicable";
     summaryColor = "text-muted-foreground";
+  }
+
+  async function toggleConcern(concernId: string, currentStatus: string) {
+    if (readonly || updatingId) return;
+    const newStatus = currentStatus === "resolved" ? "unresolved" : "resolved";
+    setUpdatingId(concernId);
+    try {
+      const res = await fetch(`/api/planning/${concernId}/concerns`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ concern_id: concernId, status: newStatus }),
+      });
+      if (res.ok) {
+        onStatusChange?.(concernId, newStatus);
+      }
+    } catch {
+      // silent fail
+    } finally {
+      setUpdatingId(null);
+    }
   }
 
   return (
@@ -128,11 +154,29 @@ export default function ConcernChecklist({
                   : "hover:bg-accent/50"
               }`}
             >
-              <span
-                className={`mt-1 h-3 w-3 shrink-0 rounded-full ${statusDot(c.status)}`}
-              />
+              {!readonly && (
+                <button
+                  onClick={() => toggleConcern(c.concern_id, c.status)}
+                  disabled={updatingId === c.concern_id}
+                  className="mt-0.5 shrink-0 transition-transform hover:scale-110"
+                  title={c.status === "resolved" ? "Mark unresolved" : "Mark resolved"}
+                >
+                  {c.status === "resolved" ? (
+                    <Check className="h-4 w-4 text-success" />
+                  ) : (
+                    <Circle className="h-4 w-4 text-muted-foreground hover:text-success" />
+                  )}
+                </button>
+              )}
+              {readonly && (
+                <span
+                  className={`mt-1 h-3 w-3 shrink-0 rounded-full ${statusDot(c.status)}`}
+                />
+              )}
               <div className="flex-1 min-w-0">
-                <span className="text-sm font-medium">{c.title}</span>
+                <span className={`text-sm font-medium ${c.status === "resolved" ? "line-through text-muted-foreground" : ""}`}>
+                  {c.title}
+                </span>
                 {c.note && (
                   <p className="mt-0.5 text-xs italic text-muted-foreground">
                     {c.note}
@@ -149,11 +193,22 @@ export default function ConcernChecklist({
                   </p>
                 )}
               </div>
-              <span
-                className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(c.status)}`}
-              >
-                {statusLabel(c.status)}
-              </span>
+              <div className="flex items-center gap-1 shrink-0">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(c.status)}`}
+                >
+                  {statusLabel(c.status)}
+                </span>
+                {onEmbedToChat && (
+                  <button
+                    onClick={() => onEmbedToChat(`Tell me more about "${c.title}" concern`)}
+                    className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                    title="Ask agent about this"
+                  >
+                    <MessageSquarePlus className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
