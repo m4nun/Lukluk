@@ -2,6 +2,7 @@
 
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
+import { useHighlight, useRowHighlight } from "@/hooks/use-highlight";
 import { CircleDollarSign } from "lucide-react";
 
 interface ExpenseItem {
@@ -14,6 +15,7 @@ interface ExpenseItem {
 interface ExpenseTableProps {
   expenses: ExpenseItem[] | null;
   variant?: "planning" | "ownership";
+  highlight?: boolean;
 }
 
 const planningLabels: Record<string, string> = {
@@ -34,7 +36,12 @@ const ownershipLabels: Record<string, string> = {
 export default function ExpenseTable({
   expenses,
   variant = "planning",
+  highlight: externalHighlight,
 }: ExpenseTableProps) {
+  const internalHighlight = useHighlight(expenses);
+  const isHighlighted = externalHighlight ?? internalHighlight;
+  const highlightedRows = useRowHighlight(expenses);
+
   if (expenses === null) {
     return <LoadingSkeleton variant="table" rows={6} />;
   }
@@ -55,7 +62,13 @@ export default function ExpenseTable({
   const grandTotal = expenses.reduce((sum, e) => sum + e.amount_thb, 0);
 
   return (
-    <div className="space-y-4">
+    <div
+      className={`space-y-4 rounded-lg transition-all duration-500 ${
+        isHighlighted
+          ? "bg-primary/10 ring-2 ring-primary/30 shadow-lg shadow-primary/10"
+          : ""
+      }`}
+    >
       {allCategories.map((cat) => {
         const items = expenses.filter((e) => e.category === cat);
         if (items.length === 0) return null;
@@ -75,22 +88,31 @@ export default function ExpenseTable({
                 {total.toLocaleString()} THB
               </span>
             </div>
-            {items.map((e, i) => (
-              <div
-                key={i}
-                className="flex items-center border-t border-border px-4 py-2.5 transition-colors hover:bg-primary/5 last:border-b-0"
-              >
-                <span className="flex-1 text-sm">{e.item}</span>
-                <span className="min-w-[100px] text-right text-sm font-semibold tabular-nums">
-                  {e.amount_thb.toLocaleString()} THB
-                </span>
-                {e.note && (
-                  <span className="ml-3 max-w-[160px] truncate text-xs text-muted-foreground">
-                    {e.note}
+            {items.map((e, i) => {
+              const rowKey = `${e.category}-${e.item}`;
+              const isNew = highlightedRows.has(rowKey);
+
+              return (
+                <div
+                  key={i}
+                  className={`flex items-center border-t border-border px-4 py-2.5 transition-all duration-500 last:border-b-0 ${
+                    isNew
+                      ? "bg-primary/20 shadow-inner"
+                      : "hover:bg-primary/5"
+                  }`}
+                >
+                  <span className="flex-1 text-sm">{e.item}</span>
+                  <span className="min-w-[100px] text-right text-sm font-semibold tabular-nums">
+                    {e.amount_thb.toLocaleString()} THB
                   </span>
-                )}
-              </div>
-            ))}
+                  {e.note && (
+                    <span className="ml-3 max-w-[160px] truncate text-xs text-muted-foreground">
+                      {e.note}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </section>
         );
       })}

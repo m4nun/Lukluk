@@ -2,6 +2,7 @@
 
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
+import { useHighlight, useRowHighlight } from "@/hooks/use-highlight";
 
 interface ConcernItem {
   concern_id: string;
@@ -14,6 +15,7 @@ interface ConcernItem {
 interface ConcernChecklistProps {
   concerns: ConcernItem[] | null;
   readonly?: boolean;
+  highlight?: boolean;
 }
 
 function statusDot(status: string) {
@@ -52,7 +54,12 @@ function statusLabel(status: string) {
 export default function ConcernChecklist({
   concerns,
   readonly = false,
+  highlight: externalHighlight,
 }: ConcernChecklistProps) {
+  const internalHighlight = useHighlight(concerns);
+  const isHighlighted = externalHighlight ?? internalHighlight;
+  const highlightedRows = useRowHighlight(concerns);
+
   if (concerns === null) {
     return <LoadingSkeleton variant="table" rows={5} />;
   }
@@ -92,7 +99,13 @@ export default function ConcernChecklist({
   }
 
   return (
-    <div>
+    <div
+      className={`rounded-lg transition-all duration-500 ${
+        isHighlighted
+          ? "bg-primary/10 ring-2 ring-primary/30 shadow-lg shadow-primary/10"
+          : ""
+      }`}
+    >
       <div className="mb-3 flex items-center gap-2">
         <span
           className={`h-2.5 w-2.5 rounded-full ${allResolved ? "bg-success" : "bg-warning"}`}
@@ -103,39 +116,47 @@ export default function ConcernChecklist({
       </div>
 
       <div className="space-y-0">
-        {unique.map((c) => (
-          <div
-            key={c.concern_id}
-            className="flex items-start gap-3 border-b border-border px-1 py-3 transition-colors hover:bg-accent/50 last:border-b-0"
-          >
-            <span
-              className={`mt-1 h-3 w-3 shrink-0 rounded-full ${statusDot(c.status)}`}
-            />
-            <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium">{c.title}</span>
-              {c.note && (
-                <p className="mt-0.5 text-xs italic text-muted-foreground">
-                  {c.note}
-                </p>
-              )}
-              {c.resolved_at && c.status === "resolved" && (
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Resolved{" "}
-                  {new Date(c.resolved_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
-              )}
-            </div>
-            <span
-              className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(c.status)}`}
+        {unique.map((c) => {
+          const isNew = highlightedRows.has(c.concern_id);
+
+          return (
+            <div
+              key={c.concern_id}
+              className={`flex items-start gap-3 border-b border-border px-1 py-3 transition-all duration-500 last:border-b-0 ${
+                isNew
+                  ? "bg-primary/20 shadow-inner"
+                  : "hover:bg-accent/50"
+              }`}
             >
-              {statusLabel(c.status)}
-            </span>
-          </div>
-        ))}
+              <span
+                className={`mt-1 h-3 w-3 shrink-0 rounded-full ${statusDot(c.status)}`}
+              />
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-medium">{c.title}</span>
+                {c.note && (
+                  <p className="mt-0.5 text-xs italic text-muted-foreground">
+                    {c.note}
+                  </p>
+                )}
+                {c.resolved_at && c.status === "resolved" && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Resolved{" "}
+                    {new Date(c.resolved_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                )}
+              </div>
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadge(c.status)}`}
+              >
+                {statusLabel(c.status)}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,6 +49,17 @@ export default function DecisionStatus({
 }: DecisionStatusProps) {
   const [updating, setUpdating] = useState(false);
   const [open, setOpen] = useState(false);
+  const [highlight, setHighlight] = useState(false);
+  const prevStatus = useRef(status);
+
+  useEffect(() => {
+    if (prevStatus.current !== status) {
+      setHighlight(true);
+      prevStatus.current = status;
+      const timer = setTimeout(() => setHighlight(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
 
   const current = statuses.find((s) => s.value === status) || statuses[0];
 
@@ -70,9 +81,10 @@ export default function DecisionStatus({
         <DropdownMenuTrigger
           disabled={disabled || updating}
           className={cn(
-            "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold transition-all hover:shadow-sm",
+            "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold transition-all duration-500 hover:shadow-sm",
             badgeStyles[status] || "bg-gray-100 text-gray-500",
             (disabled || updating) && "cursor-not-allowed opacity-60",
+            highlight && "ring-2 ring-primary/50 shadow-lg shadow-primary/20",
           )}
         >
           {updating ? (
