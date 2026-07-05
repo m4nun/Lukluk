@@ -154,10 +154,10 @@ export default function PricingPage() {
               </div>
             </div>
             <Link
-              href="/quiz"
+              href="/auth/google"
               className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-background px-6 py-3 text-sm font-semibold transition-all hover:border-foreground/20 hover:-translate-y-0.5 hover:shadow-md"
             >
-              Start Quiz
+              Sign in with Google
             </Link>
           </div>
         </div>

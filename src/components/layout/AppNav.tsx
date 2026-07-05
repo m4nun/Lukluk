@@ -88,12 +88,6 @@ export function AppNav() {
               Experiences
             </Link>
             <Link
-              href="/quiz"
-              className="relative text-sm font-medium text-muted-foreground transition-colors hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
-            >
-              Quiz
-            </Link>
-            <Link
               href="/auth/google"
               className="inline-flex items-center gap-2.5 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background shadow-[0_2px_8px_rgba(26,26,46,0.2)] transition-all hover:bg-[#2d2d4a] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(26,26,46,0.3)]"
             >
