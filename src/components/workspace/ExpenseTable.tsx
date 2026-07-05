@@ -97,7 +97,7 @@ export default function ExpenseTable({
               return (
                 <div
                   key={i}
-                  className={`flex items-center border-t border-border px-4 py-2.5 transition-all duration-500 last:border-b-0 ${
+                  className={`flex items-center border-t border-border px-4 py-2.5 transition-all duration-1000 last:border-b-0 ${
                     isNew
                       ? "bg-primary/20 shadow-inner"
                       : "hover:bg-primary/5"

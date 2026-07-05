@@ -20,6 +20,7 @@ interface ConcernChecklistProps {
   highlight?: boolean;
   onEmbedToChat?: (text: string) => void;
   onStatusChange?: (concernId: string, status: string) => void;
+  workspaceId?: string;
 }
 
 function statusDot(status: string) {
@@ -61,6 +62,7 @@ export default function ConcernChecklist({
   highlight: externalHighlight,
   onEmbedToChat,
   onStatusChange,
+  workspaceId,
 }: ConcernChecklistProps) {
   const internalHighlight = useHighlight(concerns);
   const isHighlighted = externalHighlight ?? internalHighlight;
@@ -105,11 +107,11 @@ export default function ConcernChecklist({
   }
 
   async function toggleConcern(concernId: string, currentStatus: string) {
-    if (readonly || updatingId) return;
+    if (readonly || updatingId || !workspaceId) return;
     const newStatus = currentStatus === "resolved" ? "unresolved" : "resolved";
     setUpdatingId(concernId);
     try {
-      const res = await fetch(`/api/planning/${concernId}/concerns`, {
+      const res = await fetch(`/api/planning/${workspaceId}/concerns`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ concern_id: concernId, status: newStatus }),
@@ -148,7 +150,7 @@ export default function ConcernChecklist({
           return (
             <div
               key={c.concern_id}
-              className={`flex items-start gap-3 border-b border-border px-1 py-3 transition-all duration-500 last:border-b-0 ${
+              className={`flex items-start gap-3 border-b border-border px-1 py-3 transition-all duration-1000 last:border-b-0 ${
                 isNew
                   ? "bg-primary/20 shadow-inner"
                   : "hover:bg-accent/50"

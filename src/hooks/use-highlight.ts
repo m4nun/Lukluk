@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-export function useHighlight<T>(data: T, duration = 2000) {
+export function useHighlight<T>(data: T, duration = 3500) {
   const [highlight, setHighlight] = useState(false);
   const prevData = useRef(data);
 
@@ -20,7 +20,7 @@ export function useHighlight<T>(data: T, duration = 2000) {
 
 export function useRowHighlight<T extends { category?: string; concern_id?: string; item?: string; title?: string }>(
   items: T[] | null,
-  duration = 2000
+  duration = 3500
 ) {
   const [highlightedIds, setHighlightedIds] = useState<Set<string>>(new Set());
   const prevItems = useRef<T[]>([]);
