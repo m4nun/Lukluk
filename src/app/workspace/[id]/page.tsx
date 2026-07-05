@@ -197,7 +197,7 @@ export default function WorkspacePage() {
       {/* Workspace body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Panel */}
-        <div className="flex-1 overflow-y-auto border-r border-border bg-background">
+        <div className="flex-1 min-w-0 overflow-y-auto border-r border-border bg-background">
           {/* Header */}
           <div className="px-6 pt-5">
             <div className="flex items-center gap-3 mb-1">
@@ -273,7 +273,7 @@ export default function WorkspacePage() {
         </div>
 
         {/* Right Panel — Agent Chat */}
-        <div className="w-[400px] shrink-0 flex flex-col bg-card overflow-hidden">
+        <div className="w-full max-w-[400px] shrink-0 flex flex-col bg-card overflow-hidden border-l border-border">
           <div className="flex items-center gap-2.5 border-b border-border px-4 py-3.5 shrink-0">
             <span className="h-2 w-2 rounded-full bg-primary" />
             <div>
