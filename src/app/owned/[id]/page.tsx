@@ -15,7 +15,6 @@ import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { getPetLogo } from "@/lib/pet-logos";
 import { ArrowLeft, Edit, MoreVertical, MessageCircle, Home, PawPrint, Receipt, User, Calendar, Heart } from "lucide-react";
 import type { FoodCard, ScheduleCard, HealthMetric } from "@/lib/types";
-import { useI18n } from "@/lib/i18n/provider";
 
 interface OwnedData {
   id: string;
@@ -48,7 +47,6 @@ function ageLabel(stage: string) {
 export default function OwnedPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { t } = useI18n();
   const [data, setData] = useState<OwnedData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"expenses" | "food" | "schedule" | "health">("expenses");

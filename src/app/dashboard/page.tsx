@@ -13,7 +13,6 @@ import { ExplorePetModal } from "@/components/modals/ExplorePetModal";
 import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { ChevronRight, RefreshCw, PawPrint, Home, Plus, Search } from "lucide-react";
 import { getPetLogo } from "@/lib/pet-logos";
-import { useI18n } from "@/lib/i18n/provider";
 
 interface PlanningProfile {
   id: string;
@@ -43,7 +42,6 @@ const statusLabels: Record<string, string> = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { t } = useI18n();
   const [profiles, setProfiles] = useState<PlanningProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -106,9 +104,9 @@ export default function DashboardPage() {
       <div className="mx-auto w-full max-w-[960px] flex-1 px-6">
         <div className="flex flex-wrap items-start justify-between gap-4 pt-12">
           <div>
-            <h1 className="text-[clamp(24px,4vw,32px)] font-bold tracking-tight">{t.dashboard.myWorkspaces}</h1>
+            <h1 className="text-[clamp(24px,4vw,32px)] font-bold tracking-tight">My Workspaces</h1>
             <p className="mt-1 text-muted-foreground">
-              {t.dashboard.manageProfiles}
+              Manage your planning profiles and explore pet matches
             </p>
           </div>
           <button
@@ -116,7 +114,7 @@ export default function DashboardPage() {
             className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md"
           >
             <Search className="h-4 w-4" />
-            {t.dashboard.explorePet}
+            Explore Pet
           </button>
         </div>
 
@@ -130,7 +128,7 @@ export default function DashboardPage() {
 
         {error && !loading && (
           <div className="mt-8">
-            <ErrorAlert title={t.common.error} onClose={() => setError("")}>
+            <ErrorAlert title="Error" onClose={() => setError("")}>
               {error}
             </ErrorAlert>
             <button
@@ -138,7 +136,7 @@ export default function DashboardPage() {
               className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
             >
               <RefreshCw className="h-4 w-4" />
-              {t.dashboard.retry}
+              Retry
             </button>
           </div>
         )}
@@ -147,9 +145,9 @@ export default function DashboardPage() {
           <div className="mt-8">
             <EmptyState
               icon={<PawPrint className="h-8 w-8" />}
-              title={t.dashboard.noWorkspaces}
-              description={t.dashboard.searchForPet}
-              ctaLabel={t.dashboard.explorePets}
+              title="No workspaces yet"
+              description="Search for a pet to explore, or take the Fit Quiz to find your matches"
+              ctaLabel="Explore Pets"
               onCta={() => setShowExploreModal(true)}
               variant="accent"
             />
@@ -196,7 +194,7 @@ export default function DashboardPage() {
                       }`}
                     >
                       {prof.has_ownership ? (
-                        <><Home className="h-3 w-3 inline" /> {t.status.owned}</>
+                        <><Home className="h-3 w-3 inline" /> Owned</>
                       ) : statusLabels[prof.decision_status] || prof.decision_status}
                     </span>
                   </div>

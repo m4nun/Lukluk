@@ -13,8 +13,7 @@ import DraftPanel from "@/components/workspace/DraftPanel";
 import OwnershipForm from "@/components/workspace/OwnershipForm";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { getPetLogo } from "@/lib/pet-logos";
-import { ArrowLeft, PawPrint, MessageCircle, Home, Receipt, User, Trash2 } from "lucide-react";
-import { useI18n } from "@/lib/i18n/provider";
+
 
 interface WorkspaceData {
   id: string;
@@ -54,7 +53,6 @@ const STATUS_LABELS: Record<string, string> = {
 export default function WorkspacePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { t } = useI18n();
   const [data, setData] = useState<WorkspaceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
