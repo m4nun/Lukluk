@@ -9,7 +9,6 @@ import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ActivityCards from "@/components/workspace/ActivityCards";
 import FoodGuideCard from "@/components/workspace/FoodGuideCard";
 import EditPetModal from "@/components/workspace/EditPetModal";
-import DeletePetModal from "@/components/workspace/DeletePetModal";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { getPetLogo } from "@/lib/pet-logos";
 import { ArrowLeft, Edit, MoreVertical, MessageCircle, Home, PawPrint, Receipt, User } from "lucide-react";
@@ -52,7 +51,6 @@ export default function OwnedPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   useEffect(() => {
@@ -214,7 +212,7 @@ export default function OwnedPage() {
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
                   <div className="absolute right-0 top-full mt-1 z-50 w-48 rounded-xl border border-gray-200 bg-white py-1.5 shadow-lg">
-                    <button onClick={() => { setShowDeleteModal(true); setShowMoreMenu(false); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                    <button onClick={() => { setShowEditModal(true); setShowMoreMenu(false); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
@@ -384,15 +382,6 @@ export default function OwnedPage() {
           ageLifeStage={data.age_life_stage}
           onClose={() => setShowEditModal(false)}
           onSaved={() => { setShowEditModal(false); refreshData(); }}
-        />
-      )}
-
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <DeletePetModal
-          ownedId={params.id}
-          petName={data.pet_name}
-          onClose={() => setShowDeleteModal(false)}
           onDeleted={() => router.push("/dashboard")}
         />
       )}
