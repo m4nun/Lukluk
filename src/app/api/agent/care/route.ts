@@ -38,21 +38,45 @@ export async function POST(request: Request) {
   const repo = new SupabasePlanningRepository();
   const tools = createCareTools(repo);
 
-  const result = await runAgent({
-    profileTable: "owned_pet_profiles",
-    threadField: "owned_pet_profile_id",
-    profileId: ownedProfileId,
-    agentType: "care",
-    systemPrompt: CARE_SYSTEM_PROMPT,
-    tools,
-    repo,
-    idParam: "owned_profile_id",
-    message,
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event: string, data: unknown) => {
+        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+      };
+
+      try {
+        const result = await runAgent({
+          profileTable: "owned_pet_profiles",
+          threadField: "owned_pet_profile_id",
+          profileId: ownedProfileId,
+          agentType: "care",
+          systemPrompt: CARE_SYSTEM_PROMPT,
+          tools,
+          repo,
+          idParam: "owned_profile_id",
+          message,
+          onProgress: (event) => send("progress", event),
+        });
+
+        if ("error" in result) {
+          send("error", { error: result.error });
+        } else {
+          send("done", { response: result.response, thread_id: result.thread_id });
+        }
+      } catch (e) {
+        send("error", { error: e instanceof Error ? e.message : "Unknown error" });
+      }
+
+      controller.close();
+    },
   });
 
-  if ("error" in result) {
-    return Response.json({ error: result.error }, { status: result.status });
-  }
-
-  return Response.json(result);
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+    },
+  });
 }

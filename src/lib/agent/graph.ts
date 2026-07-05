@@ -89,10 +89,36 @@ export interface AgentOpts {
   tools: StructuredTool[];
   systemPrompt: string;
   idParam: string;
+  onProgress?: (event: ProgressEvent) => void;
+}
+
+export interface ProgressEvent {
+  type: "searching" | "creating" | "thinking";
+  message: string;
+}
+
+function getToolLabel(toolName: string): ProgressEvent {
+  switch (toolName) {
+    case "web_search":
+      return { type: "searching", message: "Searching the web..." };
+    case "update_activity_schedule":
+      return { type: "creating", message: "Creating activity cards..." };
+    case "update_food_guide":
+      return { type: "creating", message: "Creating food guide..." };
+    case "update_expenses":
+    case "update_actual_expenses":
+      return { type: "creating", message: "Updating expenses..." };
+    case "update_concerns":
+      return { type: "creating", message: "Updating concerns..." };
+    case "update_decision_status":
+      return { type: "creating", message: "Updating status..." };
+    default:
+      return { type: "thinking", message: "Processing..." };
+  }
 }
 
 export function createAgent(opts: AgentOpts) {
-  const { profileId, tools, systemPrompt, idParam } = opts;
+  const { profileId, tools, systemPrompt, idParam, onProgress } = opts;
 
   const model = getChatModel(0.7);
   const modelWithTools = model.bindTools(tools);
@@ -102,9 +128,8 @@ export function createAgent(opts: AgentOpts) {
       { role: "system" as const, content: systemPrompt },
       ...state.messages,
     ];
-    console.log("[Agent] Calling LLM, iteration:", state.iteration);
+    onProgress?.({ type: "thinking", message: "Thinking..." });
     const response = await modelWithTools.invoke(messages);
-    console.log("[Agent] LLM response, tool_calls:", response.tool_calls?.length || 0);
     return { messages: [response], iteration: state.iteration + 1 };
   }
 
@@ -114,6 +139,7 @@ export function createAgent(opts: AgentOpts) {
 
     const results: ToolMessage[] = [];
     for (const call of lastMessage.tool_calls) {
+      onProgress?.(getToolLabel(call.name));
       const foundTool = tools.find((t) => t.name === call.name);
       if (foundTool) {
         const args = { ...call.args };

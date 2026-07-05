@@ -1,4 +1,4 @@
-import { createAgent } from "./graph";
+import { createAgent, type ProgressEvent } from "./graph";
 import { createClient } from "@/lib/supabase/server";
 import { HumanMessage, AIMessage, ToolMessage } from "@langchain/core/messages";
 import type { StructuredTool } from "@langchain/core/tools";
@@ -14,6 +14,7 @@ interface RunAgentConfig {
   repo: PlanningRepository;
   idParam: string;
   message: string;
+  onProgress?: (event: ProgressEvent) => void;
 }
 
 export interface AgentStep {
@@ -157,6 +158,7 @@ export async function runAgent(config: RunAgentConfig) {
     tools: config.tools,
     systemPrompt: config.systemPrompt,
     idParam: config.idParam,
+    onProgress: config.onProgress,
   });
 
   let result = await agent.invoke({

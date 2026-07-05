@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   Conversation,
   ConversationContent,
@@ -17,19 +17,17 @@ import {
   PromptInputFooter,
 } from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
-import { ArrowUp, ChevronDown, ChevronRight, Search, Wrench, CheckCircle2 } from "lucide-react";
+import { ArrowUp, Search, Sparkles, Pencil } from "lucide-react";
 
-interface AgentStep {
-  type: "thinking" | "tool_call" | "tool_result" | "response";
-  content: string;
-  toolName?: string;
-  toolArgs?: Record<string, unknown>;
+interface ProgressEvent {
+  type: "searching" | "creating" | "thinking";
+  message: string;
 }
 
 interface ChatMessage {
   role: "user" | "assistant";
   text: string;
-  steps?: AgentStep[];
+  progress?: ProgressEvent[];
 }
 
 interface AgentChatProps {
@@ -43,49 +41,17 @@ interface AgentChatProps {
   onMessageSent?: () => void;
 }
 
-function StepIcon({ type }: { type: AgentStep["type"] }) {
-  switch (type) {
-    case "tool_call":
-      return <Search className="size-3 text-blue-500" />;
-    case "tool_result":
-      return <CheckCircle2 className="size-3 text-green-500" />;
-    case "thinking":
-      return <Wrench className="size-3 text-amber-500" />;
-    default:
-      return null;
-  }
-}
-
-function StepItem({ step }: { step: AgentStep }) {
-  const [expanded, setExpanded] = useState(false);
-
-  if (step.type === "response") return null;
-
-  const label = step.type === "tool_call"
-    ? `Searching: ${step.toolArgs?.query || step.toolName}`
-    : step.type === "tool_result"
-    ? `Result from ${step.toolName}`
-    : step.content.slice(0, 50);
+function ProgressIndicator({ event }: { event: ProgressEvent }) {
+  const icon = event.type === "searching"
+    ? <Search className="size-3 text-blue-500" />
+    : event.type === "creating"
+    ? <Sparkles className="size-3 text-green-500" />
+    : <Pencil className="size-3 text-amber-500" />
 
   return (
-    <div className="border border-border/50 rounded-lg mb-2 overflow-hidden">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:bg-muted/50 transition-colors"
-      >
-        <StepIcon type={step.type} />
-        <span className="flex-1 text-left truncate">{label}</span>
-        {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
-      </button>
-      {expanded && (
-        <div className="px-3 pb-2 text-xs bg-muted/30 border-t border-border/50">
-          <pre className="whitespace-pre-wrap font-mono text-[10px] text-muted-foreground mt-2 max-h-40 overflow-y-auto">
-            {step.type === "tool_call" && step.toolArgs
-              ? JSON.stringify(step.toolArgs, null, 2)
-              : step.content}
-          </pre>
-        </div>
-      )}
+    <div className="flex items-center gap-2 text-xs text-muted-foreground py-1">
+      {icon}
+      <span>{event.message}</span>
     </div>
   );
 }
@@ -104,6 +70,8 @@ export default function AgentChat({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState<ProgressEvent[]>([]);
+  const progressRef = useRef<ProgressEvent[]>([]);
 
   const handleSend = useCallback(async (text?: string) => {
     const messageText = (text ?? input).trim();
@@ -113,6 +81,8 @@ export default function AgentChat({
     setMessages((prev) => [...prev, { role: "user", text: messageText }]);
     setError("");
     setLoading(true);
+    setProgress([]);
+    progressRef.current = [];
 
     try {
       const res = await fetch(endpoint, {
@@ -122,16 +92,53 @@ export default function AgentChat({
       });
 
       if (!res.ok) throw new Error("Agent request failed");
-      const data = await res.json();
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          text: data.response,
-          steps: data.steps || [],
-        },
-      ]);
-      onMessageSent?.();
+      if (!res.body) throw new Error("No response body");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            const eventType = line.slice(7);
+            continue;
+          }
+          if (line.startsWith("data: ")) {
+            const data = JSON.parse(line.slice(6));
+
+            const eventLine = lines.find(l => l.startsWith("event: "));
+            const eventType = eventLine ? eventLine.slice(7) : "unknown";
+
+            if (eventType === "progress") {
+              const event = data as ProgressEvent;
+              progressRef.current = [...progressRef.current, event];
+              setProgress([...progressRef.current]);
+            } else if (eventType === "done") {
+              setMessages((prev) => [
+                ...prev,
+                {
+                  role: "assistant",
+                  text: data.response,
+                  progress: [...progressRef.current],
+                },
+              ]);
+              setProgress([]);
+              progressRef.current = [];
+              onMessageSent?.();
+            } else if (eventType === "error") {
+              throw new Error(data.error);
+            }
+          }
+        }
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
       setMessages((prev) => [
@@ -141,6 +148,8 @@ export default function AgentChat({
           text: "Sorry, I hit a snag. Can you try again?",
         },
       ]);
+      setProgress([]);
+      progressRef.current = [];
     } finally {
       setLoading(false);
     }
@@ -162,10 +171,10 @@ export default function AgentChat({
                 from={msg.role === "user" ? "user" : "assistant"}
               >
                 <MessageContent>
-                  {msg.steps && msg.steps.length > 0 && (
-                    <div className="mb-3">
-                      {msg.steps.map((step, j) => (
-                        <StepItem key={j} step={step} />
+                  {msg.progress && msg.progress.length > 0 && (
+                    <div className="mb-2 pl-1 border-l-2 border-border/50 ml-1">
+                      {msg.progress.map((event, j) => (
+                        <ProgressIndicator key={j} event={event} />
                       ))}
                     </div>
                   )}
@@ -177,7 +186,23 @@ export default function AgentChat({
             ))
           )}
 
-          {loading && (
+          {loading && progress.length > 0 && (
+            <Message from="assistant">
+              <MessageContent>
+                <div className="mb-2 pl-1 border-l-2 border-border/50 ml-1">
+                  {progress.map((event, j) => (
+                    <ProgressIndicator key={j} event={event} />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Spinner className="size-3" />
+                  <span className="text-xs">Generating response...</span>
+                </div>
+              </MessageContent>
+            </Message>
+          )}
+
+          {loading && progress.length === 0 && (
             <Message from="assistant">
               <MessageContent>
                 <div className="flex items-center gap-2 text-muted-foreground">
