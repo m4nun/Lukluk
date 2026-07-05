@@ -95,14 +95,16 @@ export function createAgent(opts: AgentOpts) {
   const { profileId, tools, systemPrompt, idParam } = opts;
 
   const model = getChatModel(0.7);
-  const modelWithTools = model.bindTools(tools, { tool_choice: "required" });
+  const modelWithTools = model.bindTools(tools);
 
   async function agentNode(state: typeof AgentState.State) {
     const messages = [
       { role: "system" as const, content: systemPrompt },
       ...state.messages,
     ];
+    console.log("[Agent] Calling LLM, iteration:", state.iteration);
     const response = await modelWithTools.invoke(messages);
+    console.log("[Agent] LLM response, tool_calls:", response.tool_calls?.length || 0);
     return { messages: [response], iteration: state.iteration + 1 };
   }
 
