@@ -2,7 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
 import { getPetLogo } from "@/lib/pet-logos";
-import { PawPrint, Check } from "lucide-react";
+import {
+  PawPrint,
+  Check,
+  Coins,
+  Home,
+  Clock,
+  GraduationCap,
+} from "lucide-react";
 
 const MBTI_WORDS: Record<string, string> = {
   I: "Introverted", E: "Extraverted",
@@ -27,13 +34,6 @@ const TRAIT_COLORS = [
 ];
 
 const DIM_COLORS = ["bg-purple-500", "bg-cyan-500", "bg-pink-500", "bg-lime-500"];
-
-const CARE_ICON_COLORS = [
-  { bg: "bg-purple-50", icon: "text-purple-500" },
-  { bg: "bg-cyan-50", icon: "text-cyan-500" },
-  { bg: "bg-pink-50", icon: "text-pink-500" },
-  { bg: "bg-lime-50", icon: "text-lime-500" },
-];
 
 interface PetProfile {
   id: string; name: string; species: string; breed_or_category: string; description: string;
@@ -98,15 +98,15 @@ export default async function PetDetailPage({ params }: { params: Promise<{ slug
   const dimensions = computeDimensions(profile);
   const compatiblePets = allPets ? computeCompatibility(profile, allPets as PetProfile[]) : [];
 
-  const mbtiLetters = profile.mbti_label.split("");
-  const personalityWords = mbtiLetters.map((l) => MBTI_WORDS[l] || l);
-  const mbtiTitle = MBTI_DESCRIPTIONS[profile.mbti_label] || profile.mbti_label;
+  const mbtiCode = profile.mbti_label.slice(0, 4).toUpperCase();
+  const mbtiTitle = MBTI_DESCRIPTIONS[mbtiCode] || profile.mbti_label.split("—")[0].trim();
+  const personalityWords = mbtiCode.split("").map((l) => MBTI_WORDS[l] || l);
 
   const careCards = [
-    { label: "Budget", value: `฿${profile.monthly_cost_min_thb.toLocaleString()} - ${profile.monthly_cost_max_thb.toLocaleString()} /mo`, desc: "Food, grooming, vet", iconClass: "payments" },
-    { label: "Space", value: profile.space_tier === "apartment" ? "Apartment OK" : "House Needed", desc: profile.indoor_only_ok ? "Indoor living works" : "Outdoor access recommended", iconClass: "home" },
-    { label: "Time", value: `${profile.daily_active_minutes_min}-${profile.daily_active_minutes_max} min / day`, desc: `${profile.exercise_type} exercise + play`, iconClass: "schedule" },
-    { label: "Level", value: profile.experience_level === "beginner" ? "Beginner-friendly" : profile.experience_level === "intermediate" ? "Intermediate" : "Experienced", desc: `${profile.grooming_frequency} grooming`, iconClass: "school" },
+    { label: "Budget", value: `฿${profile.monthly_cost_min_thb.toLocaleString()} - ${profile.monthly_cost_max_thb.toLocaleString()} /mo`, desc: "Food, grooming, vet", icon: <Coins className="h-4 w-4" />, color: "text-purple-500", bg: "bg-purple-50" },
+    { label: "Space", value: profile.space_tier === "apartment" ? "Apartment OK" : "House Needed", desc: profile.indoor_only_ok ? "Indoor living works" : "Outdoor access recommended", icon: <Home className="h-4 w-4" />, color: "text-cyan-500", bg: "bg-cyan-50" },
+    { label: "Time", value: `${profile.daily_active_minutes_min}-${profile.daily_active_minutes_max} min / day`, desc: `${profile.exercise_type} + play`, icon: <Clock className="h-4 w-4" />, color: "text-pink-500", bg: "bg-pink-50" },
+    { label: "Level", value: profile.experience_level === "beginner" ? "Beginner-friendly" : profile.experience_level === "intermediate" ? "Intermediate" : "Experienced", desc: `${profile.grooming_frequency} grooming`, icon: <GraduationCap className="h-4 w-4" />, color: "text-lime-600", bg: "bg-lime-50" },
   ];
 
   return (
@@ -156,7 +156,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ slug
             </h1>
             <p className="mb-3 text-sm text-gray-500">{profile.description}</p>
             <div className="inline-flex items-center gap-2 rounded-full bg-purple-500 px-3.5 py-1.5 text-[13px] font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
-              {profile.mbti_label}
+              {mbtiCode}
               <span className="text-[11px] font-semibold opacity-90">
                 {personalityWords.join(", ")}
               </span>
@@ -215,8 +215,8 @@ export default async function PetDetailPage({ params }: { params: Promise<{ slug
             {careCards.map((card, i) => (
               <div key={card.label} className="rounded-xl border border-gray-200 bg-white p-4">
                 <div className="mb-1.5 flex items-center gap-2">
-                  <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${CARE_ICON_COLORS[i].bg}`}>
-                    <span className={`material-symbols-outlined text-sm ${CARE_ICON_COLORS[i].icon}`}>{card.iconClass}</span>
+                  <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${card.bg}`}>
+                    <span className={card.color}>{card.icon}</span>
                   </div>
                   <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{card.label}</span>
                 </div>
