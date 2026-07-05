@@ -91,7 +91,7 @@ export function AppNav() {
               href="/quiz"
               className="relative text-sm font-medium text-muted-foreground transition-colors hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all hover:after:w-full"
             >
-              Take the Quiz
+              Quiz
             </Link>
             <Link
               href="/auth/google"

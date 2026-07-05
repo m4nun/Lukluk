@@ -12,7 +12,7 @@ import DraftPanel from "@/components/workspace/DraftPanel";
 import OwnershipForm from "@/components/workspace/OwnershipForm";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { getPetLogo } from "@/lib/pet-logos";
-import { ArrowLeft, PawPrint, MessageCircle, Home, Receipt, User } from "lucide-react";
+import { ArrowLeft, PawPrint, MessageCircle, Home, Receipt, User, Trash2 } from "lucide-react";
 
 interface WorkspaceData {
   id: string;
@@ -60,6 +60,8 @@ export default function WorkspacePage() {
   const [transitionError, setTransitionError] = useState("");
   const [chatInput, setChatInput] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleEmbedToChat = useCallback((text: string) => {
     setChatInput(text);
@@ -128,6 +130,22 @@ export default function WorkspacePage() {
       }
     } catch {}
     finally { setStatusUpdating(false); }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/planning/${params.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        router.push("/dashboard");
+      }
+    } catch {}
+    finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   }
 
   async function handleOwnership(petName: string, ageLifeStage: string) {
@@ -247,6 +265,13 @@ export default function WorkspacePage() {
               <div className="text-lg font-bold text-gray-900">{displayName}</div>
               <div className="text-[13px] text-gray-500">{data.pet_type_profiles.species} · {data.pet_type_profiles.mbti_label}</div>
             </div>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+              title="Remove from workspaces"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
           </div>
 
           {/* Decision Status */}
@@ -416,6 +441,36 @@ export default function WorkspacePage() {
           <span className="text-[10px] font-medium">Profile</span>
         </Link>
       </nav>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <>
+          <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="fixed inset-x-4 top-[20%] z-50 rounded-2xl bg-white shadow-xl max-w-sm mx-auto">
+            <div className="px-5 py-5">
+              <h3 className="text-base font-bold text-gray-900">Remove {displayName}?</h3>
+              <p className="mt-2 text-sm text-gray-500">
+                This will remove this pet from your workspaces. You can always explore it again later.
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-5 py-4">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-5 py-2 rounded-xl bg-red-500 text-sm font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Removing..." : "Remove"}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

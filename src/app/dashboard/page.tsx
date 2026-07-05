@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,7 +8,9 @@ import { AppNav } from "@/components/layout/AppNav";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { ErrorAlert } from "@/components/layout/ErrorAlert";
-import { ChevronRight, RefreshCw, PawPrint, Home, Plus } from "lucide-react";
+import { QuizModal } from "@/components/quiz/QuizModal";
+import { ExplorePetModal } from "@/components/modals/ExplorePetModal";
+import { ChevronRight, RefreshCw, PawPrint, Home, Plus, Search } from "lucide-react";
 import { getPetLogo } from "@/lib/pet-logos";
 
 interface PlanningProfile {
@@ -42,6 +44,8 @@ export default function DashboardPage() {
   const [profiles, setProfiles] = useState<PlanningProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [showExploreModal, setShowExploreModal] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -62,9 +66,29 @@ export default function DashboardPage() {
     }
   }
 
+  async function checkLifestyleAndShowQuiz() {
+    try {
+      const res = await fetch("/api/lifestyle");
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.hasLifestyle) {
+          setShowQuizModal(true);
+        }
+      }
+    } catch {
+      // Allow user to proceed on error
+    }
+  }
+
   useEffect(() => {
     load();
+    checkLifestyleAndShowQuiz();
   }, [router]);
+
+  const handleQuizComplete = useCallback(() => {
+    setShowQuizModal(false);
+    load();
+  }, [load]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -78,13 +102,13 @@ export default function DashboardPage() {
               Manage your planning profiles and explore pet matches.
             </p>
           </div>
-          <Link
-            href="/"
+          <button
+            onClick={() => setShowExploreModal(true)}
             className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-md"
           >
-            <Plus className="h-4 w-4" />
+            <Search className="h-4 w-4" />
             Explore Pet
-          </Link>
+          </button>
         </div>
 
         {loading && (
@@ -115,9 +139,9 @@ export default function DashboardPage() {
             <EmptyState
               icon={<PawPrint className="h-8 w-8" />}
               title="No workspaces yet"
-              description="Take the Fit Quiz to discover your top pet matches, then create a workspace to explore them in depth."
-              ctaLabel="Take the Quiz"
-              onCta={() => router.push("/quiz")}
+              description="Search for a pet to explore, or take the Fit Quiz to discover your top matches."
+              ctaLabel="Explore Pets"
+              onCta={() => setShowExploreModal(true)}
               variant="accent"
             />
           </div>
@@ -174,6 +198,22 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Quiz Modal */}
+      {showQuizModal && (
+        <QuizModal onComplete={handleQuizComplete} onClose={() => setShowQuizModal(false)} />
+      )}
+
+      {/* Explore Pet Modal */}
+      {showExploreModal && (
+        <ExplorePetModal
+          onClose={() => setShowExploreModal(false)}
+          onSelect={(slug) => {
+            setShowExploreModal(false);
+            router.push(`/pet/${slug}`);
+          }}
+        />
+      )}
     </div>
   );
 }
