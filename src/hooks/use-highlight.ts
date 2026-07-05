@@ -24,9 +24,16 @@ export function useRowHighlight<T extends { category?: string; concern_id?: stri
 ) {
   const [highlightedIds, setHighlightedIds] = useState<Set<string>>(new Set());
   const prevItems = useRef<T[]>([]);
+  const initialized = useRef(false);
 
   useEffect(() => {
     if (!items) return;
+
+    if (!initialized.current) {
+      initialized.current = true;
+      prevItems.current = [...items];
+      return;
+    }
 
     const newIds = new Set<string>();
     const prevMap = new Map<string, T>();
