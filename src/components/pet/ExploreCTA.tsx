@@ -44,7 +44,7 @@ export function ExploreCTA({ petTypeId, petName }: ExploreCTAProps) {
       } else {
         const err = await res.json().catch(() => ({}));
         if (res.status === 402) {
-          router.push("/pricing");
+          router.push("/");
         }
       }
     } catch {}

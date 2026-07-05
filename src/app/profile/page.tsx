@@ -183,7 +183,7 @@ export default function ProfilePage() {
                         Subscribe to unlock AI agents, workspaces, and full pet planning tools.
                       </p>
                       <Link
-                        href="/pricing"
+                        href="/"
                         className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-all hover:opacity-90"
                       >
                         View Plans
@@ -296,7 +296,6 @@ export default function ProfilePage() {
           <div className="flex gap-6">
             <Link href="/" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link href="/" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/experiences" className="hover:text-foreground transition-colors">Experiences</Link>
           </div>
         </div>
       </footer>

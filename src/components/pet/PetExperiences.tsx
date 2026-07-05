@@ -79,9 +79,6 @@ export default function PetExperiences({ petTypeProfileId }: PetExperiencesProps
           </div>
         ))}
       </div>
-      <a href="/experiences" className="mt-3 inline-flex items-center gap-1 text-[13px] text-purple-500 hover:text-purple-600 font-medium">
-        View all experiences →
-      </a>
     </section>
   );
 }

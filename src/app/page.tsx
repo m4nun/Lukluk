@@ -354,11 +354,11 @@ export default function Home() {
                 ))}
               </ul>
               <Link
-                href="/pricing"
+                href="/auth/google"
                 className="mt-8 flex w-full items-center justify-center gap-2.5 rounded-full bg-primary px-6 py-4 text-base font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:opacity-90 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30"
               >
                 <Sparkles className="h-5 w-5" />
-                View Pricing
+                Sign in to Subscribe
               </Link>
             </div>
           </div>
@@ -407,7 +407,6 @@ export default function Home() {
           <div className="flex gap-6">
             <Link href="/" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link href="/" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/experiences" className="hover:text-foreground transition-colors">Experiences</Link>
           </div>
         </div>
       </footer>

@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?canceled=true`,
     });
 
     return Response.json({ url: session.url });
