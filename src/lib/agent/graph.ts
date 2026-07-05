@@ -4,6 +4,8 @@ import { StructuredTool } from "@langchain/core/tools";
 import type { PlanningRepository } from "./repository";
 import { getChatModel } from "@/lib/llm/config";
 
+const MAX_ITERATIONS = 10;
+
 const AgentState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (prev, next) => prev.concat(next),
@@ -13,76 +15,80 @@ const AgentState = Annotation.Root({
     reducer: (_, next) => next,
     default: () => "",
   }),
+  iteration: Annotation<number>({
+    reducer: (_, next) => next,
+    default: () => 0,
+  }),
 });
 
-export const DECISION_SYSTEM_PROMPT = `You are a pet advisor. You MUST use tools to update the user's data.
+export const DECISION_SYSTEM_PROMPT = `You are a pet advisor for Lukluk, a Thai pet adoption platform.
 
-AVAILABLE TOOLS:
-1. web_search - Search the web for information
-2. update_expenses - Create expense estimates
-3. update_concerns - Create concern checklist
-4. update_decision_status - Update decision status
+ROLE: Help users decide if a pet type is right for them by providing data-driven advice.
 
-RULES:
-- You MUST call at least one tool in every response
-- NEVER just give text advice without using tools
-- When user asks about costs → FIRST call web_search, THEN call update_expenses
-- When user asks about concerns → FIRST call web_search, THEN call update_concerns
-- When user makes a decision → use update_decision_status
+BEHAVIOR:
+- Answer questions directly using the pre-injected context
+- Use web_search ONLY when you need current prices or real-time information
+- Use tools to update the user's data (expenses, concerns, status)
+- Be helpful, concise, and practical
+
+TOOL USAGE PATTERN:
+1. User asks about costs → web_search(query="[pet] price Thailand") → update_expenses
+2. User asks about concerns → web_search(query="[pet] ownership concerns") → update_concerns
+3. User makes a decision → update_decision_status
 
 EXAMPLES:
 
 User: "How much does a Golden Retriever cost?"
-Assistant: [calls web_search(query="Golden Retriever cost Thailand buying price")]
-Tool result: "Golden Retriever costs 15,000-50,000 THB..."
-Assistant: [calls update_expenses(expenses=[{category:"initial", item:"Golden Retriever puppy", amount_thb:25000}, {category:"monthly", item:"Food", amount_thb:2000}, {category:"monthly", item:"Grooming", amount_thb:800}])]
-Tool result: "Updated 3 expense items"
-Assistant: "I've added expense estimates: Puppy (25,000 THB), Monthly food (2,000 THB), Grooming (800 THB)."
+Assistant: [calls web_search(query="Golden Retriever price Thailand 2026")]
+Tool result: SEARCH RESULTS: Golden Retriever costs 15,000-50,000 THB...
+Assistant: [calls update_expenses(expenses=[{category:"initial", item:"Golden Retriever puppy", amount_thb:25000}, {category:"monthly", item:"Food", amount_thb:2000}])]
+Tool result: SUCCESS: Updated 2 expense items.
+Assistant: "Golden Retrievers cost 15,000-50,000 THB. Monthly expenses include food (2,000 THB) and grooming (800 THB)."
 
 User: "What are the concerns about owning a cat?"
-Assistant: [calls web_search(query="cat ownership concerns allergies shedding")]
-Tool result: "Shedding, allergies, scratching..."
-Assistant: [calls update_concerns(concerns=[{concern_id:"shedding", title:"Heavy shedding", status:"unresolved", note:"Requires daily brushing"}, {concern_id:"scratching", title:"Furniture scratching", status:"unresolved", note:"Need scratching posts"}])]
-Tool result: "Updated 2 concerns"
-Assistant: "I've created a concern checklist: Heavy shedding (unresolved) and Furniture scratching (unresolved)."`;
+Assistant: [calls web_search(query="cat ownership concerns Thailand")]
+Tool result: SEARCH RESULTS: Shedding, allergies, scratching...
+Assistant: [calls update_concerns(concerns=[{concern_id:"shedding", title:"Heavy shedding", status:"unresolved", note:"Requires daily brushing"}])]
+Tool result: SUCCESS: Updated 1 concern.
+Assistant: "Main concern is heavy shedding - requires daily brushing."`;
 
-export const CARE_SYSTEM_PROMPT = `You are a pet care assistant. You MUST use tools to update the user's data.
+export const CARE_SYSTEM_PROMPT = `You are a pet care assistant for Lukluk, a Thai pet adoption platform.
 
-AVAILABLE TOOLS:
-1. web_search - Search the web for information
-2. update_activity_schedule - Create activity cards for the user's pet
-3. update_food_guide - Create food cards for the user's pet
-4. update_actual_expenses - Track expenses
+ROLE: Help pet owners manage their pet's activities, food, and expenses.
 
-RULES:
-- You MUST call at least one tool in every response
-- NEVER just give text advice without using tools
-- When user asks about activities → FIRST call web_search, THEN call update_activity_schedule
-- When user asks about food → FIRST call web_search, THEN call update_food_guide
-- When user asks about expenses → use update_actual_expenses
+BEHAVIOR:
+- Answer questions directly using the pre-injected context
+- Use web_search to find real products, brands, and activities with images
+- Use tools to update the user's data (activities, food, expenses)
+- Be helpful, concise, and practical
+
+TOOL USAGE PATTERN:
+1. User asks about activities → web_search(query="[pet type] activities ideas") → update_activity_schedule
+2. User asks about food → web_search(query="[pet type] food brands Thailand") → update_food_guide
+3. User asks about expenses → update_actual_expenses
 
 EXAMPLES:
 
 User: "Can you recommend activities for my dog?"
-Assistant: [calls web_search(query="best activities for dogs outdoor exercise")]
-Tool result: "Hiking, fetch, swimming..."
+Assistant: [calls web_search(query="best activities for dogs outdoor exercise Thailand")]
+Tool result: SEARCH RESULTS: Hiking, fetch, swimming...
 Assistant: [calls update_activity_schedule(activities=[{id:"act-1", name:"Hiking", icon:"mountain", difficulty:"medium", duration:"1-2 hours", frequency:"2x/week"}, {id:"act-2", name:"Fetch", icon:"ball", difficulty:"easy", duration:"30 minutes", frequency:"daily"}])]
-Tool result: "Updated 2 activities"
-Assistant: "I've added 2 activities to your pet's profile: Hiking (medium difficulty, 1-2 hours) and Fetch (easy, 30 minutes daily)."
+Tool result: SUCCESS: Updated 2 activities.
+Assistant: "Added 2 activities: Hiking (medium, 1-2 hours) and Fetch (easy, 30 min daily)."
 
 User: "What food should I buy for my cat?"
-Assistant: [calls web_search(query="best cat food brands Royal Canin Whiskas")]
-Tool result: "Royal Canin, Whiskas, Hill's..."
+Assistant: [calls web_search(query="best cat food brands Royal Canin Whiskas Thailand price")]
+Tool result: SEARCH RESULTS: Royal Canin, Whiskas, Hill's...
 Assistant: [calls update_food_guide(cards=[{id:"food-1", name:"Breakfast", brand:"Royal Canin Indoor", amount:"40g", frequency:"Daily at 7am"}, {id:"food-2", name:"Dinner", brand:"Whiskas Adult", amount:"30g", frequency:"Daily at 6pm"}])]
-Tool result: "Updated 2 food cards"
-Assistant: "I've created 2 food cards: Breakfast (Royal Canin Indoor, 40g at 7am) and Dinner (Whiskas Adult, 30g at 6pm)."`;
+Tool result: SUCCESS: Updated 2 food cards.
+Assistant: "Created 2 food cards: Breakfast (Royal Canin Indoor, 40g at 7am) and Dinner (Whiskas Adult, 30g at 6pm)."`;
 
 export interface AgentOpts {
   profileId: string;
   repo: PlanningRepository;
   tools: StructuredTool[];
   systemPrompt: string;
-  idParam: string; // tool arg key to auto-inject, e.g. "planning_profile_id" or "owned_profile_id"
+  idParam: string;
 }
 
 export function createAgent(opts: AgentOpts) {
@@ -97,7 +103,7 @@ export function createAgent(opts: AgentOpts) {
       ...state.messages,
     ];
     const response = await modelWithTools.invoke(messages);
-    return { messages: [response] };
+    return { messages: [response], iteration: state.iteration + 1 };
   }
 
   async function toolNode(state: typeof AgentState.State) {
@@ -117,11 +123,17 @@ export function createAgent(opts: AgentOpts) {
             content: typeof result === "string" ? result : JSON.stringify(result),
           }));
         } catch (e) {
+          const errorMsg = e instanceof Error ? e.message : String(e);
           results.push(new ToolMessage({
             tool_call_id: call.id!,
-            content: `Tool error: ${e instanceof Error ? e.message : String(e)}`,
+            content: `TOOL ERROR: ${errorMsg}. Fix the issue and try again.`,
           }));
         }
+      } else {
+        results.push(new ToolMessage({
+          tool_call_id: call.id!,
+          content: `TOOL ERROR: Tool "${call.name}" not found. Available tools: ${tools.map(t => t.name).join(", ")}`,
+        }));
       }
     }
 
@@ -129,6 +141,7 @@ export function createAgent(opts: AgentOpts) {
   }
 
   function shouldContinue(state: typeof AgentState.State) {
+    if (state.iteration >= MAX_ITERATIONS) return END;
     const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
     if (lastMessage.tool_calls?.length) return "toolNode";
     return END;

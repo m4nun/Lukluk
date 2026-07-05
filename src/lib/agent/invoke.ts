@@ -117,6 +117,7 @@ export async function runAgent(config: RunAgentConfig) {
   let result = await agent.invoke({
     messages: [new HumanMessage(enrichedMessage)],
     profileId: config.profileId,
+    iteration: 0,
   });
 
   let aiMessages = result.messages.filter(
@@ -130,15 +131,17 @@ export async function runAgent(config: RunAgentConfig) {
 
   if (!calledTools) {
     const forcePrompt = config.agentType === "care"
-      ? `The user asked a question. You MUST call tools. Do NOT just give text advice.
+      ? `The user asked: "${config.message}"
+
+You MUST use tools. Do NOT just give text advice.
 
 STEP 1: Call web_search to find information about what the user asked.
 STEP 2: Call update_activity_schedule or update_food_guide to create cards with the search results.
 
-Example: If user asks "recommend activities", call web_search first, then call update_activity_schedule with the results.
-
 Call web_search NOW with a relevant query.`
-      : `The user asked a question. You MUST call tools. Do NOT just give text advice.
+      : `The user asked: "${config.message}"
+
+You MUST use tools. Do NOT just give text advice.
 
 STEP 1: Call web_search to find information about what the user asked.
 STEP 2: Call update_expenses or update_concerns to update their data.
@@ -152,6 +155,7 @@ Call web_search NOW with a relevant query.`;
         new HumanMessage(forcePrompt),
       ],
       profileId: config.profileId,
+      iteration: 0,
     });
 
     aiMessages = result.messages.filter(
