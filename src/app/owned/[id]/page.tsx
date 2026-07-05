@@ -177,7 +177,7 @@ export default function OwnedPage() {
           <span className="text-[15px] font-semibold">{data.pet_name}</span>
           <span className="inline-flex items-center gap-0.5 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-600 border border-green-200">
             <PawPrint className="h-2.5 w-2.5" fill="currentColor" />
-            {t.status.owned}
+            Owned
           </span>
         </div>
         <button className="h-9 w-9 rounded-full flex items-center justify-center text-gray-500">

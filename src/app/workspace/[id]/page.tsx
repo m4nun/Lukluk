@@ -13,6 +13,7 @@ import DraftPanel from "@/components/workspace/DraftPanel";
 import OwnershipForm from "@/components/workspace/OwnershipForm";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { getPetLogo } from "@/lib/pet-logos";
+import { ArrowLeft, Trash2, MessageCircle, PawPrint } from "lucide-react";
 
 
 interface WorkspaceData {
@@ -446,7 +447,6 @@ export default function WorkspacePage() {
                 className="px-5 py-2 rounded-xl bg-red-500 text-sm font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
               >
                 {deleting ? "Removing..." : "Remove"}
-              </button>
               </button>
             </div>
           </div>
