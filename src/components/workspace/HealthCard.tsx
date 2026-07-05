@@ -77,7 +77,7 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
       }));
   }, [metrics]);
 
-  if (metrics === null) {
+  if (metrics == null) {
     return <LoadingSkeleton variant="card" />;
   }
 

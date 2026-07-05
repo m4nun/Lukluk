@@ -69,7 +69,7 @@ export default function ConcernChecklist({
   const highlightedRows = useRowHighlight(concerns);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  if (concerns === null) {
+  if (concerns == null) {
     return <LoadingSkeleton variant="table" rows={5} />;
   }
 

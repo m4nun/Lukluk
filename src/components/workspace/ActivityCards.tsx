@@ -91,7 +91,7 @@ export default function ActivityCards({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  if (activities === null) {
+  if (activities == null) {
     return <LoadingSkeleton variant="card" />;
   }
 

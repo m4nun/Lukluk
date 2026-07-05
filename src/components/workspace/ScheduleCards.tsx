@@ -108,7 +108,7 @@ export default function ScheduleCards({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  if (schedules === null) {
+  if (schedules == null) {
     return <LoadingSkeleton variant="card" />;
   }
 

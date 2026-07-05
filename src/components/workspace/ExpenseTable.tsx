@@ -44,7 +44,7 @@ export default function ExpenseTable({
   const isHighlighted = externalHighlight ?? internalHighlight;
   const highlightedRows = useRowHighlight(expenses);
 
-  if (expenses === null) {
+  if (expenses == null) {
     return <LoadingSkeleton variant="table" rows={6} />;
   }
 
