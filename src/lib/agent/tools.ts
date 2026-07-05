@@ -10,7 +10,7 @@ export function createAgentTools(repo: PlanningRepository) {
     },
     {
       name: "update_expenses",
-      description: "Update the Estimated Expense Table for a Planning Pet Profile. Overwrites all existing expenses with the new list.",
+      description: `Update the estimated expense table for a planning pet. Call this when user asks about costs, expenses, budget, or how much a pet costs. The expenses array replaces all existing expenses. Each item must have: category ("initial"|"monthly"|"annual"|"one_time"), item (string), amount_thb (number), and optional note (string or null). Example: [{category:"monthly", item:"Food", amount_thb:1500, note:"Premium brand"}]`,
       schema: z.object({
         planning_profile_id: z.string().uuid(),
         expenses: z.array(z.object({
@@ -30,7 +30,7 @@ export function createAgentTools(repo: PlanningRepository) {
     },
     {
       name: "update_concerns",
-      description: "Update the Concern Checklist for a Planning Pet Profile. Overwrites all existing concerns with the new list.",
+      description: `Update the concern checklist for a planning pet. Call this when user asks about concerns, risks, downsides, or worries. Each item must have: concern_id (string like "heavy_shedding"), title (string), status ("unresolved"|"resolved"|"not_applicable"), and optional note. Example: [{concern_id:"allergies", title:"Heavy shedding", status:"unresolved", note:"Requires daily brushing"}]`,
       schema: z.object({
         planning_profile_id: z.string().uuid(),
         concerns: z.array(z.object({
@@ -50,7 +50,7 @@ export function createAgentTools(repo: PlanningRepository) {
     },
     {
       name: "update_decision_status",
-      description: "Change the decision status for a Planning Pet Profile.",
+      description: `Change the decision status for a planning pet. Call this when user says they're ready to buy, not interested, or still exploring. Status must be one of: "exploring", "considering", "ready_to_buy", "not_a_fit", "already_have".`,
       schema: z.object({
         planning_profile_id: z.string().uuid(),
         status: z.enum(["exploring", "considering", "ready_to_buy", "not_a_fit", "already_have"]),
@@ -82,7 +82,7 @@ export function createAgentTools(repo: PlanningRepository) {
     },
     {
       name: "get_context",
-      description: "Get the full context for a Planning Pet Profile — pet type info, expenses, concerns, and owner experiences.",
+      description: "Get the full context for a planning pet. Call this FIRST before any other tool. Returns pet type info, current expenses, concerns, and owner experiences.",
       schema: z.object({
         planning_profile_id: z.string().uuid(),
       }),
