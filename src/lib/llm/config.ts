@@ -8,7 +8,7 @@ export interface LLMConfig {
 
 export function getLLMConfig(): LLMConfig {
   return {
-    model: "deepseek/deepseek-chat",
+    model: "deepseek/deepseek-v4-flash",
     baseURL: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
     apiKey: process.env.OPENROUTER_API_KEY || "",
   };
