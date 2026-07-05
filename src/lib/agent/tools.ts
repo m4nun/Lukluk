@@ -2,8 +2,8 @@ import { z } from "zod";
 import { safeTool } from "./safe-tool";
 import type { PlanningRepository } from "./repository";
 
-export function createAgentTools(repo: PlanningRepository) {
-  const webSearchTool = safeTool(
+function createWebSearchTool() {
+  return safeTool(
     async ({ query }) => {
       const apiKey = process.env.TAVILY_API_KEY;
       if (!apiKey) return "Web search not configured.";
@@ -40,6 +40,10 @@ export function createAgentTools(repo: PlanningRepository) {
       }),
     }
   );
+}
+
+export function createAgentTools(repo: PlanningRepository) {
+  const webSearchTool = createWebSearchTool();
 
   const updateExpenseTool = safeTool(
     async ({ planning_profile_id, expenses }) => {
@@ -131,6 +135,8 @@ export function createAgentTools(repo: PlanningRepository) {
 }
 
 export function createCareTools(repo: PlanningRepository) {
+  const webSearchTool = createWebSearchTool();
+
   const getCareContextTool = safeTool(
     async ({ owned_profile_id }) => {
       const owned = await repo.getOwnedProfile(owned_profile_id);

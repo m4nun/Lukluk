@@ -1,5 +1,5 @@
-import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow, FoodGuide } from "./repository";
-import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, ActivityInterest } from "@/lib/types";
+import type { PlanningRepository, PlanningProfileWithPetType, OwnedProfile, OwnerExperienceRow } from "./repository";
+import type { ExpenseItem, ConcernChecklistItem, DecisionStatus, ActivityCard, FoodCard } from "@/lib/types";
 import { SupabasePlanningRepository } from "./supabase-repo";
 import type { DraftStore } from "./draft-store";
 
@@ -66,7 +66,7 @@ export class DraftPlanningRepository implements PlanningRepository {
     });
   }
 
-  async replaceActivitySchedule(ownedProfileId: string, activities: ActivityInterest[]): Promise<void> {
+  async replaceActivitySchedule(ownedProfileId: string, activities: ActivityCard[]): Promise<void> {
     const current = await this.real.getActivitySchedule(ownedProfileId);
     await this.drafts.create({
       planning_pet_profile_id: ownedProfileId,
@@ -77,14 +77,14 @@ export class DraftPlanningRepository implements PlanningRepository {
     });
   }
 
-  async replaceFoodGuide(ownedProfileId: string, guide: FoodGuide): Promise<void> {
+  async replaceFoodGuide(ownedProfileId: string, cards: FoodCard[]): Promise<void> {
     const current = await this.real.getFoodGuide(ownedProfileId);
     await this.drafts.create({
       planning_pet_profile_id: ownedProfileId,
       user_id: this.userId,
       target: "food_guide",
       current_value: current,
-      proposed_value: guide,
+      proposed_value: cards,
     });
   }
 
@@ -121,10 +121,10 @@ export async function confirmDraft(draftId: string, drafts: DraftStore): Promise
       await repo.replaceActualExpenses(draft.planning_pet_profile_id, draft.proposed_value as ExpenseItem[]);
       break;
     case "activity_schedule":
-      await repo.replaceActivitySchedule(draft.planning_pet_profile_id, draft.proposed_value as ActivityInterest[]);
+      await repo.replaceActivitySchedule(draft.planning_pet_profile_id, draft.proposed_value as ActivityCard[]);
       break;
     case "food_guide":
-      await repo.replaceFoodGuide(draft.planning_pet_profile_id, draft.proposed_value as FoodGuide);
+      await repo.replaceFoodGuide(draft.planning_pet_profile_id, draft.proposed_value as FoodCard[]);
       break;
   }
 }
