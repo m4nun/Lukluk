@@ -88,8 +88,8 @@ export default function AgentChat({
   }, [input, loading, endpoint, bodyKey, profileId, onMessageSent]);
 
   return (
-    <div className="flex flex-1 flex-col">
-      <Conversation className="flex-1">
+    <div className="flex flex-col flex-1 min-h-0">
+      <Conversation className="flex-1 min-h-0">
         <ConversationContent>
           {messages.length === 0 ? (
             <ConversationEmptyState
@@ -131,7 +131,7 @@ export default function AgentChat({
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="border-t px-4 py-3">
+      <div className="border-t px-4 py-3 shrink-0">
         <Suggestions>
           {suggestions.map((s) => (
             <Suggestion

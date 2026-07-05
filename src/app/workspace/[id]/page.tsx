@@ -195,7 +195,7 @@ export default function WorkspacePage() {
       </nav>
 
       {/* Workspace body */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Left Panel */}
         <div className="flex-1 min-w-0 overflow-y-auto border-r border-border bg-background">
           {/* Header */}
@@ -273,31 +273,29 @@ export default function WorkspacePage() {
         </div>
 
         {/* Right Panel — Agent Chat */}
-        <div className="w-full max-w-[400px] shrink-0 flex flex-col bg-card overflow-hidden border-l border-border">
-          <div className="flex items-center gap-2.5 border-b border-border px-4 py-3.5 shrink-0">
+        <div className="w-[380px] shrink-0 flex flex-col bg-card overflow-hidden border-l border-border">
+          <div className="flex items-center gap-2.5 border-b border-border px-4 py-3 shrink-0">
             <span className="h-2 w-2 rounded-full bg-primary" />
             <div>
               <h3 className="text-sm font-semibold">Decision Agent</h3>
               <p className="text-xs text-muted-foreground">Always available</p>
             </div>
           </div>
-          <div className="flex flex-1 overflow-hidden">
-            <AgentChat
-              endpoint="/api/agent/chat"
-              bodyKey="planningProfileId"
-              profileId={params.id}
-              suggestions={[
-                "Show me the costs",
-                "What are the main concerns?",
-                "Does this pet fit my lifestyle?",
-                "How much time does this pet need?",
-              ]}
-              placeholder="Ask about costs, concerns, lifestyle fit..."
-              emptyTitle="Hi! I'm your Decision Agent"
-              emptyDescription="Ask me anything about this pet type — costs, concerns, whether it fits your lifestyle."
-              onMessageSent={refreshData}
-            />
-          </div>
+          <AgentChat
+            endpoint="/api/agent/chat"
+            bodyKey="planningProfileId"
+            profileId={params.id}
+            suggestions={[
+              "Show me the costs",
+              "What are the main concerns?",
+              "Does this pet fit my lifestyle?",
+              "How much time does this pet need?",
+            ]}
+            placeholder="Ask about costs, concerns, lifestyle fit..."
+            emptyTitle="Hi! I'm your Decision Agent"
+            emptyDescription="Ask me anything about this pet type — costs, concerns, whether it fits your lifestyle."
+            onMessageSent={refreshData}
+          />
         </div>
       </div>
     </div>
