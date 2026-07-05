@@ -78,6 +78,17 @@ export default function OwnedPage() {
     load();
   }, [params.id]);
 
+  async function refreshData() {
+    try {
+      const res = await fetch(`/api/ownership/${params.id}`);
+      if (res.ok) {
+        setData(await res.json());
+      }
+    } catch {
+      // silent fail on refresh
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen flex-col">
@@ -297,6 +308,7 @@ export default function OwnedPage() {
             placeholder="Ask about feeding, schedules, expenses..."
             emptyTitle="Hi! I'm your Care Agent"
             emptyDescription="Ask me about feeding, activity routines, tracking expenses, or any care concerns."
+            onMessageSent={refreshData}
           />
         </div>
       </div>
