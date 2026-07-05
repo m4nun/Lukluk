@@ -233,12 +233,12 @@ export default function OwnedPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 px-5 md:px-7 sticky top-0 bg-[#fafafa] z-10">
+          <div className="flex overflow-x-auto border-b border-gray-200 px-5 md:px-7 sticky top-0 bg-[#fafafa] z-10 scrollbar-hide">
             {tabs.map((t) => (
               <button
                 key={t.key}
                 onClick={() => setActiveTab(t.key)}
-                className={`px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
+                className={`shrink-0 px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
                   activeTab === t.key
                     ? "border-orange-500 text-gray-900"
                     : "border-transparent text-gray-500 hover:text-gray-700"
