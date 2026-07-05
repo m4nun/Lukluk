@@ -98,7 +98,7 @@ export function createCareTools(repo: PlanningRepository) {
       const owned = await repo.getOwnedProfile(owned_profile_id);
       if (!owned) return "Owned pet profile not found.";
 
-      const [expenses, schedule, food] = await Promise.all([
+      const [expenses, schedule, foodGuide] = await Promise.all([
         repo.getActualExpenses(owned_profile_id),
         repo.getActivitySchedule(owned_profile_id),
         repo.getFoodGuide(owned_profile_id),
@@ -114,12 +114,12 @@ export function createCareTools(repo: PlanningRepository) {
         },
         actual_expenses: expenses,
         activity_schedule: schedule,
-        food_guide: food,
+        food_guide: foodGuide,
       });
     },
     {
       name: "get_care_context",
-      description: "Get the full context for an Owned Pet Profile — pet details, expenses, activity schedule, and food guide.",
+      description: "Get the full care context for an owned pet. Call this FIRST before any other tool. Returns pet details, current expenses, activity schedule, and food guide.",
       schema: z.object({
         owned_profile_id: z.string().uuid(),
       }),
@@ -133,7 +133,7 @@ export function createCareTools(repo: PlanningRepository) {
     },
     {
       name: "update_actual_expenses",
-      description: "Update the Actual Expense Tracker for an Owned Pet Profile.",
+      description: `Update the actual expense tracker for an owned pet. Call this when user asks about costs, expenses, budget, or wants to track spending. The expenses array replaces all existing expenses. Each item must have: category ("food"|"medical"|"grooming"|"supplies"|"other"), item (string), amount_thb (number), and optional note (string or null). Example: [{category:"food", item:"Cat food (Royal Canin)", amount_thb:1200, note:"Monthly"}]`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         expenses: z.array(z.object({
@@ -153,7 +153,7 @@ export function createCareTools(repo: PlanningRepository) {
     },
     {
       name: "update_activity_schedule",
-      description: "Update the daily Activity Schedule for an Owned Pet Profile.",
+      description: `Update the daily activity schedule for an owned pet. Call this when user asks about routine, schedule, daily activities, exercise, playtime, or wants to build a care routine. The schedule array replaces all existing entries. Each item must have: day (string like "Monday"), activity (string like "Morning walk"), time (string like "07:00"). Include entries for every day of the week.`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         schedule: z.array(z.object({
@@ -172,7 +172,7 @@ export function createCareTools(repo: PlanningRepository) {
     },
     {
       name: "update_food_guide",
-      description: "Update the Food Guide for an Owned Pet Profile.",
+      description: `Update the food guide for an owned pet. Call this when user asks about feeding, food, diet, what to feed, or feeding schedule. All fields are optional strings or null. Example: {brand:"Royal Canin Indoor", amount:"40g per meal", frequency:"2 times per day", notes:"No wet food - causes diarrhea"}`,
       schema: z.object({
         owned_profile_id: z.string().uuid(),
         guide: z.object({
