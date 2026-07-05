@@ -226,8 +226,8 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
         </div>
       )}
 
-      {/* Add Measurement Button / Form */}
-      {onAdd && !showAddForm && (
+      {/* Add Measurement Button */}
+      {onAdd && (
         <button
           onClick={() => setShowAddForm(true)}
           className="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white p-4 text-gray-400 hover:border-emerald-300 hover:text-emerald-600 transition-colors"
@@ -237,60 +237,75 @@ export default function HealthCard({ metrics, onAdd, onRemove }: HealthCardProps
         </button>
       )}
 
+      {/* Add Measurement Modal */}
       {showAddForm && (
-        <div className="rounded-2xl border-2 border-emerald-300 bg-white p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-bold text-gray-900">Add Weight Measurement</h4>
-            <button
-              onClick={() => setShowAddForm(false)}
-              className="h-6 w-6 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Weight (kg)</label>
-              <input
-                type="number"
-                step="0.1"
-                value={newWeight}
-                onChange={(e) => setNewWeight(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
-                placeholder="5.2"
-              />
+        <>
+          <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setShowAddForm(false)} />
+          <div className="fixed inset-x-4 top-[15%] z-50 rounded-2xl bg-white shadow-xl max-w-md mx-auto md:inset-x-auto md:left-1/2 md:-translate-x-1/2">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+              <h2 className="text-base font-bold text-gray-900">Add Weight Measurement</h2>
+              <button onClick={() => setShowAddForm(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <div>
-              <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Date</label>
-              <input
-                type="date"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
-              />
+
+            {/* Body */}
+            <div className="px-5 py-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Weight (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={newWeight}
+                    onChange={(e) => setNewWeight(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                    placeholder="5.2"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Date</label>
+                  <input
+                    type="date"
+                    value={newDate}
+                    onChange={(e) => setNewDate(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Notes (optional)</label>
+                <input
+                  type="text"
+                  value={newNotes}
+                  onChange={(e) => setNewNotes(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  placeholder="After vet visit, post-meal, etc."
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-5 py-4">
+              <button
+                onClick={() => setShowAddForm(false)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAdd}
+                disabled={!newWeight || !newDate}
+                className="px-5 py-2 rounded-xl bg-emerald-500 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Save Measurement
+              </button>
             </div>
           </div>
-
-          <div>
-            <label className="block text-[13px] font-semibold text-gray-700 mb-1.5">Notes (optional)</label>
-            <input
-              type="text"
-              value={newNotes}
-              onChange={(e) => setNewNotes(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
-              placeholder="After vet visit, post-meal, etc."
-            />
-          </div>
-
-          <button
-            onClick={handleAdd}
-            disabled={!newWeight || !newDate}
-            className="w-full rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Save Measurement
-          </button>
-        </div>
+        </>
       )}
     </div>
   );

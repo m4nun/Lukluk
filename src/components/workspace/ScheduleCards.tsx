@@ -41,14 +41,14 @@ interface ScheduleCardsProps {
   onAdd?: () => void;
 }
 
-const EVENT_TYPE_CONFIG: Record<ScheduleEventType, { icon: React.ComponentType<{ className?: string }>; color: string; label: string }> = {
-  vaccine: { icon: Syringe, color: "blue", label: "VACCINE" },
-  checkup: { icon: Stethoscope, color: "emerald", label: "CHECKUP" },
-  grooming: { icon: Scissors, color: "amber", label: "GROOMING" },
-  medication: { icon: Pill, color: "rose", label: "MEDICATION" },
-  boarding: { icon: Building2, color: "violet", label: "BOARDING" },
-  emergency: { icon: AlertTriangle, color: "rose", label: "EMERGENCY" },
-  other: { icon: Calendar, color: "gray", label: "OTHER" },
+const EVENT_TYPE_CONFIG: Record<ScheduleEventType, { icon: React.ComponentType<{ className?: string }>; color: string; label: string; bgClass: string; textClass: string; borderClass: string }> = {
+  vaccine: { icon: Syringe, color: "blue", label: "VACCINE", bgClass: "bg-blue-50", textClass: "text-blue-600", borderClass: "border-blue-100" },
+  checkup: { icon: Stethoscope, color: "emerald", label: "CHECKUP", bgClass: "bg-emerald-50", textClass: "text-emerald-600", borderClass: "border-emerald-100" },
+  grooming: { icon: Scissors, color: "amber", label: "GROOMING", bgClass: "bg-amber-50", textClass: "text-amber-600", borderClass: "border-amber-100" },
+  medication: { icon: Pill, color: "rose", label: "MEDICATION", bgClass: "bg-rose-50", textClass: "text-rose-600", borderClass: "border-rose-100" },
+  boarding: { icon: Building2, color: "violet", label: "BOARDING", bgClass: "bg-violet-50", textClass: "text-violet-600", borderClass: "border-violet-100" },
+  emergency: { icon: AlertTriangle, color: "rose", label: "EMERGENCY", bgClass: "bg-rose-50", textClass: "text-rose-600", borderClass: "border-rose-100" },
+  other: { icon: Calendar, color: "gray", label: "OTHER", bgClass: "bg-gray-50", textClass: "text-gray-600", borderClass: "border-gray-100" },
 };
 
 function getStatus(schedule: ScheduleCardType): { label: string; color: string } {
@@ -178,15 +178,15 @@ export default function ScheduleCards({
                       />
                     </div>
                   ) : (
-                    <div className={`flex h-28 w-full items-center justify-center rounded-t-xl bg-${config.color}-50 border-b border-${config.color}-100`}>
-                      <IconComp className={`h-10 w-10 text-${config.color}-400`} />
+                    <div className={`flex h-28 w-full items-center justify-center rounded-t-xl ${config.bgClass} border-b ${config.borderClass}`}>
+                      <IconComp className={`h-10 w-10 ${config.textClass}`} />
                     </div>
                   )}
 
                   {/* Content */}
                   <div className="px-4 py-3">
                     <div className="flex items-center justify-between">
-                      <span className={`text-[10px] font-bold tracking-wide ${config.color === "gray" ? "text-gray-500" : `text-${config.color}-600`}`}>
+                      <span className={`text-[10px] font-bold tracking-wide ${config.textClass}`}>
                         {config.label}
                       </span>
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${status.color}`}>
