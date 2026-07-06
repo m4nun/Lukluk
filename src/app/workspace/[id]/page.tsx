@@ -340,37 +340,39 @@ export default function WorkspacePage() {
         </div>
 
         {/* Right Panel — Decision Chat (Desktop) */}
-        <div className="hidden md:flex w-[380px] shrink-0 flex-col bg-white border-l border-gray-200">
-          <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-3.5">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
-              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-              </svg>
+        {!chatOpen && (
+          <div className="hidden md:flex w-[380px] shrink-0 flex-col bg-white border-l border-gray-200">
+            <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-3.5">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-gray-900">Decision Agent</h3>
+                <p className="text-xs text-gray-500">Help with costs, concerns, and lifestyle fit</p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-green-600">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                Available
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-gray-900">Decision Agent</h3>
-              <p className="text-xs text-gray-500">Help with costs, concerns, and lifestyle fit</p>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-green-600">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-              Available
-            </div>
+            <AgentChat
+              endpoint="/api/agent/chat"
+              bodyKey="planningProfileId"
+              profileId={params.id}
+              suggestions={["Show estimated costs", "Main concerns?", "Does this pet fit my lifestyle?"]}
+              placeholder="Type a message"
+              emptyTitle="Hi, I'm the Decision Agent"
+              emptyDescription="Ask me about costs, concerns, or whether this pet fits your lifestyle"
+              onMessageSent={refreshData}
+              externalInput={chatInput}
+              onExternalInputConsumed={() => setChatInput("")}
+              messages={chatMessages}
+              onMessagesChange={setChatMessages}
+            />
           </div>
-          <AgentChat
-            endpoint="/api/agent/chat"
-            bodyKey="planningProfileId"
-            profileId={params.id}
-            suggestions={["Show estimated costs", "Main concerns?", "Does this pet fit my lifestyle?"]}
-            placeholder="Type a message"
-            emptyTitle="Hi, I'm the Decision Agent"
-            emptyDescription="Ask me about costs, concerns, or whether this pet fits your lifestyle"
-            onMessageSent={refreshData}
-            externalInput={chatInput}
-            onExternalInputConsumed={() => setChatInput("")}
-            messages={chatMessages}
-            onMessagesChange={setChatMessages}
-          />
-        </div>
+        )}
       </div>
 
       {/* Mobile Chat FAB */}
@@ -382,46 +384,42 @@ export default function WorkspacePage() {
       </button>
 
       {/* Mobile Bottom Sheet Chat */}
-      {chatOpen && (
-        <>
-          <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setChatOpen(false)} />
-          <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[20px] flex flex-col" style={{ height: "85dvh" }}>
-            <div className="w-9 h-1 rounded-full bg-gray-300 mx-auto mt-2.5 flex-shrink-0" />
-            <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-gray-200 flex-shrink-0">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
-                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-[15px] font-semibold">Decision Agent</h3>
-                <p className="text-xs text-gray-500">Always available</p>
-              </div>
-              <button onClick={() => setChatOpen(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="flex-1 min-h-0 h-full">
-              <AgentChat
-                endpoint="/api/agent/chat"
-                bodyKey="planningProfileId"
-                profileId={params.id}
-                suggestions={["Show estimated costs", "Main concerns?"]}
-                placeholder="Type a message"
-                emptyTitle="Hi, I'm the Decision Agent"
-                emptyDescription="Does this pet fit my lifestyle?"
-                onMessageSent={refreshData}
-                externalInput={chatInput}
-                onExternalInputConsumed={() => setChatInput("")}
-                messages={chatMessages}
-                onMessagesChange={setChatMessages}
-              />
-            </div>
+      <div className={`md:hidden fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 ${chatOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setChatOpen(false)} />
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[20px] flex flex-col transition-transform duration-300 ${chatOpen ? 'translate-y-0' : 'translate-y-full'}`} style={{ height: "85dvh" }}>
+        <div className="w-9 h-1 rounded-full bg-gray-300 mx-auto mt-2.5 flex-shrink-0" />
+        <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-gray-200 flex-shrink-0">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
           </div>
-        </>
-      )}
+          <div className="flex-1">
+            <h3 className="text-[15px] font-semibold">Decision Agent</h3>
+            <p className="text-xs text-gray-500">Always available</p>
+          </div>
+          <button onClick={() => setChatOpen(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div className="flex-1 min-h-0 h-full">
+          <AgentChat
+            endpoint="/api/agent/chat"
+            bodyKey="planningProfileId"
+            profileId={params.id}
+            suggestions={["Show estimated costs", "Main concerns?"]}
+            placeholder="Type a message"
+            emptyTitle="Hi, I'm the Decision Agent"
+            emptyDescription="Does this pet fit my lifestyle?"
+            onMessageSent={refreshData}
+            externalInput={chatInput}
+            onExternalInputConsumed={() => setChatInput("")}
+            messages={chatMessages}
+            onMessagesChange={setChatMessages}
+          />
+        </div>
+      </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (

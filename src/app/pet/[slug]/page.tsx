@@ -4,6 +4,7 @@ import Image from "next/image";
 import { getPetLogo } from "@/lib/pet-logos";
 import { ExploreCTA } from "@/components/pet/ExploreCTA";
 import PetExperiences from "@/components/pet/PetExperiences";
+import ShareExperience from "@/components/pet/ShareExperience";
 import {
   PawPrint,
   Check,
@@ -262,6 +263,11 @@ export default async function PetDetailPage({ params }: { params: Promise<{ slug
         {/* Experiences */}
         <div className="anim anim-d4">
           <PetExperiences petTypeProfileId={profile.id} />
+        </div>
+
+        {/* Share Experience Form */}
+        <div className="mt-4 anim anim-d4">
+          <ShareExperience petTypeProfileId={profile.id} petName={profile.name} />
         </div>
 
         {/* CTA */}

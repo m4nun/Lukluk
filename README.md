@@ -67,32 +67,61 @@ See `ROADMAP.md` for a complete overview. Key principles:
 ```
 src/
 ├── app/
-│   ├── page.tsx              # Landing page (Google sign-in)
-│   ├── auth/callback/        # OAuth callback
-│   ├── auth/google/          # OAuth redirect
+│   ├── page.tsx              # Landing page (hero, pet grid, CTA)
+│   ├── layout.tsx            # Root layout (Geist fonts)
+│   ├── globals.css           # Tailwind config + animations
+│   ├── auth/
+│   │   ├── google/           # Google OAuth redirect
+│   │   └── callback/         # OAuth callback handler
+│   ├── quiz/page.tsx         # 9-step quiz with phase machine
+│   ├── result/[id]/page.tsx  # Match result with top 3 + Match Card
+│   ├── dashboard/page.tsx    # Workspace list + onboarding gate
+│   ├── workspace/[id]/       # Two-panel planning workspace + agent
+│   ├── owned/[id]/           # Ownership mode workspace
+│   ├── pet/[slug]/           # Pet detail page
+│   ├── experiences/          # Owner Experience reading/submission
+│   ├── pricing/              # Subscription pricing page
+│   ├── profile/              # User profile page
 │   └── api/
 │       ├── agent/chat/       # Decision Agent chat endpoint
+│       ├── agent/care/       # Care Agent endpoint (stub)
 │       ├── auth/logout/      # Session logout
-│       ├── experiences/      # Owner Experience submission
-│       ├── match/            # Quiz → match → save result
+│       ├── experiences/      # Owner Experience CRUD
+│       ├── lifestyle/        # Lifestyle profile check
+│       ├── match/            # Quiz → match → save
 │       │   └── follow-up/    # LLM follow-up question round
 │       ├── ownership/transition/  # Planning → owned conversion
+│       ├── pet/[slug]/       # Pet profile by slug
 │       ├── planning/         # Planning Pet Profile CRUD
+│       ├── profile/          # User profile
 │       ├── seed/             # YAML → Supabase pipeline
 │       └── stripe/           # Checkout + webhook
+├── components/
+│   ├── onboarding/           # OnboardingModal, OnboardingSlide
+│   ├── quiz/                 # QuizModal
+│   ├── modals/               # ExplorePetModal
+│   ├── layout/               # AppNav, LoadingSkeleton, etc.
+│   ├── match-card/           # Match Card export (html2canvas)
+│   ├── pet/                  # Pet display components
+│   ├── workspace/            # ExpenseTable, ConcernChecklist, etc.
+│   ├── ui/                   # 17 shadcn/ui components
+│   └── agent/                # AgentChat components
+├── hooks/
 ├── lib/
-│   ├── agent/                # LangGraph agent
+│   ├── agent/                # LangGraph agent system
+│   │   ├── graph.ts          # StateGraph definition
+│   │   ├── tools.ts          # 4 tools (factory)
 │   │   ├── repository.ts     # PlanningRepository interface
-│   │   ├── supabase-repo.ts  # Supabase adapter
-│   │   ├── tools.ts          # Agent tools (factory)
-│   │   └── graph.ts          # StateGraph definition
-│   ├── matching/             # Matching engine
-│   │   ├── engine.ts         # Pure runMatch function
+│   │   └── supabase-repo.ts  # Supabase adapter
+│   ├── matching/             # Pure matching engine
+│   │   ├── engine.ts         # runMatch() — 8-dimension scoring
 │   │   └── dimensions.ts     # ScoreDimension interface + defaults
+│   ├── llm/config.ts         # callLLM() — OpenRouter client
 │   ├── pipeline/             # YAML validation + seed
-│   ├── quiz/questions.ts     # Fixed quiz questions
-│   ├── stripe/guard.ts       # Subscription gating
+│   ├── quiz/questions.ts     # 9 fixed questions + transformAnswers()
+│   ├── stripe/guard.ts       # isSubscriber(), requireSubscriber()
 │   ├── supabase/             # Server/client/admin clients
+│   ├── pet-logos.ts          # Shared getPetLogo() mapping
 │   └── types.ts              # Domain types
 └── proxy.ts                  # Session refresh proxy
 ```
@@ -106,10 +135,17 @@ src/
 | `/api/auth/logout` | POST | User | End session |
 | `/api/match` | POST | User | Quiz → match → save |
 | `/api/match/follow-up` | POST | User | LLM follow-up questions |
+| `/api/match/[id]` | GET | User | Get match result by ID |
+| `/api/lifestyle` | GET | User | Check if lifestyle profile exists |
+| `/api/pet/[slug]` | GET | None | Get pet profile by slug |
 | `/api/planning` | GET/POST | Subscriber | List/create planning profiles |
 | `/api/agent/chat` | POST | User | Decision Agent conversation |
-| `/api/experiences` | POST | Subscriber | Submit owner experience |
+| `/api/agent/care` | POST | User | Care Agent conversation (stub) |
+| `/api/agent/drafts` | POST | User | Agent draft proposals |
+| `/api/experiences` | GET/POST | GET: None / POST: Sub | Owner experiences |
+| `/api/ownership/[id]` | GET | User | Get owned profile |
 | `/api/ownership/transition` | POST | Subscriber | Convert to owned profile |
+| `/api/profile` | GET/POST | User | User profile |
 | `/api/stripe/checkout` | POST | User | Create checkout session |
 | `/api/stripe/webhook` | POST | Stripe | Handle Stripe events |
 | `/api/seed` | GET | Dev only | Seed pet profiles |

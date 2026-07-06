@@ -1,6 +1,6 @@
-# Lukluk Handoff — 2026-07-04
+# Lukluk Handoff — 2026-07-06
 
-Generated from 16-commit session. Full project docs at `HANDOFF_NEXT.md`, asset guide at `ASSET_GUIDE.md`.
+Generated from multi-session work. Full project docs at `HANDOFF_NEXT.md`, asset guide at `ASSET_GUIDE.md`.
 
 ## What the Next Session Is About
 
@@ -9,11 +9,13 @@ Pick up where this session left off — the project is functionally complete wit
 ## Project at a Glance
 
 - **Stack**: Next.js 16.2.10 (Turbopack), Supabase, OpenRouter (optional)
-- **Branch**: `master` (16 commits, clean build, zero TS errors)
+- **Branch**: `master`
 - **`.env.local`**: Supabase URL + anon key set. No Stripe or OpenRouter keys.
 - **Pet data**: 19 YAML profiles in `pet_pools/`, seeded to Supabase `pet_type_profiles` table.
+- **Pet names**: Short & punchy display names (Golden Gentleman, Sassy Siamese, Party Pug, etc.)
 - **Pet images**: `public/assets/PetLogo/{folder}/1.png` — see `ASSET_GUIDE.md` for naming conventions and sizes.
 - **YAML → asset mapping**: `src/lib/pet-logos.ts` handles the two mismatches (`american-shorthair` → `american-shorthair-cat`, `sphynx` → `sphynx-cat`)
+- **46 tests passing** across 4 suites
 
 ## Key Architecture Decisions
 
@@ -22,6 +24,7 @@ Pick up where this session left off — the project is functionally complete wit
 - **Guest quiz flow**: Matches stored in `sessionStorage`, result page reads from it. No auth or DB write needed for guests.
 - **Agent chat is stub**: `api/agent/chat` and `api/agent/care` return placeholder responses with auth + sub checks. The real LangGraph agent is in `src/lib/agent/invoke.ts` — just needs an OpenRouter key.
 - **Phase machine for quiz**: `quiz → analyzing → followup → matching` — single `phase` state variable, no ad-hoc flags.
+- **Onboarding before quiz**: First-time logged-in users see a 4-step onboarding modal on `/dashboard` before the quiz. State tracked via `/api/lifestyle` (no localStorage).
 
 ## Current Flow (All Working)
 
@@ -33,6 +36,9 @@ Landing → "Start Quiz" → 9 questions → analyzing spinner
       Auth'd + sub → POST /api/planning → /workspace/[id]
       Not auth'd → Google OAuth with return URL → retry
       No sub → inline subscription prompt → Stripe/demo → retry
+
+First-time login → /dashboard → Onboarding modal (4 slides)
+  → Quiz modal → lifestyle profile created → no more onboarding
 ```
 
 ## Critical Files
@@ -41,6 +47,8 @@ Landing → "Start Quiz" → 9 questions → analyzing spinner
 |------|---------|
 | `HANDOFF_NEXT.md` | Full feature status table, API endpoint matrix, remaining tasks |
 | `ASSET_GUIDE.md` | Pet image naming, color tokens, nav states, CTA patterns |
+| `src/components/onboarding/OnboardingModal.tsx` | 4-step onboarding for first-time users |
+| `src/components/onboarding/OnboardingSlide.tsx` | Individual onboarding slide |
 | `src/lib/pet-logos.ts` | Shared `getPetLogo(id)` — maps YAML IDs to asset folder paths |
 | `src/lib/stripe/guard.ts` | `isSubscriber()` — mock-aware subscription check |
 | `src/lib/llm/config.ts` | `callLLM()` — OpenRouter API client |
@@ -53,24 +61,25 @@ Landing → "Start Quiz" → 9 questions → analyzing spinner
 | `src/app/result/[id]/page.tsx` | Reads sessionStorage, shows matches, workspace/sub flow |
 | `src/app/page.tsx` | Landing — AppNav, 19-pet grid, Start Quiz + Google CTA |
 | `src/components/layout/AppNav.tsx` | Auth-aware nav: logged-out vs logged-in states |
+| `src/app/dashboard/page.tsx` | Workspace list, onboarding gate, quiz trigger |
 | `src/app/api/stripe/checkout/route.ts` | Demo mode without keys, real Stripe with keys |
 | `src/app/api/stripe/webhook/route.ts` | Mock fallback when no Stripe keys |
-| `src/app/dashboard/page.tsx` | Workspace list, auth gated by middleware |
 | `src/lib/supabase/middleware.ts` | Protects `/dashboard`, `/workspace`, `/owned` |
 | `supabase_schema.sql` | DB schema (run manually in Supabase SQL editor) |
 
-## What Still Needs Work
+## Known Issues
 
-1. **Google OAuth** — must be tested manually in browser. Middleware redirects unauthenticated `/dashboard` to `/`, `/auth/google` + `/auth/callback` are wired and redirect to `/dashboard`.
-2. **Stripe keys** — add `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` to `.env.local`. Checkout and webhook activate automatically.
-3. **OpenRouter key** — add `OPENROUTER_API_KEY` to `.env.local`. Agent chat becomes real AI, follow-up questions use LLM instead of rules.
-4. **Pet images** — place PNGs in `public/assets/PetLogo/{id}/1.png` for each YAML `id`. See `ASSET_GUIDE.md` for sizing per component.
-5. **Design/styling pass** — everything functions, needs visual polish from `design/` HTML files.
-6. **Remove unused `src/app/experiences` route?** — standalone experiences page may be redundant since each pet detail page has its own experiences section.
+1. **Pre-existing TS error** in `src/lib/agent/invoke.ts:77` — type cast issue with `ToolMessage`. Not blocking functionality.
+2. **Google OAuth** — must be tested manually in browser.
+3. **Stripe keys** — add to `.env.local` to activate real payments.
+4. **OpenRouter key** — add to `.env.local` to activate real AI agents.
+5. **Pet images** — place PNGs in `public/assets/PetLogo/{id}/1.png`.
+6. **Design/styling pass** — everything functions, needs visual polish from `design/` HTML files.
+7. **Re-seed needed** — after pet name changes, run `GET /api/seed` to push new names to Supabase.
 
 ## Suggested Skills
 
 - **`agent-browser`** — Run through full quiz flow, verify result page shows matches with images, test Explore/Subscribe/Create workspace flows
-- **`code-review`** — Review the 16-commit diff against `design/` specs
-- **`diagnosing-bugs`** — If any API 500s or image 404s appear during browser testing
+- **`code-review`** — Review current codebase against `design/` specs
+- **`diagnosing-bugs`** — Fix the pre-existing TS error in `invoke.ts`
 - **`tdd`** — Write integration tests for quiz → match → result pipeline

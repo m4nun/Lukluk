@@ -15,7 +15,7 @@
 - Denormalized JSONB mirrors for snapshot queries
 
 ### Pet Type Profiles (✓ Done)
-- 19 validated YAML profiles (5 dogs, 4 cats, 5 small mammals, rabbit, reptile, fish, other)
+- 19 validated YAML profiles with short & punchy display names
 - Zod schema validation + consistency checks
 - Build-step seed pipeline via GET /api/seed
 
@@ -25,6 +25,11 @@
 - LLM follow-up question round (capped at 20)
 - Match result storage
 - Google OAuth landing page
+
+### Onboarding (✓ Done)
+- 4-step onboarding modal on `/dashboard` for first-time logged-in users
+- Shows before quiz, state tracked via `/api/lifestyle` (no localStorage)
+- Animated slides with pet images, floating badges, progress dots
 
 ### Subscriber Features (✓ Done)
 - Stripe test checkout → webhook → subscription activation
@@ -45,26 +50,32 @@
 - Left panel: expenses, activity schedule, food guide (JSONB)
 
 ### Code Quality (✓ Done)
+- 46 tests passing across 4 suites (matching, dimensions, quiz, pipeline)
 - Matching engine is pure: `runMatch(profiles, lifestyle, dimensions?)`
 - Scoring dimensions are pluggable data objects: `ScoreDimension`
 - Agent tools depend on injected `PlanningRepository`, not Supabase
 
-## What's Left (Engineering)
+## What's Left
 
 ### Must Do Before Launch
-1. **Tests** — matching engine pure function tests, dimension tests, quiz transform tests, API boundary tests, RLS policy tests
-2. **Documentation** — README with setup instructions, env variable guide, deployment steps, database migration steps
-3. **Landing page content** — Replace Next.js boilerplate with real Lukluk copy and quiz entry point
+1. ~~Tests~~ — Done (46 passing)
+2. ~~Documentation~~ — Done (README, HANDOFF, CONTEXT, ADR, ROADMAP)
+3. ~~Landing page~~ — Done (hero, pet grid, features, testimonials, CTA)
+4. **Re-seed pet profiles** — After name changes, run `GET /api/seed`
+5. **Google OAuth testing** — Manual browser verification needed
 
 ### Nice to Have
-4. **Match Card export** — html2canvas integration for social sharing image
-5. **Streaming agent responses** — SSE streaming from LangGraph to client
-6. **Agent draft confirmation** — Draft table + confirmation flow (skipped for v1 speed)
-7. **Care Agent** — Different system prompt + tools for ownership mode
-8. **Buying/Adoption guidance gate** — Structured gating logic in agent prompt
+6. **Match Card export** — html2canvas integration for social sharing image
+7. **Streaming agent responses** — SSE streaming from LangGraph to client
+8. **Agent draft confirmation** — Draft table + confirmation flow (skipped for v1 speed)
+9. **Care Agent polish** — Different system prompt + tools for ownership mode
+10. **Buying/Adoption guidance gate** — Structured gating logic in agent prompt
 
 ### Design (User-owned)
 18 design cards spanning every screen — the user will provide designs for implementation.
+
+### Pre-existing Issues
+- **TS error in `invoke.ts:77`** — type cast issue with `ToolMessage`. Not blocking.
 
 ## Architecture Principles (for future agents)
 
@@ -73,3 +84,4 @@
 3. **Interface before implementation** — PlanningRepository, ScoreDimension define what, adapters define how
 4. **Lazy initialization** — Supabase admin, Stripe client are lazy to survive build without env vars
 5. **Google OAuth only** — no email/password auth routes exist
+6. **Lifestyle profile as state** — `/api/lifestyle` determines if user needs onboarding/quiz

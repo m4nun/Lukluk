@@ -35,6 +35,8 @@ Design the first impression so visitors understand Lukluk helps choose a respons
 
 Design a low-friction signup/onboarding path before the Fit Quiz.
 
+- 2026-07-06: Engineering implemented 4-step onboarding modal on `/dashboard` for first-time logged-in users. Shows before quiz, state tracked via `/api/lifestyle`. Design cards still needed for visual polish.
+
 ### Design: Fixed Fit Quiz experience
 
 - Owner: Design
@@ -191,9 +193,10 @@ Built Zod schema for YAML validation with consistency checks. Seed pipeline read
 - Owner: Engineering
 - Tags: Documentation, Testing
 
-Created 19 validated YAML Pet Type Profiles: Golden Retriever, Welsh Corgi, Siberian Husky, Pug, Bulldog, Siamese Cat, Persian Cat, American Shorthair, Sphynx, Chinchilla, Ferret, Rabbit, Fennec Fox, Hedgehog, Sugar Glider, Green Iguana, Axolotl, Hamster, Gerbil.
+Created 19 validated YAML Pet Type Profiles with short & punchy display names: Golden Gentleman, Sassy Siamese, Fluffy Persian, Cool Cat Shorthair, Naked Noble, Buff Bulldog, Party Pug, Snow Explorer, Royal Corgi, Pocket Rocket, Gerbil Ninja, Hop Star, Cloud Chinchilla, Ferret Ninja, Spikestar, Sugar Glider Ace, Fennec Flash, Iguana King, Axolotl Angel.
 
 - 2026-07-03: 19 profiles in pet_pools/ covering 7 species. Each passes Zod schema validation and consistency checks.
+- 2026-07-06: Updated display names to short & punchy style.
 
 ### Done: Implement Fixed Fit Quiz flow
 

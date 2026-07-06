@@ -320,37 +320,39 @@ export default function OwnedPage() {
         </div>
 
         {/* Right Panel — Care Chat (Desktop) */}
-        <div className="hidden md:flex w-[380px] shrink-0 flex-col bg-white border-l border-gray-200 overflow-hidden">
-          <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-3.5">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
-              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-              </svg>
+        {!chatOpen && (
+          <div className="hidden md:flex w-[380px] shrink-0 flex-col bg-white border-l border-gray-200 overflow-hidden">
+            <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-3.5">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-gray-900">Care Agent</h3>
+                <p className="text-xs text-gray-500">Help with feeding, schedule, and expenses</p>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-green-600">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                Available
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-gray-900">Care Agent</h3>
-              <p className="text-xs text-gray-500">Help with feeding, schedule, and expenses</p>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-green-600">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-              Available
-            </div>
+            <AgentChat
+              endpoint="/api/agent/care"
+              bodyKey="ownedProfileId"
+              profileId={params.id}
+              suggestions={["Track an expense", "Feeding tips", "Schedule ideas"]}
+              placeholder="Type a message"
+              emptyTitle="Hi, I'm the Care Agent"
+              emptyDescription="I help with feeding schedules, expense tracking, and pet care questions"
+              onMessageSent={refreshData}
+              externalInput={chatInput}
+              onExternalInputConsumed={() => setChatInput("")}
+              messages={chatMessages}
+              onMessagesChange={setChatMessages}
+            />
           </div>
-          <AgentChat
-            endpoint="/api/agent/care"
-            bodyKey="ownedProfileId"
-            profileId={params.id}
-            suggestions={["Track an expense", "Feeding tips", "Schedule ideas"]}
-            placeholder="Type a message"
-            emptyTitle="Hi, I'm the Care Agent"
-            emptyDescription="I help with feeding schedules, expense tracking, and pet care questions"
-            onMessageSent={refreshData}
-            externalInput={chatInput}
-            onExternalInputConsumed={() => setChatInput("")}
-            messages={chatMessages}
-            onMessagesChange={setChatMessages}
-          />
-        </div>
+        )}
       </div>
 
       {/* Mobile Chat FAB */}

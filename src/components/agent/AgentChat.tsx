@@ -127,6 +127,7 @@ export default function AgentChat({
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let currentEventType = "unknown";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -138,20 +139,17 @@ export default function AgentChat({
 
         for (const line of lines) {
           if (line.startsWith("event: ")) {
-            const eventType = line.slice(7);
+            currentEventType = line.slice(7);
             continue;
           }
           if (line.startsWith("data: ")) {
             const data = JSON.parse(line.slice(6));
 
-            const eventLine = lines.find(l => l.startsWith("event: "));
-            const eventType = eventLine ? eventLine.slice(7) : "unknown";
-
-            if (eventType === "progress") {
+            if (currentEventType === "progress") {
               const event = data as ProgressEvent;
               progressRef.current = [...progressRef.current, event];
               setProgress([...progressRef.current]);
-            } else if (eventType === "done") {
+            } else if (currentEventType === "done") {
               updateMessages((prev) => [
                 ...prev,
                 {
@@ -163,19 +161,42 @@ export default function AgentChat({
               setProgress([]);
               progressRef.current = [];
               onMessageSent?.();
-            } else if (eventType === "error") {
+            } else if (currentEventType === "error") {
               throw new Error(data.error);
             }
+            currentEventType = "unknown";
+          }
+        }
+      }
+
+      if (buffer.trim()) {
+        if (buffer.startsWith("data: ")) {
+          const data = JSON.parse(buffer.slice(6));
+          if (currentEventType === "done") {
+            updateMessages((prev) => [
+              ...prev,
+              {
+                role: "assistant",
+                text: data.response,
+                progress: [...progressRef.current],
+              },
+            ]);
+            setProgress([]);
+            progressRef.current = [];
+            onMessageSent?.();
+          } else if (currentEventType === "error") {
+            throw new Error(data.error);
           }
         }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : t.agentChat.error);
+      const errorMessage = e instanceof Error ? e.message : t.agentChat.error;
+      setError(errorMessage);
       updateMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          text: t.agentChat.error,
+          text: errorMessage,
         },
       ]);
       setProgress([]);
@@ -242,12 +263,6 @@ export default function AgentChat({
                 </div>
               </MessageContent>
             </Message>
-          )}
-
-          {error && (
-            <div className="mx-4 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-destructive text-xs">
-              {error}
-            </div>
           )}
         </ConversationContent>
         <ConversationScrollButton />
