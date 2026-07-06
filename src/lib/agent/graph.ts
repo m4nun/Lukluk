@@ -158,7 +158,7 @@ export function createAgent(opts: AgentOpts) {
 
   function shouldContinue(state: typeof AgentState.State) {
     const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
-    const hasToolCalls = lastMessage.tool_calls?.length > 0;
+    const hasToolCalls = (lastMessage.tool_calls?.length ?? 0) > 0;
 
     // If at iteration limit, still execute pending tool calls, then force text
     if (state.iteration >= MAX_ITERATIONS) {
