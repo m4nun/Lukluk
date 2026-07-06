@@ -19,6 +19,10 @@ const AgentState = Annotation.Root({
     reducer: (_, next) => next,
     default: () => 0,
   }),
+  forceText: Annotation<boolean>({
+    reducer: (_, next) => next,
+    default: () => false,
+  }),
 });
 
 export const DECISION_SYSTEM_PROMPT = `You are a pet advisor for Lukluk.
@@ -103,17 +107,21 @@ export function createAgent(opts: AgentOpts) {
 
   async function agentNode(state: typeof AgentState.State) {
     const messages = [
-      { role: "system" as const, content: systemPrompt },
+      { role: "system" as const, content: state.forceText
+        ? systemPrompt + "\n\nIMPORTANT: You MUST respond with a text answer. Do NOT use any tools. Just answer directly based on the information already available."
+        : systemPrompt },
       ...state.messages,
     ];
     onProgress?.({ type: "thinking", message: "Thinking..." });
-    const response = await modelWithTools.invoke(messages);
+
+    const modelToUse = state.forceText ? model : modelWithTools;
+    const response = await modelToUse.invoke(messages);
     return { messages: [response], iteration: state.iteration + 1 };
   }
 
   async function toolNode(state: typeof AgentState.State) {
     const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
-    if (!lastMessage.tool_calls?.length) return { messages: [] };
+    if (!lastMessage.tool_calls?.length) return { messages: [], forceText: false };
 
     const results: ToolMessage[] = [];
     for (const call of lastMessage.tool_calls) {
@@ -143,13 +151,24 @@ export function createAgent(opts: AgentOpts) {
       }
     }
 
-    return { messages: results };
+    // If at iteration limit, force text response on next agentNode call
+    const atLimit = state.iteration >= MAX_ITERATIONS;
+    return { messages: results, forceText: atLimit };
   }
 
   function shouldContinue(state: typeof AgentState.State) {
-    if (state.iteration >= MAX_ITERATIONS) return END;
     const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
-    if (lastMessage.tool_calls?.length) return "toolNode";
+    const hasToolCalls = lastMessage.tool_calls?.length > 0;
+
+    // If at iteration limit, still execute pending tool calls, then force text
+    if (state.iteration >= MAX_ITERATIONS) {
+      if (hasToolCalls && !state.forceText) {
+        return "toolNode";
+      }
+      return END;
+    }
+
+    if (hasToolCalls) return "toolNode";
     return END;
   }
 

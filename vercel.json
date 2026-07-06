@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/api/agent/**": {
+      "maxDuration": 300
+    },
+    "src/app/api/match/**": {
+      "maxDuration": 120
+    }
+  }
+}
