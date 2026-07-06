@@ -212,6 +212,7 @@ CREATE TABLE IF NOT EXISTS public.agent_threads (
   thread_id             TEXT NOT NULL UNIQUE,
   owned_pet_profile_id  UUID REFERENCES public.owned_pet_profiles(id) ON DELETE CASCADE,
   agent_type            TEXT NOT NULL DEFAULT 'decision',
+  messages              JSONB DEFAULT '[]'::jsonb,
   is_active             BOOLEAN NOT NULL DEFAULT true,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
