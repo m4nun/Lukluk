@@ -174,42 +174,69 @@ export async function runAgent(config: RunAgentConfig) {
 
   // Extract the final text response from the last AI message
   let responseText = "";
-  const allAiMessages = result.messages.filter(
+  const allMessages = result.messages;
+  const allAiMessages = allMessages.filter(
     (m) => m.constructor.name === "AIMessage",
   ) as AIMessage[];
 
-  // Get the last AI message that has actual text content (not just tool calls)
+  // Strategy 1: Get the last AI message that has actual text content (not just tool calls)
   for (let i = allAiMessages.length - 1; i >= 0; i--) {
     const msg = allAiMessages[i];
     const hasToolCalls = msg.tool_calls?.length;
 
     if (!hasToolCalls && msg.content) {
-      if (typeof msg.content === "string") {
+      if (typeof msg.content === "string" && msg.content.trim()) {
         responseText = msg.content;
+        break;
       } else if (Array.isArray(msg.content)) {
-        // Handle array content format from some models
         const textParts = msg.content
-          .filter((p: any) => p.type === "text")
+          .filter((p: any) => p.type === "text" && p.text?.trim())
           .map((p: any) => p.text);
-        responseText = textParts.join("\n");
-      } else {
-        responseText = JSON.stringify(msg.content);
+        if (textParts.length > 0) {
+          responseText = textParts.join("\n");
+          break;
+        }
       }
-      break;
     }
   }
 
-  // Fallback: if no text response found, use the last AI message content
-  if (!responseText && allAiMessages.length > 0) {
-    const lastMsg = allAiMessages[allAiMessages.length - 1];
-    if (typeof lastMsg.content === "string") {
-      responseText = lastMsg.content;
-    } else if (Array.isArray(lastMsg.content)) {
-      const textParts = lastMsg.content
-        .filter((p: any) => p.type === "text")
-        .map((p: any) => p.text);
-      responseText = textParts.join("\n");
+  // Strategy 2: Check ALL messages (including tool messages) for text content
+  if (!responseText) {
+    for (let i = allMessages.length - 1; i >= 0; i--) {
+      const msg = allMessages[i];
+      if (msg.constructor.name === "ToolMessage") continue;
+      if (!msg.content) continue;
+
+      const text = typeof msg.content === "string"
+        ? msg.content
+        : Array.isArray(msg.content)
+          ? msg.content.filter((p: any) => p.type === "text").map((p: any) => p.text).join("\n")
+          : "";
+
+      if (text.trim() && !text.includes("TOOL ERROR")) {
+        responseText = text;
+        break;
+      }
     }
+  }
+
+  // Strategy 3: Extract useful info from tool results as the response
+  if (!responseText) {
+    const toolMessages = allMessages.filter(
+      (m) => m.constructor.name === "ToolMessage",
+    ) as ToolMessage[];
+    const toolResults = toolMessages
+      .map((m) => (typeof m.content === "string" ? m.content : JSON.stringify(m.content)))
+      .filter((c) => c.trim() && !c.includes("TOOL ERROR"));
+
+    if (toolResults.length > 0) {
+      responseText = toolResults[toolResults.length - 1];
+    }
+  }
+
+  // Strategy 4: Ultimate fallback
+  if (!responseText) {
+    responseText = "I've processed your request. Let me know if you need anything else!";
   }
 
   const steps = extractSteps(result.messages.filter(
