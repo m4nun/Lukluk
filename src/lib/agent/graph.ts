@@ -4,7 +4,7 @@ import { StructuredTool } from "@langchain/core/tools";
 import type { PlanningRepository } from "./repository";
 import { getChatModel } from "@/lib/llm/config";
 
-const MAX_ITERATIONS = 3;
+const MAX_ITERATIONS = 6;
 
 const AgentState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
