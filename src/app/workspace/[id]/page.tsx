@@ -254,36 +254,50 @@ export default function WorkspacePage() {
         {/* Left Panel */}
         <div className="flex-1 overflow-y-auto">
           {/* Pet Header */}
-          <div className="flex items-start gap-4 px-5 pt-5 pb-4 md:px-7 md:pt-7">
-            {logoSrc ? (
-              <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border-2 border-white shadow-lg">
-                <Image src={logoSrc} alt={displayName} width={80} height={80} className="object-cover" />
+          <div className="border-b border-gray-200 bg-white px-7 py-5">
+            <div className="flex items-center gap-4">
+              {logoSrc ? (
+                <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200">
+                  <Image src={logoSrc} alt={displayName} width={56} height={56} className="object-cover" />
+                </div>
+              ) : (
+                <div className="h-14 w-14 flex-shrink-0 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center">
+                  <PawPrint className="h-6 w-6 text-gray-300" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-lg font-bold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>{displayName}</h1>
+                  <span className="text-[13px] text-gray-400">·</span>
+                  <span className="text-[13px] text-gray-500">{data.pet_type_profiles.species}</span>
+                </div>
+                <div className="mt-1 text-[13px] text-gray-500">{data.pet_type_profiles.mbti_label}</div>
               </div>
-            ) : (
-              <div className="h-20 w-20 flex-shrink-0 rounded-2xl border-2 border-white shadow-lg bg-gray-100 flex items-center justify-center">
-                <PawPrint className="h-8 w-8 text-gray-400" />
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] text-gray-500">Status:</span>
+                  <select
+                    value={data.decision_status}
+                    onChange={(e) => handleStatusUpdate(e.target.value)}
+                    disabled={statusUpdating}
+                    className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[13px] font-medium text-gray-700 transition-colors hover:border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50 cursor-pointer"
+                  >
+                    <option value="exploring">Exploring</option>
+                    <option value="considering">Considering</option>
+                    <option value="ready_to_buy">Ready to Buy</option>
+                    <option value="not_a_fit">Not a Fit</option>
+                    <option value="already_have">Already Have</option>
+                  </select>
+                </div>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  title="Remove from workspaces"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
-            )}
-            <div className="flex-1 min-w-0 pt-1">
-              <div className="text-xl font-bold text-gray-900">{displayName}</div>
-              <div className="text-sm text-gray-500 mt-0.5">{data.pet_type_profiles.species} · {data.pet_type_profiles.mbti_label}</div>
             </div>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors pt-1"
-              title="Remove from workspaces"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Decision Status */}
-          <div className="px-5 md:px-7 pb-4">
-            <DecisionStatus
-              status={data.decision_status}
-              onUpdate={handleStatusUpdate}
-              disabled={statusUpdating}
-            />
           </div>
 
           {/* Tabs */}
