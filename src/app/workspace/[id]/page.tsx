@@ -310,7 +310,7 @@ export default function WorkspacePage() {
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              Estimated Expenses
+              Expenses
             </button>
             <button
               onClick={() => setActiveTab("concerns")}
@@ -320,7 +320,7 @@ export default function WorkspacePage() {
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              Concern Checklist
+              Concerns
             </button>
           </div>
 

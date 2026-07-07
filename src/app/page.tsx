@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
@@ -8,6 +8,40 @@ import { AppNav } from "@/components/layout/AppNav";
 import { getPetLogo } from "@/lib/pet-logos";
 import { ClipboardList, BarChart3, MessageSquare, Shield, Brain, Camera, Check, Sparkles } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+
+function useInView<T extends HTMLElement>(options?: IntersectionObserverInit) {
+  const ref = useRef<T | null>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, ...options }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+  return { ref, inView };
+}
+
+function RevealSection({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const { ref, inView } = useInView<HTMLDivElement>();
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${
+        inView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -61,28 +95,22 @@ export default function Home() {
                     href="#how-it-works"
                     className="inline-flex items-center gap-2.5 rounded-full border border-border bg-card px-8 py-4 text-base font-semibold transition-all hover:border-foreground/20 hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    Learn More
+                    See how it works
                   </a>
                 </>
               ) : (
                 <>
                   <Link
-                    href="/auth/google"
-                    className="inline-flex items-center gap-3 rounded-full bg-white px-8 py-4 text-base font-semibold text-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.12)] transition-all hover:bg-gray-50 hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(0,0,0,0.16)] border border-gray-200"
+                    href="/quiz"
+                    className="inline-flex items-center gap-2.5 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-[0_4px_16px_rgba(249,115,22,0.25)] transition-all hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(249,115,22,0.3)]"
                   >
-                    <svg viewBox="0 0 24 24" className="h-5 w-5">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                    Sign in with Google
+                    Start the Fit Quiz
                   </Link>
                   <a
                     href="#how-it-works"
                     className="inline-flex items-center gap-2.5 rounded-full border border-border bg-card px-8 py-4 text-base font-semibold transition-all hover:border-foreground/20 hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    Learn More
+                    See how it works
                   </a>
                 </>
               )}
@@ -142,6 +170,7 @@ export default function Home() {
       </section>
 
       {/* Social Proof */}
+      <RevealSection>
       <section className="border-b border-border bg-gradient-to-b from-primary/5 to-background">
         <div className="mx-auto flex max-w-[1200px] items-center justify-center gap-14 flex-wrap px-6 py-16">
           {[
@@ -160,7 +189,10 @@ export default function Home() {
         </div>
       </section>
 
+      </RevealSection>
+
       {/* How It Works */}
+      <RevealSection>
       <section id="how-it-works" className="border-b border-border bg-card py-24">
         <div className="mx-auto max-w-[1200px] px-6">
           <span className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-primary">
@@ -191,8 +223,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </RevealSection>
 
       {/* Pet Types */}
+      <RevealSection>
       <section className="bg-background py-20">
         <div className="mx-auto max-w-[1200px] px-6">
           <span className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-primary">
@@ -244,9 +278,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </RevealSection>
 
       {/* Features */}
-      <section className="bg-card border-b border-border py-24">
+      <RevealSection>
+      <section id="features" className="bg-card border-b border-border py-24">
         <div className="mx-auto max-w-[1200px] px-6">
           <span className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-primary">
             Features
@@ -275,8 +311,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </RevealSection>
 
       {/* Testimonials */}
+      <RevealSection>
       <section className="bg-foreground py-24">
         <div className="mx-auto max-w-[1200px] px-6">
           <span className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-primary/80">
@@ -309,6 +347,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </RevealSection>
 
       {/* Pricing */}
       <section className="bg-background py-24">
@@ -383,16 +422,10 @@ export default function Home() {
                 </Link>
               ) : (
                 <Link
-                  href="/auth/google"
-                  className="inline-flex items-center gap-3 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-gray-900 shadow-[0_4px_16px_rgba(0,0,0,0.12)] transition-all hover:bg-gray-50 hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(0,0,0,0.16)] border border-gray-200"
+                  href="/quiz"
+                  className="inline-flex items-center gap-2.5 rounded-full bg-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-[0_4px_16px_rgba(249,115,22,0.25)] transition-all hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(249,115,22,0.3)]"
                 >
-                  <svg viewBox="0 0 24 24" className="h-5 w-5">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                  Sign in with Google
+                  Start the Fit Quiz
                 </Link>
               )}
             </div>
@@ -401,14 +434,23 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-        <div className="mx-auto max-w-[1200px] flex items-center justify-between px-6">
-          <p>&copy; 2026 Lukluk. All rights reserved.</p>
-          <div className="flex gap-6">
+      <footer className="border-t border-border py-10 text-sm text-muted-foreground">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-6 sm:flex-row sm:items-center sm:justify-between">
+          <Link href="/" className="flex items-center gap-2 text-base font-bold text-foreground">
+            <Image src="/assets/logo.png" alt="Lukluk" width={24} height={24} />
+            Lukluk
+          </Link>
+          <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <Link href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</Link>
+            <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
+            <Link href="/experiences" className="hover:text-foreground transition-colors">Experiences</Link>
             <Link href="/" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link href="/" className="hover:text-foreground transition-colors">Terms</Link>
-          </div>
+          </nav>
         </div>
+        <p className="mt-6 border-t border-border pt-6 text-center text-xs text-muted-foreground/70">
+          &copy; 2026 Lukluk. All rights reserved.
+        </p>
       </footer>
     </div>
   );

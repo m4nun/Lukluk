@@ -243,7 +243,7 @@ export default function OwnedPage() {
                 onClick={() => setActiveTab(t.key)}
                 className={`shrink-0 px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
                   activeTab === t.key
-                    ? "border-orange-500 text-gray-900"
+                    ? "border-green-500 text-gray-900"
                     : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
