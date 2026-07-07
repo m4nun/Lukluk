@@ -4,6 +4,7 @@ import { runAgent } from "@/lib/agent/invoke";
 import { SupabasePlanningRepository } from "@/lib/agent/supabase-repo";
 import { createCareTools } from "@/lib/agent/tools";
 import { CARE_SYSTEM_PROMPT } from "@/lib/agent/graph";
+import { extractToolResults } from "@/lib/agent/tool-results";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -62,7 +63,8 @@ export async function POST(request: Request) {
         if ("error" in result) {
           send("error", { error: result.error });
         } else {
-          send("done", { response: result.response, thread_id: result.thread_id });
+          const toolResults = extractToolResults(result.steps);
+          send("done", { response: result.response, thread_id: result.thread_id, toolResults });
         }
       } catch (e) {
         send("error", { error: e instanceof Error ? e.message : "Unknown error" });

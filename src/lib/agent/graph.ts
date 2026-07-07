@@ -79,6 +79,8 @@ function getToolLabel(toolName: string): ProgressEvent {
   switch (toolName) {
     case "web_search":
       return { type: "searching", message: "Searching..." };
+    case "search_pet_places":
+      return { type: "searching", message: "Finding nearby pet places..." };
     case "update_food_guide":
       return { type: "creating", message: "Updating food guide..." };
     case "update_expenses":

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { safeTool } from "./safe-tool";
 import type { PlanningRepository } from "./repository";
+import { findPetPlaces } from "./map-places";
 
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
@@ -17,6 +18,36 @@ async function retryWithBackoff<T>(
     }
   }
   throw new Error("Max retries exceeded");
+}
+
+function createPetPlacesTool() {
+  return safeTool(
+    async ({ query, location }) => {
+      try {
+        const result = await findPetPlaces(location);
+        if (!result) {
+          return `NO LOCATION FOUND: Could not geocode "${location}". Ask the user for a more specific area (district, city, or postal code in Thailand).`;
+        }
+
+        if (!result.places.length) {
+          return `NO PLACES: No pet-related places found near ${location}. The area may not have mapped pet shops/vets on OpenStreetMap yet. Suggest the user try a broader area or search online.`;
+        }
+
+        return JSON.stringify(result);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        return `SEARCH FAILED: ${msg}. Tell the user the map service is temporarily unavailable.`;
+      }
+    },
+    {
+      name: "search_pet_places",
+      description: `Find nearby pet shops, veterinary clinics, pet boarding, dog parks, and grooming services on an interactive map. The map is shown to the user inline. Ask the user for their area (district/city in Thailand) if not provided, then call this tool. Categories searched: pet shops, vets, boarding, dog parks, grooming.`,
+      schema: z.object({
+        query: z.string().describe("What the user is looking for, e.g., 'pet shop', 'vet', 'dog park'"),
+        location: z.string().describe("Location in Thailand as a place name, e.g., 'Bangkok', 'Sukhumvit, Bangkok', 'Chiang Mai'"),
+      }),
+    }
+  );
 }
 
 function createWebSearchTool() {
@@ -67,6 +98,7 @@ function createWebSearchTool() {
 
 export function createAgentTools(repo: PlanningRepository) {
   const webSearchTool = createWebSearchTool();
+  const petPlacesTool = createPetPlacesTool();
 
   const updateExpenseTool = safeTool(
     async ({ planning_profile_id, expenses }) => {
@@ -156,11 +188,12 @@ export function createAgentTools(repo: PlanningRepository) {
     }
   );
 
-  return [webSearchTool, updateExpenseTool, updateConcernsTool, updateDecisionStatusTool, getContextTool];
+  return [webSearchTool, petPlacesTool, updateExpenseTool, updateConcernsTool, updateDecisionStatusTool, getContextTool];
 }
 
 export function createCareTools(repo: PlanningRepository) {
   const webSearchTool = createWebSearchTool();
+  const petPlacesTool = createPetPlacesTool();
 
   const getCareContextTool = safeTool(
     async ({ owned_profile_id }) => {
@@ -312,5 +345,5 @@ export function createCareTools(repo: PlanningRepository) {
     }
   );
 
-  return [webSearchTool, getCareContextTool, updateActualExpensesTool, updateFoodGuideTool, updateScheduleTool, addHealthMetricTool];
+  return [webSearchTool, petPlacesTool, getCareContextTool, updateActualExpensesTool, updateFoodGuideTool, updateScheduleTool, addHealthMetricTool];
 }
