@@ -41,7 +41,7 @@ function createPetPlacesTool() {
     },
     {
       name: "search_pet_places",
-      description: `Find nearby pet shops, veterinary clinics, pet boarding, dog parks, and grooming services on an interactive map. The map is shown to the user inline. Ask the user for their area (district/city in Thailand) if not provided, then call this tool. Categories searched: pet shops, vets, boarding, dog parks, grooming.`,
+      description: `Show an interactive map of nearby pet places in Thailand. CALL THIS TOOL whenever the user asks about pet shops, vets, grooming, boarding, dog parks, or anything location-based ("pet shop near me", "vet in Bangkok", "where can I buy a hamster nearby"). Pass a location extracted from the user's message (city, district, or area in Thailand). If no location is given, ask the user for their area first. Results render as a clickable map inline in the chat. Categories searched: pet shops, vets, boarding, dog parks, grooming.`,
       schema: z.object({
         query: z.string().describe("What the user is looking for, e.g., 'pet shop', 'vet', 'dog park'"),
         location: z.string().describe("Location in Thailand as a place name, e.g., 'Bangkok', 'Sukhumvit, Bangkok', 'Chiang Mai'"),
