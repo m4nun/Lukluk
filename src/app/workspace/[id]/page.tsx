@@ -10,6 +10,7 @@ import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ConcernChecklist from "@/components/workspace/ConcernChecklist";
 import DecisionStatus from "@/components/workspace/DecisionStatus";
 import DraftPanel from "@/components/workspace/DraftPanel";
+import GuidanceGate from "@/components/workspace/GuidanceGate";
 import OwnershipForm from "@/components/workspace/OwnershipForm";
 import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { getPetLogo } from "@/lib/pet-logos";
@@ -58,6 +59,7 @@ export default function WorkspacePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"expenses" | "concerns">("expenses");
+  const [visitedTabs, setVisitedTabs] = useState<Set<"expenses" | "concerns">>(new Set(["expenses"]));
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [transitionError, setTransitionError] = useState("");
   const [chatInput, setChatInput] = useState("");
@@ -65,6 +67,16 @@ export default function WorkspacePage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const handleTabChange = useCallback((tab: "expenses" | "concerns") => {
+    setActiveTab(tab);
+    setVisitedTabs((prev) => {
+      if (prev.has(tab)) return prev;
+      const next = new Set(prev);
+      next.add(tab);
+      return next;
+    });
+  }, []);
 
   const handleEmbedToChat = useCallback((text: string) => {
     setChatInput(text);
@@ -218,7 +230,7 @@ export default function WorkspacePage() {
             Dashboard
           </Link>
         </div>
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
+        <div className="flex-1 flex items-center justify-center gap-2.5">
           {logoSrc && (
             <div className="h-7 w-7 overflow-hidden rounded-full border-2 border-gray-200">
               <Image src={logoSrc} alt={displayName} width={28} height={28} className="object-cover" />
@@ -303,7 +315,7 @@ export default function WorkspacePage() {
           {/* Tabs */}
           <div className="flex border-b border-gray-200 px-5 md:px-7 sticky top-0 bg-[#fafafa] z-10">
             <button
-              onClick={() => setActiveTab("expenses")}
+              onClick={() => handleTabChange("expenses")}
               className={`px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
                 activeTab === "expenses"
                   ? "border-orange-500 text-gray-900"
@@ -313,7 +325,7 @@ export default function WorkspacePage() {
               Expenses
             </button>
             <button
-              onClick={() => setActiveTab("concerns")}
+              onClick={() => handleTabChange("concerns")}
               className={`px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
                 activeTab === "concerns"
                   ? "border-orange-500 text-gray-900"
@@ -336,6 +348,20 @@ export default function WorkspacePage() {
                 workspaceId={params.id}
               />
             )}
+          </div>
+
+          {/* Adoption guidance */}
+          <div className="px-5 pb-6 md:px-7">
+            <GuidanceGate
+              hasSeenExpenses={visitedTabs.has("expenses")}
+              hasSeenConcerns={visitedTabs.has("concerns")}
+              expenseCount={data.estimated_expenses.length}
+              concernCount={data.concern_checklist.length}
+              onRequestHelp={() => {
+                setChatInput("Help me with adoption guidance");
+                setChatOpen(true);
+              }}
+            />
           </div>
 
           {/* Drafts */}
