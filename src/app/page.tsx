@@ -69,7 +69,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-[1200px] items-center gap-16 px-6 md:grid-cols-2">
           <div className="animate-fade-in-up">
             <span className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-2 text-[13px] font-semibold text-primary backdrop-blur-sm tracking-wide">
-              <Image src="/assets/logo.png" alt="" width={18} height={18} className="inline-block" /> Responsible Pet Matching
+              <Image src="/assets/logo.png" alt="" width={18} height={18} className="inline-block" /> AI-Powered Pet Matching
             </span>
             <h1 className="text-[clamp(36px,5vw,64px)] font-bold leading-[1.08] tracking-[-0.03em]">
               Find the pet that truly fits your{" "}
