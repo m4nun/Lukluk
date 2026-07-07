@@ -65,11 +65,13 @@ src/
 ├── components/
 │   ├── onboarding/           # OnboardingModal (4 slides), shown before quiz
 │   ├── quiz/, modals/, layout/, match-card/, pet/, workspace/, agent/
+│   │   └── agent/            # AgentChat, CareChat, ChatMap (inline Leaflet map)
 │   └── ui/                   # shadcn/ui components
 ├── hooks/
 ├── lib/
 │   ├── agent/                # LangGraph: graph.ts, tools.ts, repository.ts (interface),
-│   │                         #   supabase-repo.ts, supabase-draft-store.ts, care-tools.ts
+│   │                         #   supabase-repo.ts, supabase-draft-store.ts, care-tools.ts,
+│   │                         #   map-places.ts (Nominatim/Overpass), tool-results.ts
 │   ├── matching/             # engine.ts (runMatch, 8-dim scoring), dimensions.ts (ScoreDimension)
 │   ├── llm/config.ts         # callLLM() — OpenRouter client
 │   ├── pipeline/             # validate.ts (Zod), seed.ts (YAML → DB)
@@ -139,7 +141,8 @@ src/
 - **Pet Type Profiles**: 19 validated YAML profiles with short & punchy display names (Golden Gentleman, Sassy Siamese, Fluffy Persian, Cool Cat Shorthair, Naked Noble, Buff Bulldog, Party Pug, Snow Explorer, Royal Corgi, Pocket Rocket, Gerbil Ninja, Hop Star, Cloud Chinchilla, Ferret Ninja, Spikestar, Sugar Glider Ace, Fennec Flash, Iguana King, Axolotl Angel).
 - **Core**: 9-question fixed Fit Quiz with phase machine; pure matching engine (8 weighted dimensions + MBTI secondary); LLM follow-up round (cap 20); match result storage; onboarding modal (4 slides) gated by `/api/lifestyle`.
 - **Subscriber**: Stripe test checkout → webhook → subscription; `requireSubscriber()` gating; Planning Pet Profile CRUD; Owner Experiences (subscriber-only POST, live immediately).
-- **Agent**: LangGraph StateGraph; 4 tools (update_expenses, update_concerns, update_decision_status, get_context); PlanningRepository interface + Supabase adapter; per-profile agent threads; care-tools.ts for ownership mode.
+- **Agent**: LangGraph StateGraph; 5 tools in Decision Agent (update_expenses, update_concerns, update_decision_status, get_context, search_pet_places); 6 tools in Care Agent (plus update_actual_expenses, update_food_guide, update_schedule, add_health_metric); PlanningRepository interface + Supabase adapter; per-profile agent threads.
+- **Inline Map**: `search_pet_places` tool renders an interactive Leaflet map inside the chat message bubble. Server geocodes the location via OpenStreetMap Nominatim and queries the Overpass API for pet shops, veterinary clinics, pet boarding, dog parks, and grooming within 8km. Results stream through the existing SSE `done` event as a `toolResults` payload and render as clickable markers + popups + a scrollable place list. No new API keys required.
 - **Ownership**: Planning → owned conversion; required fields enforced (pet name, age/life stage); agent thread switches to care type; left panel shows expenses, activity schedule, food guide.
 - **Tests**: 46 passing across 4 suites (dimensions 16, engine 8, questions 11, validate 11).
 
@@ -162,10 +165,9 @@ Workspace: Dashboard → workspace[id] → Expenses/Concerns/DecisionStatus + Ag
 
 ### Known Issues
 1. Pre-existing TS error in `src/lib/agent/invoke.ts:77` — `ToolMessage` type cast. Not blocking.
+2. Pre-existing TS errors in test fixtures (`engine.test.ts`, `validate.test.ts`) — test data type mismatches, unrelated to features. Not blocking; the `next build` production build passes.
 
 ### Remaining (polish/design only)
-- Match Card export (html2canvas already in deps).
-- Streaming agent responses (SSE).
 - Agent draft confirmation flow (deferred for v1 speed — direct writes currently).
 - Care Agent distinct system prompt + tools (care-tools.ts exists, needs polish).
 - Buying/Adoption guidance explicit gate (currently natural via agent tool calls).
@@ -211,7 +213,7 @@ Statuses: Not started / In development / Testing / Reviewing / Done. Engineering
 
 **Open (Design, Not started)**: product narrative + landing, account creation + onboarding, Fit Quiz experience, LLM follow-up moment, Match Result page, Shareable Match Card, subscription upgrade moment, subscriber dashboard, planning two-panel workspace, expense table interactions, concern checklist interactions, decision status UI, decision agent chat, agent draft confirmation flow, owner experiences reading/submission, buying/adoption guidance gate, ownership setup flow, ownership mode workspace + Care Agent, responsive system + UI components, empty/loading/error/permission states, design QA review.
 
-**Done (Engineering)**: Supabase auth + profile provisioning; Pet Type Profile YAML validation + seed pipeline; 19 validated Pet Type Profiles; Fixed Fit Quiz flow; Responsible Fit matching engine; LLM follow-up question round; Match Result page + Match Card export endpoint; Stripe test-mode subscription boundary; subscriber dashboard + Planning Pet Profile creation; two-panel workspace + LangGraph Decision Agent; Owner Experiences; Buying/Adoption guidance gate; Ownership setup + transition + Care Agent; design shells (8 pages, 4 components); RLS/API/pure-module tests (46); roadmap + README + ADR + supabase schema.
+**Done (Engineering)**: Supabase auth + profile provisioning; Pet Type Profile YAML validation + seed pipeline; 19 validated Pet Type Profiles; Fixed Fit Quiz flow; Responsible Fit matching engine; LLM follow-up question round; Match Result page + Match Card export endpoint; Stripe test-mode subscription boundary; subscriber dashboard + Planning Pet Profile creation; two-panel workspace + LangGraph Decision Agent; Owner Experiences; Buying/Adoption guidance gate; Ownership setup + transition + Care Agent; inline interactive map in agent chat (search_pet_places tool + Leaflet rendering); design shells (8 pages, 4 components); RLS/API/pure-module tests (46); roadmap + README + ADR + supabase schema.
 
 ## Deployment
 

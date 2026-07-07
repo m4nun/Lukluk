@@ -64,6 +64,8 @@ When the user marks that they already have the pet, Lukluk collects basic owners
 46. As a product maintainer, I want Pet Type Profile YAML to be validated by a strict schema, so that malformed profiles cannot affect matching or agent behavior.
 47. As a product maintainer, I want basic consistency checks for Pet Type Profiles, so that suspicious values like unrealistic costs or contradictory care levels are caught before use.
 48. As a product maintainer, I want user-specific state stored separately from Pet Type Profiles, so that global pet knowledge does not get mixed with individual user data.
+49. As a user, I want the agent to show me nearby pet shops, veterinary clinics, pet boarding, dog parks, and grooming services as an interactive map inside the chat when I ask about them, so that I can find real places near me without leaving the conversation.
+50. As a user, I want each map marker to show the place name, category, address, distance from my area, and a link to open it in a map service, so that I can decide where to go.
 
 ## Implementation Decisions
 
@@ -93,6 +95,8 @@ When the user marks that they already have the pet, Lukluk collects basic owners
 - Ownership mode starts when the user marks that they already have this pet.
 - Ownership setup requires pet name, Pet Type, age/life stage, and got-date or "I don't remember"; weight/size and other fields are optional.
 - Ownership mode keeps the two-panel layout and changes the left panel toward expense, activity schedule, and food guide while the right panel becomes a Care Agent.
+- The Pet Place Search tool uses OpenStreetMap Nominatim (geocoding) and the Overpass API (place search) with no API key required. Results are rendered as an Inline Map directly inside the chat message bubble.
+- Inline Map tool results are forwarded from the server to the client through the existing SSE `done` event as a `toolResults` payload, keeping the transport protocol unchanged.
 
 ## Testing Decisions
 

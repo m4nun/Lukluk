@@ -83,3 +83,15 @@ _Avoid_: Extra quiz question, survey question
 **Agent Draft**:
 An agent-generated edit to the left panel (expense table, concern checklist, decision status) that is proposed but not yet saved. Drafts require explicit user confirmation before being written to the Planning Pet Profile.
 _Avoid_: Suggestion, recommendation, pending change
+
+**Pet Place Search**:
+A tool the agent can invoke to find nearby pet-related services (pet shops, veterinary clinics, pet boarding, dog parks, pet grooming) in Thailand using OpenStreetMap Nominatim for geocoding and the Overpass API for place search.
+_Avoid_: Map search, location lookup, Google Places
+
+**Inline Map**:
+A structured agent tool result rendered as an interactive Leaflet map inside the chat message bubble. Forwarded to the client through the SSE `done` event as a `toolResults` payload and rendered with colored markers, popups, and a place list.
+_Avoid_: Map widget, embedded map, map preview
+
+**Map Place**:
+A single point of interest on an Inline Map, with name, latitude, longitude, category, optional address, and optional distance from the search center.
+_Avoid_: Map marker, pin, point of interest
