@@ -375,10 +375,10 @@ export default function WorkspacePage() {
               endpoint="/api/agent/chat"
               bodyKey="planningProfileId"
               profileId={params.id}
-              suggestions={["Show estimated costs", "Main concerns?", "Does this pet fit my lifestyle?"]}
-              placeholder="Type a message"
+              suggestions={["Show estimated costs", "Main concerns?", "Pet shops near me", "Is this pet right for me?"]}
+              placeholder="Ask about costs, concerns, or nearby pet shops..."
               emptyTitle="Hi, I'm the Decision Agent"
-              emptyDescription="Ask me about costs, concerns, or whether this pet fits your lifestyle"
+              emptyDescription="Ask about costs, concerns, or find pet shops near you on the map"
               onMessageSent={refreshData}
               externalInput={chatInput}
               onExternalInputConsumed={() => setChatInput("")}
@@ -422,10 +422,10 @@ export default function WorkspacePage() {
             endpoint="/api/agent/chat"
             bodyKey="planningProfileId"
             profileId={params.id}
-            suggestions={["Show estimated costs", "Main concerns?"]}
-            placeholder="Type a message"
+            suggestions={["Show estimated costs", "Main concerns?", "Pet shops near me"]}
+            placeholder="Ask about costs, concerns, or nearby pet shops..."
             emptyTitle="Hi, I'm the Decision Agent"
-            emptyDescription="Does this pet fit my lifestyle?"
+            emptyDescription="Does this pet fit your lifestyle?"
             onMessageSent={refreshData}
             externalInput={chatInput}
             onExternalInputConsumed={() => setChatInput("")}

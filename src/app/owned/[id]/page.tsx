@@ -341,10 +341,10 @@ export default function OwnedPage() {
               endpoint="/api/agent/care"
               bodyKey="ownedProfileId"
               profileId={params.id}
-              suggestions={["Track an expense", "Feeding tips", "Schedule ideas"]}
-              placeholder="Type a message"
+              suggestions={["Track an expense", "Feeding tips", "Vets near me", "Schedule ideas"]}
+              placeholder="Ask about feeding, schedules, expenses, or nearby vets..."
               emptyTitle="Hi, I'm the Care Agent"
-              emptyDescription="I help with feeding schedules, expense tracking, and pet care questions"
+              emptyDescription="I help with feeding, schedules, expenses, and finding pet services near you"
               onMessageSent={refreshData}
               externalInput={chatInput}
               onExternalInputConsumed={() => setChatInput("")}
@@ -388,8 +388,8 @@ export default function OwnedPage() {
             endpoint="/api/agent/care"
             bodyKey="ownedProfileId"
             profileId={params.id}
-            suggestions={["Track an expense", "Feeding tips"]}
-            placeholder="Type a message"
+            suggestions={["Track an expense", "Feeding tips", "Vets near me"]}
+            placeholder="Ask about feeding, schedules, expenses, or nearby vets..."
             emptyTitle="Hi, I'm the Care Agent"
             emptyDescription="Schedule ideas"
             onMessageSent={refreshData}
