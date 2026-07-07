@@ -294,8 +294,8 @@ export default function ProfilePage() {
         <div className="mx-auto max-w-[1200px] flex items-center justify-between px-6">
           <p>© 2026 Lukluk. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="/" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link href="/" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link href="/#privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link href="/#terms" className="hover:text-foreground transition-colors">Terms</Link>
           </div>
         </div>
       </footer>
