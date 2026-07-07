@@ -203,7 +203,7 @@ export default function Home() {
             <span className="text-primary">three steps</span>
           </h2>
           <p className="mt-5 max-w-[580px] text-lg text-muted-foreground leading-relaxed">
-            Sign in with Google, take the quiz, see your top matches, and chat with an AI agent to decide responsibly.
+            Take the quiz, see your top matches, and chat with an AI agent to decide responsibly.
           </p>
           <div className="mt-16 grid gap-10 md:grid-cols-3">
             {[
@@ -410,7 +410,7 @@ export default function Home() {
           <div className="mx-auto max-w-xl rounded-2xl border border-border bg-card p-10 text-center shadow-lg">
             <h2 className="text-2xl font-bold">Ready to find your match?</h2>
             <p className="mt-3 text-muted-foreground">
-              Sign in with Google and take the Fit Quiz to get your top 3 responsible pet matches in 5 minutes.
+              Take the Fit Quiz to get your top 3 responsible pet matches in 5 minutes.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
               {!loading && user ? (
