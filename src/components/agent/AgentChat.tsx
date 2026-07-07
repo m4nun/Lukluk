@@ -19,6 +19,8 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { ArrowUp, Search, Sparkles, Pencil } from "lucide-react";
 import { useI18n } from "@/lib/i18n/provider";
+import ChatMap from "./ChatMapLoader";
+import type { ToolResultRender } from "@/lib/agent/tool-results";
 
 interface ProgressEvent {
   type: "searching" | "creating" | "thinking";
@@ -29,6 +31,7 @@ export interface ChatMessage {
   role: "user" | "assistant";
   text: string;
   progress?: ProgressEvent[];
+  toolResults?: ToolResultRender[];
 }
 
 interface AgentChatProps {
@@ -156,6 +159,7 @@ export default function AgentChat({
                   role: "assistant",
                   text: data.response,
                   progress: [...progressRef.current],
+                  toolResults: Array.isArray(data.toolResults) ? data.toolResults : [],
                 },
               ]);
               setProgress([]);
@@ -179,6 +183,7 @@ export default function AgentChat({
                 role: "assistant",
                 text: data.response,
                 progress: [...progressRef.current],
+                toolResults: Array.isArray(data.toolResults) ? data.toolResults : [],
               },
             ]);
             setProgress([]);
@@ -233,6 +238,19 @@ export default function AgentChat({
                   <MessageResponse>
                     {msg.text}
                   </MessageResponse>
+                  {msg.toolResults?.map((tr, k) => {
+                    if (tr.renderType === "map") {
+                      return (
+                        <ChatMap
+                          key={`map-${k}`}
+                          places={tr.data.places}
+                          center={tr.data.center}
+                          zoom={tr.data.zoom}
+                        />
+                      );
+                    }
+                    return null;
+                  })}
                 </MessageContent>
               </Message>
             ))
