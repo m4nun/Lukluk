@@ -53,6 +53,9 @@ export default function ChatMap({ places, center, zoom }: ChatMapProps) {
         center={centerLatLng}
         zoom={zoom}
         scrollWheelZoom={false}
+        touchZoom
+        doubleClickZoom
+        dragging
         style={{ height: "320px", width: "100%" }}
         attributionControl
       >
