@@ -207,7 +207,7 @@ export default function Home() {
           </p>
           <div className="mt-16 grid gap-10 md:grid-cols-3">
             {[
-              { step: "1", title: "Take the Quiz", desc: "Answer 8 lifestyle questions about budget, time, space, and more. It takes 5 minutes.", Icon: ClipboardList },
+              { step: "1", title: "Take the Quiz", desc: "Answer 9 lifestyle questions about budget, time, space, and more. It takes 5 minutes.", Icon: ClipboardList },
               { step: "2", title: "See Your Matches", desc: "Get your top 3 responsible pet matches scored across 8 dimensions with explanations.", Icon: BarChart3 },
               { step: "3", title: "Chat with Agents", desc: "Talk to AI agents that help you estimate costs, review concerns, and decide confidently.", Icon: MessageSquare },
             ].map((s) => (
@@ -444,8 +444,8 @@ export default function Home() {
             <Link href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</Link>
             <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
             <Link href="/experiences" className="hover:text-foreground transition-colors">Experiences</Link>
-            <Link href="/" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link href="/" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link href="/#privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link href="/#terms" className="hover:text-foreground transition-colors">Terms</Link>
           </nav>
         </div>
         <p className="mt-6 border-t border-border pt-6 text-center text-xs text-muted-foreground/70">
