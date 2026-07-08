@@ -35,6 +35,28 @@ function createDivIcon(color: string): L.DivIcon {
   });
 }
 
+/**
+ * Center "search area" pin — intentionally distinct shape and elevated z-index
+ * so it stays visible even when a category place shares identical coordinates.
+ * Do not merge with `createDivIcon`; the visual separation is load-bearing.
+ */
+function createCenterIcon(): L.DivIcon {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40" fill="none">
+      <path d="M16 38s13-12.5 13-22a13 13 0 1 0-26 0c0 9.5 13 22 13 22z" fill="#f97316" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="16" cy="16" r="5" fill="white"/>
+      <circle cx="16" cy="16" r="2.5" fill="#f97316"/>
+    </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: "lukluk-map-marker lukluk-map-marker--center",
+    iconSize: [32, 40],
+    // Pin tip (not icon center) must align with the coordinate.
+    iconAnchor: [16, 40],
+    popupAnchor: [0, -36],
+  });
+}
+
 export default function ChatMap({ places, center, zoom }: ChatMapProps) {
   const centerLatLng = useMemo<L.LatLngExpression>(
     () => [center.lat, center.lng],
@@ -63,7 +85,11 @@ export default function ChatMap({ places, center, zoom }: ChatMapProps) {
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
         />
-        <Marker position={centerLatLng} icon={createDivIcon("#f97316")}>
+        <Marker
+          position={centerLatLng}
+          icon={createCenterIcon()}
+          zIndexOffset={1000}
+        >
           <Popup>Your search area</Popup>
         </Marker>
         {places.map((place, i) => (

@@ -143,10 +143,11 @@ export async function findPetPlaces(
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
+      // Overpass API requires an identifying User-Agent; without it the public
+      // endpoint returns HTTP 406.
       "User-Agent": "Lukluk/1.0 (https://github.com/m4nun/Lukluk)",
-      "Accept": "application/json",
     },
-    body: `data=${encodeURIComponent(query)}`,
+    body: new URLSearchParams({ data: query }).toString(),
   });
   if (!res.ok) throw new Error(`Overpass API failed: HTTP ${res.status}`);
 

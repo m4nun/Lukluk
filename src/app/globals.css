@@ -235,6 +235,19 @@ html { scroll-behavior: smooth; }
   to { transform: rotate(360deg); }
 }
 
+/* Leaflet map markers — override default divIcon styling so the SVG renders
+   edge-to-edge. Higher specificity is required to beat Leaflet's bundled CSS. */
+.leaflet-div-icon.lukluk-map-marker {
+  background: transparent;
+  border: 0;
+}
+
+.leaflet-div-icon.lukluk-map-marker--center {
+  background: transparent;
+  border: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
 @keyframes badge-float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
