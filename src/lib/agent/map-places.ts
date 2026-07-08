@@ -29,26 +29,37 @@ const PET_PLACE_CATEGORIES: Record<string, { overpassFilter: string; label: stri
   pet_grooming: { overpassFilter: '["shop"="pet_grooming"]', label: "Pet Grooming" },
 };
 
-const SEARCH_RADIUS_M = 8000; // 8km radius
-const MAX_RESULTS = 30;
-const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
-// Public Overpass instances are flaky (504/429 under load). Try in order.
-const OVERPASS_MIRRORS = [
-  "https://overpass-api.de/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter",
-  "https://overpass.private.coffee/api/interpreter",
-] as const;
+export interface MapSearchConfig {
+  searchRadiusM: number;
+  maxResults: number;
+  nominatimBase: string;
+  overpassMirrors: readonly string[];
+  overpassMaxAttempts: number;
+  overpassBaseDelayMs: number;
+  transientHttpStatuses: Set<number>;
+}
 
-const TRANSIENT_HTTP_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
-const OVERPASS_MAX_ATTEMPTS = 2;
-const OVERPASS_BASE_DELAY_MS = 500;
+export const defaultMapConfig: MapSearchConfig = {
+  searchRadiusM: 8000,
+  maxResults: 30,
+  nominatimBase: "https://nominatim.openstreetmap.org",
+  // Public Overpass instances are flaky (504/429 under load). Try in order.
+  overpassMirrors: [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+  ],
+  overpassMaxAttempts: 2,
+  overpassBaseDelayMs: 500,
+  transientHttpStatuses: new Set([408, 425, 429, 500, 502, 503, 504]),
+};
 
-async function geocode(location: string): Promise<{ lat: number; lng: number; displayName: string } | null> {
+async function geocode(location: string, config: MapSearchConfig): Promise<{ lat: number; lng: number; displayName: string } | null> {
   // Nominatim has zero fuzzy matching — a single-character typo returns
   // nothing. Try with country filter first, then a wider net.
   for (const countryFilter of [`countrycodes=th`, ``]) {
-    const url = `${NOMINATIM_BASE}/search?q=${encodeURIComponent(location)}&format=json&limit=1${countryFilter ? `&${countryFilter}` : ""}`;
-    for (let attempt = 1; attempt <= OVERPASS_MAX_ATTEMPTS; attempt++) {
+    const url = `${config.nominatimBase}/search?q=${encodeURIComponent(location)}&format=json&limit=1${countryFilter ? `&${countryFilter}` : ""}`;
+    for (let attempt = 1; attempt <= config.overpassMaxAttempts; attempt++) {
       try {
         const res = await fetch(url, {
           headers: {
@@ -66,13 +77,13 @@ async function geocode(location: string): Promise<{ lat: number; lng: number; di
             };
           }
         }
-        if (!TRANSIENT_HTTP_STATUSES.has(res.status)) break;
+        if (!config.transientHttpStatuses.has(res.status)) break;
       } catch (e) {
         const err = e instanceof Error ? e : new Error(String(e));
-        if (!TRANSIENT_HTTP_STATUSES.has(parseHttpStatus(err.message))) break;
+        if (!config.transientHttpStatuses.has(parseHttpStatus(err.message))) break;
       }
-      if (attempt < OVERPASS_MAX_ATTEMPTS) {
-        const delay = OVERPASS_BASE_DELAY_MS * Math.pow(2, attempt - 1) * (0.5 + Math.random());
+      if (attempt < config.overpassMaxAttempts) {
+        const delay = config.overpassBaseDelayMs * Math.pow(2, attempt - 1) * (0.5 + Math.random());
         await new Promise((r) => setTimeout(r, delay));
       }
     }
@@ -80,7 +91,7 @@ async function geocode(location: string): Promise<{ lat: number; lng: number; di
   return null;
 }
 
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
@@ -92,27 +103,26 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function buildOverpassQuery(lat: number, lng: number): string {
+export function buildOverpassQuery(lat: number, lng: number, config: MapSearchConfig): string {
   const filters = Object.values(PET_PLACE_CATEGORIES)
     .map((c) => c.overpassFilter)
-    .map((f) => `node${f}(around:${SEARCH_RADIUS_M},${lat},${lng});\nway${f}(around:${SEARCH_RADIUS_M},${lat},${lng});`)
+    .map((f) => `node${f}(around:${config.searchRadiusM},${lat},${lng});\nway${f}(around:${config.searchRadiusM},${lat},${lng});`)
     .join("\n");
-  return `[out:json][timeout:25];\n(\n${filters}\n);\nout center ${MAX_RESULTS};`;
+  return `[out:json][timeout:25];\n(\n${filters}\n);\nout center ${config.maxResults};`;
 }
 
 async function fetchOverpassWithFallback(
   query: string,
+  config: MapSearchConfig,
 ): Promise<{ elements: OverpassElement[] }> {
   let lastError: Error | null = null;
-  for (const mirror of OVERPASS_MIRRORS) {
-    for (let attempt = 1; attempt <= OVERPASS_MAX_ATTEMPTS; attempt++) {
+  for (const mirror of config.overpassMirrors) {
+    for (let attempt = 1; attempt <= config.overpassMaxAttempts; attempt++) {
       try {
         const res = await fetch(mirror, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            // Overpass API requires an identifying User-Agent; without it the
-            // public endpoint returns HTTP 406.
             "User-Agent": "Lukluk/1.0 (https://github.com/m4nun/Lukluk)",
           },
           body: new URLSearchParams({ data: query }).toString(),
@@ -120,21 +130,18 @@ async function fetchOverpassWithFallback(
         if (res.ok) {
           return (await res.json()) as { elements: OverpassElement[] };
         }
-        if (!TRANSIENT_HTTP_STATUSES.has(res.status)) {
-          // Non-transient (400, 404, 422, ...): no point retrying or
-          // switching mirrors — same query against a different host will
-          // fail the same way.
+        if (!config.transientHttpStatuses.has(res.status)) {
           throw new Error(`Overpass API failed: HTTP ${res.status}`);
         }
         lastError = new Error(`Overpass API failed: HTTP ${res.status}`);
       } catch (e) {
         lastError = e instanceof Error ? e : new Error(String(e));
-        if (!TRANSIENT_HTTP_STATUSES.has(parseHttpStatus(lastError.message))) {
+        if (!config.transientHttpStatuses.has(parseHttpStatus(lastError.message))) {
           throw lastError;
         }
       }
-      if (attempt < OVERPASS_MAX_ATTEMPTS) {
-        const delay = OVERPASS_BASE_DELAY_MS * Math.pow(2, attempt - 1) * (0.5 + Math.random());
+      if (attempt < config.overpassMaxAttempts) {
+        const delay = config.overpassBaseDelayMs * Math.pow(2, attempt - 1) * (0.5 + Math.random());
         await new Promise((r) => setTimeout(r, delay));
       }
     }
@@ -142,15 +149,16 @@ async function fetchOverpassWithFallback(
   throw lastError ?? new Error("Overpass API: all mirrors failed");
 }
 
-function parseHttpStatus(message: string): number {
+export function parseHttpStatus(message: string): number {
   const m = /HTTP (\d{3})/.exec(message);
   return m ? Number(m[1]) : 0;
 }
 
-function parseOverpassResult(
+export function parseOverpassResult(
   elements: OverpassElement[],
   centerLat: number,
   centerLng: number,
+  config: MapSearchConfig,
 ): MapPlace[] {
   const seen = new Set<string>();
   const places: MapPlace[] = [];
@@ -195,7 +203,7 @@ function parseOverpassResult(
     });
   }
 
-  return places.sort((a, b) => (a.distance_km ?? 0) - (b.distance_km ?? 0)).slice(0, MAX_RESULTS);
+  return places.sort((a, b) => (a.distance_km ?? 0) - (b.distance_km ?? 0)).slice(0, config.maxResults);
 }
 
 /**
@@ -205,17 +213,18 @@ function parseOverpassResult(
  */
 export async function findPetPlaces(
   location: string,
+  config: MapSearchConfig = defaultMapConfig,
 ): Promise<{
   places: MapPlace[];
   center: { lat: number; lng: number };
   zoom: number;
 } | null> {
-  const geo = await geocode(location);
+  const geo = await geocode(location, config);
   if (!geo) return null;
 
-  const query = buildOverpassQuery(geo.lat, geo.lng);
-  const data = await fetchOverpassWithFallback(query);
-  const places = parseOverpassResult(data.elements ?? [], geo.lat, geo.lng);
+  const query = buildOverpassQuery(geo.lat, geo.lng, config);
+  const data = await fetchOverpassWithFallback(query, config);
+  const places = parseOverpassResult(data.elements ?? [], geo.lat, geo.lng, config);
 
   const zoom = places.length > 0 ? 13 : 12;
 

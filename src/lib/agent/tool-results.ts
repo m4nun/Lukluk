@@ -3,6 +3,8 @@
  * These bridge the server (tool output → SSE) and client (SSE → React component).
  */
 
+import { z } from "zod";
+
 /** A single place marker on the map. */
 export interface MapPlace {
   name: string;
@@ -13,9 +15,25 @@ export interface MapPlace {
   distance_km?: number;
 }
 
+/** Shared schema for the SSE payload crossing the server↔client seam. */
+export const mapDataSchema = z.object({
+  places: z.array(z.object({
+    name: z.string(),
+    lat: z.number(),
+    lng: z.number(),
+    category: z.string(),
+    address: z.string().optional(),
+    distance_km: z.number().optional(),
+  })),
+  center: z.object({ lat: z.number(), lng: z.number() }),
+  zoom: z.number(),
+});
+
+export type MapData = z.infer<typeof mapDataSchema>;
+
 /** Discriminated union for renderable tool results. */
 export type ToolResultRender =
-  | { renderType: "map"; data: { places: MapPlace[]; center: { lat: number; lng: number }; zoom: number } }
+  | { renderType: "map"; data: MapData }
   | { renderType: "generic"; data: Record<string, unknown> };
 
 /** String literal set of tool names that produce structured render data. */
@@ -28,23 +46,12 @@ export function extractToolResults(
   for (const step of steps ?? []) {
     if (step.type === "tool_result" && step.toolName === "search_pet_places") {
       try {
-        const parsed: unknown = JSON.parse(step.content);
-        if (
-          parsed &&
-          typeof parsed === "object" &&
-          "places" in parsed &&
-          "center" in parsed
-        ) {
-          renders.push({
-            renderType: "map",
-            data: parsed as {
-              places: MapPlace[];
-              center: { lat: number; lng: number };
-              zoom: number;
-            },
-          });
+        const parsed = mapDataSchema.safeParse(JSON.parse(step.content));
+        if (parsed.success) {
+          renders.push({ renderType: "map", data: parsed.data });
         }
       } catch {
+        // content is not valid JSON (e.g. "NO LOCATION FOUND" text) — skip
       }
     }
   }
