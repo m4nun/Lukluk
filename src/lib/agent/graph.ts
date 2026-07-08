@@ -168,25 +168,31 @@ export function createAgent(opts: AgentOpts) {
       onProgress?.(getToolLabel(call.name));
       const foundTool = tools.find((t) => t.name === call.name);
       if (foundTool) {
-        const args = { ...call.args };
+        // Spread call.args and inject the profile ID for tools that need it.
+        // Zod strips unknown keys for tools whose schema doesn't declare idParam.
+        const args: Record<string, unknown> = { ...call.args };
         args[idParam] = state.profileId;
         try {
-          const result = await (foundTool as any).invoke(args);
+          // StructuredTool.invoke is typed per-schema; args are dynamic here.
+          const result = await (foundTool as unknown as StructuredTool).invoke(args);
           results.push(new ToolMessage({
             tool_call_id: call.id!,
             content: typeof result === "string" ? result : JSON.stringify(result),
+            name: call.name,
           }));
         } catch (e) {
           const errorMsg = e instanceof Error ? e.message : String(e);
           results.push(new ToolMessage({
             tool_call_id: call.id!,
             content: `TOOL ERROR: ${errorMsg}. Fix the issue and try again.`,
+            name: call.name,
           }));
         }
       } else {
         results.push(new ToolMessage({
           tool_call_id: call.id!,
           content: `TOOL ERROR: Tool "${call.name}" not found. Available tools: ${tools.map(t => t.name).join(", ")}`,
+          name: call.name,
         }));
       }
     }
