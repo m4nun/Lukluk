@@ -2,45 +2,23 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import AgentChat from "@/components/agent/AgentChat";
 import type { ChatMessage } from "@/components/agent/AgentChat";
+import { WorkspaceLayout } from "@/components/workspace/WorkspaceLayout";
 import ExpenseTable from "@/components/workspace/ExpenseTable";
 import ConcernChecklist from "@/components/workspace/ConcernChecklist";
-import DecisionStatus from "@/components/workspace/DecisionStatus";
 import DraftPanel from "@/components/workspace/DraftPanel";
 import GuidanceGate from "@/components/workspace/GuidanceGate";
 import OwnershipForm from "@/components/workspace/OwnershipForm";
-import { LoadingSkeleton } from "@/components/layout/LoadingSkeleton";
 import { getPetLogo } from "@/lib/pet-logos";
-import { ArrowLeft, Trash2, MessageCircle, PawPrint } from "lucide-react";
-
+import { Trash2 } from "lucide-react";
 
 interface WorkspaceData {
   id: string;
   planning_name: string | null;
-  decision_status: string;
-  estimated_expenses: Array<{
-    category: string;
-    item: string;
-    amount_thb: number;
-    note?: string;
-  }>;
-  concern_checklist: Array<{
-    concern_id: string;
-    title: string;
-    status: string;
-    note?: string;
-    resolved_at?: string;
-  }>;
-  pet_type_profiles: {
-    id: string;
-    name: string;
-    species: string;
-    mbti_label: string;
-    description: string;
-  };
+  decision_status: "exploring" | "considering" | "ready_to_buy" | "not_a_fit" | "already_have";
+  estimated_expenses: { category: string; item: string; amount_thb: number; note?: string }[];
+  concern_checklist: { concern_id: string; title: string; status: string; note?: string; resolved_at?: string }[];
+  pet_type_profiles: { id: string; name: string; species: string; mbti_label: string; description: string };
   has_ownership: boolean;
 }
 
@@ -68,12 +46,12 @@ export default function WorkspacePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const handleTabChange = useCallback((tab: "expenses" | "concerns") => {
-    setActiveTab(tab);
+  const handleTabChange = useCallback((tab: string) => {
+    setActiveTab(tab as "expenses" | "concerns");
     setVisitedTabs((prev) => {
-      if (prev.has(tab)) return prev;
+      if (prev.has(tab as "expenses" | "concerns")) return prev;
       const next = new Set(prev);
-      next.add(tab);
+      next.add(tab as "expenses" | "concerns");
       return next;
     });
   }, []);
@@ -83,27 +61,19 @@ export default function WorkspacePage() {
     setChatOpen(true);
   }, []);
 
-  function handleConcernStatusChange(concernId: string, newStatus: string) {
-    setData((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        concern_checklist: prev.concern_checklist.map((c) =>
-          c.concern_id === concernId
-            ? { ...c, status: newStatus, resolved_at: newStatus === "resolved" ? new Date().toISOString() : c.resolved_at }
-            : c
-        ),
-      };
-    });
-  }
-
-  const allConcernsResolved = data
-    ? data.concern_checklist.length > 0 &&
-      data.concern_checklist.every((c) => c.status === "resolved" || c.status === "not_applicable")
-    : false;
+  const handleConcernStatusChange = useCallback((concernId: string, newStatus: string) => {
+    setData((prev) => prev ? {
+      ...prev,
+      concern_checklist: prev.concern_checklist.map((c) =>
+        c.concern_id === concernId
+          ? { ...c, status: newStatus, resolved_at: newStatus === "resolved" ? new Date().toISOString() : c.resolved_at }
+          : c
+      ),
+    } : null);
+  }, []);
 
   useEffect(() => {
-    async function load() {
+    (async () => {
       try {
         const res = await fetch("/api/planning");
         if (!res.ok) throw new Error("Failed to load");
@@ -116,8 +86,7 @@ export default function WorkspacePage() {
       } finally {
         setLoading(false);
       }
-    }
-    load();
+    })();
   }, [params.id]);
 
   const refreshData = useCallback(async () => {
@@ -128,10 +97,10 @@ export default function WorkspacePage() {
         const profile = profiles.find((p: { id: string }) => p.id === params.id);
         if (profile) setData(profile);
       }
-    } catch {}
+    } catch { /* ignore */ }
   }, [params.id]);
 
-  async function handleStatusUpdate(newStatus: string) {
+  const handleStatusUpdate = useCallback(async (newStatus: string) => {
     if (!data) return;
     setStatusUpdating(true);
     try {
@@ -141,29 +110,22 @@ export default function WorkspacePage() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
-        setData((prev) => prev ? { ...prev, decision_status: newStatus } : null);
+        setData((prev) => prev ? { ...prev, decision_status: newStatus as WorkspaceData["decision_status"] } : null);
       }
-    } catch {}
+    } catch { /* ignore */ }
     finally { setStatusUpdating(false); }
-  }
+  }, [params.id, data]);
 
-  async function handleDelete() {
+  const handleDelete = useCallback(async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`/api/planning/${params.id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        router.push("/dashboard");
-      }
-    } catch {}
-    finally {
-      setDeleting(false);
-      setShowDeleteConfirm(false);
-    }
-  }
+      const res = await fetch(`/api/planning/${params.id}`, { method: "DELETE" });
+      if (res.ok) router.push("/dashboard");
+    } catch { /* ignore */ }
+    finally { setDeleting(false); setShowDeleteConfirm(false); }
+  }, [params.id, router]);
 
-  async function handleOwnership(petName: string, ageLifeStage: string) {
+  const handleOwnership = useCallback(async (petName: string, ageLifeStage: string) => {
     setTransitionError("");
     try {
       const res = await fetch("/api/ownership/transition", {
@@ -178,291 +140,109 @@ export default function WorkspacePage() {
         const err = await res.json().catch(() => ({}));
         setTransitionError(err.message || "Failed to switch to ownership");
       }
-    } catch {
-      setTransitionError("Could not connect. Check your internet and try again.");
-    }
-  }
+    } catch { setTransitionError("Could not connect. Check your internet and try again."); }
+  }, [params.id, router]);
 
-  if (loading) {
-    return (
-      <div className="flex h-screen flex-col">
-        <div className="flex h-14 items-center border-b border-gray-200 bg-white px-5">
-          <LoadingSkeleton variant="text" rows={1} />
-        </div>
-        <div className="flex flex-1">
-          <div className="flex-1 overflow-auto p-6">
-            <LoadingSkeleton variant="card" />
-            <div className="mt-6"><LoadingSkeleton variant="table" rows={6} /></div>
-          </div>
-          <div className="w-[380px] border-l border-gray-200 bg-white" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="flex h-screen flex-col items-center justify-center px-6">
-        <h2 className="text-xl font-bold">Workspace not found</h2>
-        <p className="mt-2 text-gray-500">{error || "This workspace may have been deleted"}</p>
-        <Link href="/dashboard" className="mt-6 inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white">
-          Back to Dashboard
-        </Link>
-      </div>
-    );
-  }
-
-  const logoSrc = getPetLogo(data.pet_type_profiles.id);
-  const displayName = data.planning_name || data.pet_type_profiles.name;
+  const displayName = data?.planning_name || data?.pet_type_profiles.name || "";
+  const logoSrc = data ? getPetLogo(data.pet_type_profiles.id) : null;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#fafafa]">
-      {/* Desktop Nav */}
-      <nav className="hidden md:flex h-14 shrink-0 items-center border-b border-gray-200 bg-white px-6">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2 text-sm font-bold text-gray-900">
-            <Image src="/assets/logo.png" alt="Lukluk" width={24} height={24} />
-            Lukluk
-          </Link>
-          <div className="h-5 w-px bg-gray-200" />
-          <Link href="/dashboard" className="flex items-center gap-1 text-[13px] text-gray-500 transition-colors hover:text-gray-900 rounded-full px-2.5 py-1 hover:bg-gray-100">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Dashboard
-          </Link>
-        </div>
-        <div className="flex-1 flex items-center justify-center gap-2.5">
-          {logoSrc && (
-            <div className="h-7 w-7 overflow-hidden rounded-full border-2 border-gray-200">
-              <Image src={logoSrc} alt={displayName} width={28} height={28} className="object-cover" />
+    <>
+      <WorkspaceLayout
+        profileId={params.id}
+        petName={displayName}
+        logoSrc={logoSrc}
+        badgeLabel={data ? (STATUS_LABELS[data.decision_status] || data.decision_status) : ""}
+        tabs={[
+          { key: "expenses", label: "Expenses" },
+          { key: "concerns", label: "Concerns" },
+        ]}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        chat={{
+          endpoint: "/api/agent/chat",
+          bodyKey: "planningProfileId",
+          suggestions: ["Show estimated costs", "Main concerns?", "Pet shops near me", "Is this pet right for me?"],
+          placeholder: "Ask about costs, concerns, or nearby pet shops...",
+          emptyTitle: "Decision Agent",
+          emptyDescription: "Help with costs, concerns, and lifestyle fit",
+          onMessageSent: refreshData,
+          messages: chatMessages,
+          onMessagesChange: setChatMessages,
+          chatInput,
+          onChatInputConsumed: () => setChatInput(""),
+        }}
+        chatOpen={chatOpen}
+        onChatToggle={setChatOpen}
+        headerActions={data ? (
+          <>
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] text-gray-500">Status:</span>
+              <select
+                value={data.decision_status}
+                onChange={(e) => handleStatusUpdate(e.target.value)}
+                disabled={statusUpdating}
+                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[13px] font-medium text-gray-700 transition-colors hover:border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50 cursor-pointer"
+              >
+                <option value="exploring">Exploring</option>
+                <option value="considering">Considering</option>
+                <option value="ready_to_buy">Ready to Buy</option>
+                <option value="not_a_fit">Not a Fit</option>
+                <option value="already_have">Already Have</option>
+              </select>
             </div>
-          )}
-          <span className="text-sm font-semibold">{displayName}</span>
-          <span className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-0.5 text-[11px] font-semibold text-orange-600">
-            <PawPrint className="h-3 w-3" fill="currentColor" />
-            {STATUS_LABELS[data.decision_status] || data.decision_status}
-          </span>
-        </div>
-        <div className="w-[100px]" />
-      </nav>
-
-      {/* Mobile Nav */}
-      <nav className="flex md:hidden h-[52px] shrink-0 items-center border-b border-gray-200 bg-white px-4">
-        <Link href="/dashboard" className="flex items-center gap-1 text-sm text-orange-500 font-medium">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <div className="mx-auto flex items-center gap-2">
-          {logoSrc && (
-            <div className="h-7 w-7 overflow-hidden rounded-full border-2 border-gray-200">
-              <Image src={logoSrc} alt={displayName} width={28} height={28} className="object-cover" />
-            </div>
-          )}
-          <span className="text-[15px] font-semibold">{displayName}</span>
-        </div>
-        <div className="w-9" />
-      </nav>
-
-      {/* Body */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Panel */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Pet Header */}
-          <div className="border-b border-gray-200 bg-white px-7 py-5">
-            <div className="flex items-center gap-4">
-              {logoSrc ? (
-                <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200">
-                  <Image src={logoSrc} alt={displayName} width={56} height={56} className="object-cover" />
-                </div>
-              ) : (
-                <div className="h-14 w-14 flex-shrink-0 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center">
-                  <PawPrint className="h-6 w-6 text-gray-300" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-lg font-bold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>{displayName}</h1>
-                  <span className="text-[13px] text-gray-400">·</span>
-                  <span className="text-[13px] text-gray-500">{data.pet_type_profiles.species}</span>
-                </div>
-                <div className="mt-1 text-[13px] text-gray-500">{data.pet_type_profiles.mbti_label}</div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-[13px] text-gray-500">Status:</span>
-                  <select
-                    value={data.decision_status}
-                    onChange={(e) => handleStatusUpdate(e.target.value)}
-                    disabled={statusUpdating}
-                    className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[13px] font-medium text-gray-700 transition-colors hover:border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50 cursor-pointer"
-                  >
-                    <option value="exploring">Exploring</option>
-                    <option value="considering">Considering</option>
-                    <option value="ready_to_buy">Ready to Buy</option>
-                    <option value="not_a_fit">Not a Fit</option>
-                    <option value="already_have">Already Have</option>
-                  </select>
-                </div>
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                  title="Remove from workspaces"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex border-b border-gray-200 px-5 md:px-7 sticky top-0 bg-[#fafafa] z-10">
             <button
-              onClick={() => handleTabChange("expenses")}
-              className={`px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
-                activeTab === "expenses"
-                  ? "border-orange-500 text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+              title="Remove from workspaces"
             >
-              Expenses
+              <Trash2 className="h-4 w-4" />
             </button>
-            <button
-              onClick={() => handleTabChange("concerns")}
-              className={`px-4 py-3 text-[13px] font-semibold border-b-2 transition-colors ${
-                activeTab === "concerns"
-                  ? "border-orange-500 text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Concerns
-            </button>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-5 pb-24 md:p-7 md:pb-7">
-            {activeTab === "expenses" ? (
-              <ExpenseTable expenses={data.estimated_expenses} onEmbedToChat={handleEmbedToChat} />
-            ) : (
-              <ConcernChecklist
-                concerns={data.concern_checklist}
-                onEmbedToChat={handleEmbedToChat}
-                onStatusChange={handleConcernStatusChange}
-                workspaceId={params.id}
-              />
-            )}
-          </div>
-
-          {/* Adoption guidance */}
-          <div className="px-5 pb-6 md:px-7">
-            <GuidanceGate
-              hasSeenExpenses={visitedTabs.has("expenses")}
-              hasSeenConcerns={visitedTabs.has("concerns")}
-              expenseCount={data.estimated_expenses.length}
-              concernCount={data.concern_checklist.length}
-              onRequestHelp={() => {
-                setChatInput("Help me with adoption guidance");
-                setChatOpen(true);
-              }}
-            />
-          </div>
-
-          {/* Drafts */}
-          <DraftPanel planningProfileId={params.id} />
-
-          {/* Ownership form */}
-          {!data.has_ownership && (
-            <div className="px-5 pb-24 md:px-7 md:pb-7">
-              <OwnershipForm
-                onSubmit={handleOwnership}
-                error={transitionError}
-                petTypeName={data.pet_type_profiles.name}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Right Panel — Decision Chat (Desktop) */}
-        {!chatOpen && (
-          <div className="hidden md:flex w-[380px] shrink-0 flex-col bg-white border-l border-gray-200">
-            <div className="flex items-center gap-3 border-b border-gray-200 px-5 py-3.5">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
-                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold text-gray-900">Decision Agent</h3>
-                <p className="text-xs text-gray-500">Help with costs, concerns, and lifestyle fit</p>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-green-600">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                Available
-              </div>
-            </div>
-            <AgentChat
-              endpoint="/api/agent/chat"
-              bodyKey="planningProfileId"
-              profileId={params.id}
-              suggestions={["Show estimated costs", "Main concerns?", "Pet shops near me", "Is this pet right for me?"]}
-              placeholder="Ask about costs, concerns, or nearby pet shops..."
-              emptyTitle="Hi, I'm the Decision Agent"
-              emptyDescription="Ask about costs, concerns, or find pet shops near you on the map"
-              onMessageSent={refreshData}
-              externalInput={chatInput}
-              onExternalInputConsumed={() => setChatInput("")}
-              messages={chatMessages}
-              onMessagesChange={setChatMessages}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Mobile Chat FAB */}
-      <button
-        onClick={() => setChatOpen(true)}
-        className="md:hidden fixed bottom-20 right-4 z-30 h-14 w-14 rounded-full bg-gradient-to-br from-blue-500 to-green-500 text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+          </>
+        ) : undefined}
+        loading={loading}
+        error={error}
       >
-        <MessageCircle className="h-6 w-6" />
-      </button>
-
-      {/* Mobile Bottom Sheet Chat */}
-      <div className={`md:hidden fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 ${chatOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setChatOpen(false)} />
-      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[20px] flex flex-col transition-transform duration-300 ${chatOpen ? 'translate-y-0' : 'translate-y-full'}`} style={{ height: "85dvh" }}>
-        <div className="w-9 h-1 rounded-full bg-gray-300 mx-auto mt-2.5 flex-shrink-0" />
-        <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-gray-200 flex-shrink-0">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
-            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-[15px] font-semibold">Decision Agent</h3>
-            <p className="text-xs text-gray-500">Always available</p>
-          </div>
-          <button onClick={() => setChatOpen(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-gray-500">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div className="flex-1 min-h-0 h-full">
-          <AgentChat
-            endpoint="/api/agent/chat"
-            bodyKey="planningProfileId"
-            profileId={params.id}
-            suggestions={["Show estimated costs", "Main concerns?", "Pet shops near me"]}
-            placeholder="Ask about costs, concerns, or nearby pet shops..."
-            emptyTitle="Hi, I'm the Decision Agent"
-            emptyDescription="Does this pet fit your lifestyle?"
-            onMessageSent={refreshData}
-            externalInput={chatInput}
-            onExternalInputConsumed={() => setChatInput("")}
-            messages={chatMessages}
-            onMessagesChange={setChatMessages}
+        {data && activeTab === "expenses" && (
+          <ExpenseTable expenses={data.estimated_expenses} onEmbedToChat={handleEmbedToChat} />
+        )}
+        {data && activeTab === "concerns" && (
+          <ConcernChecklist
+            concerns={data.concern_checklist}
+            onEmbedToChat={handleEmbedToChat}
+            onStatusChange={handleConcernStatusChange}
+            workspaceId={params.id}
           />
-        </div>
-      </div>
+        )}
+        {data && (
+          <>
+            <div className="mt-6">
+              <GuidanceGate
+                hasSeenExpenses={visitedTabs.has("expenses")}
+                hasSeenConcerns={visitedTabs.has("concerns")}
+                expenseCount={data.estimated_expenses.length}
+                concernCount={data.concern_checklist.length}
+                onRequestHelp={() => { setChatInput("Help me with adoption guidance"); setChatOpen(true); }}
+              />
+            </div>
+            <div className="mt-6">
+              <DraftPanel planningProfileId={params.id} />
+            </div>
+            {!data.has_ownership && (
+              <div className="mt-6">
+                <OwnershipForm
+                  onSubmit={handleOwnership}
+                  error={transitionError}
+                  petTypeName={data.pet_type_profiles.name}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </WorkspaceLayout>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
+      {showDeleteConfirm && data && (
         <>
           <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setShowDeleteConfirm(false)} />
           <div className="fixed inset-x-4 top-[20%] z-50 rounded-2xl bg-white shadow-xl max-w-sm mx-auto">
@@ -473,23 +253,16 @@ export default function WorkspacePage() {
               </p>
             </div>
             <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-5 py-4">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
-              >
+              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">
                 Cancel
               </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="px-5 py-2 rounded-xl bg-red-500 text-sm font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
-              >
+              <button onClick={handleDelete} disabled={deleting} className="px-5 py-2 rounded-xl bg-red-500 text-sm font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-50">
                 {deleting ? "Removing..." : "Remove"}
               </button>
             </div>
           </div>
         </>
       )}
-    </div>
+    </>
   );
 }
