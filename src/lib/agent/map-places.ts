@@ -32,24 +32,54 @@ const PET_PLACE_CATEGORIES: Record<string, { overpassFilter: string; label: stri
 const SEARCH_RADIUS_M = 8000; // 8km radius
 const MAX_RESULTS = 30;
 const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
-const OVERPASS_BASE = "https://overpass-api.de/api/interpreter";
+// Public Overpass instances are flaky (504/429 under load). Try in order.
+const OVERPASS_MIRRORS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+] as const;
+
+const TRANSIENT_HTTP_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
+const OVERPASS_MAX_ATTEMPTS = 2;
+const OVERPASS_BASE_DELAY_MS = 500;
 
 async function geocode(location: string): Promise<{ lat: number; lng: number; displayName: string } | null> {
   const url = `${NOMINATIM_BASE}/search?q=${encodeURIComponent(location)}&format=json&limit=1&countrycodes=th`;
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent": "Lukluk/1.0 (https://github.com/m4nun/Lukluk)",
-      "Accept-Language": "en",
-    },
-  });
-  if (!res.ok) throw new Error(`Geocoding failed: HTTP ${res.status}`);
-  const data = (await res.json()) as NominatimResult[];
-  if (!data.length) return null;
-  return {
-    lat: parseFloat(data[0].lat),
-    lng: parseFloat(data[0].lon),
-    displayName: data[0].display_name,
-  };
+  // Nominatim is rate-limited to 1 req/s; retry transient failures with backoff.
+  let lastError: Error | null = null;
+  for (let attempt = 1; attempt <= OVERPASS_MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: {
+          "User-Agent": "Lukluk/1.0 (https://github.com/m4nun/Lukluk)",
+          "Accept-Language": "en",
+        },
+      });
+      if (res.ok) {
+        const data = (await res.json()) as NominatimResult[];
+        if (!data.length) return null;
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon),
+          displayName: data[0].display_name,
+        };
+      }
+      if (!TRANSIENT_HTTP_STATUSES.has(res.status)) {
+        throw new Error(`Geocoding failed: HTTP ${res.status}`);
+      }
+      lastError = new Error(`Geocoding failed: HTTP ${res.status}`);
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+      if (!TRANSIENT_HTTP_STATUSES.has(parseHttpStatus(lastError.message))) {
+        throw lastError;
+      }
+    }
+    if (attempt < OVERPASS_MAX_ATTEMPTS) {
+      const delay = OVERPASS_BASE_DELAY_MS * Math.pow(2, attempt - 1) * (0.5 + Math.random());
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastError ?? new Error("Geocoding failed");
 }
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -70,6 +100,53 @@ function buildOverpassQuery(lat: number, lng: number): string {
     .map((f) => `node${f}(around:${SEARCH_RADIUS_M},${lat},${lng});\nway${f}(around:${SEARCH_RADIUS_M},${lat},${lng});`)
     .join("\n");
   return `[out:json][timeout:25];\n(\n${filters}\n);\nout center ${MAX_RESULTS};`;
+}
+
+async function fetchOverpassWithFallback(
+  query: string,
+): Promise<{ elements: OverpassElement[] }> {
+  let lastError: Error | null = null;
+  for (const mirror of OVERPASS_MIRRORS) {
+    for (let attempt = 1; attempt <= OVERPASS_MAX_ATTEMPTS; attempt++) {
+      try {
+        const res = await fetch(mirror, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            // Overpass API requires an identifying User-Agent; without it the
+            // public endpoint returns HTTP 406.
+            "User-Agent": "Lukluk/1.0 (https://github.com/m4nun/Lukluk)",
+          },
+          body: new URLSearchParams({ data: query }).toString(),
+        });
+        if (res.ok) {
+          return (await res.json()) as { elements: OverpassElement[] };
+        }
+        if (!TRANSIENT_HTTP_STATUSES.has(res.status)) {
+          // Non-transient (400, 404, 422, ...): no point retrying or
+          // switching mirrors — same query against a different host will
+          // fail the same way.
+          throw new Error(`Overpass API failed: HTTP ${res.status}`);
+        }
+        lastError = new Error(`Overpass API failed: HTTP ${res.status}`);
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(String(e));
+        if (!TRANSIENT_HTTP_STATUSES.has(parseHttpStatus(lastError.message))) {
+          throw lastError;
+        }
+      }
+      if (attempt < OVERPASS_MAX_ATTEMPTS) {
+        const delay = OVERPASS_BASE_DELAY_MS * Math.pow(2, attempt - 1) * (0.5 + Math.random());
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
+  }
+  throw lastError ?? new Error("Overpass API: all mirrors failed");
+}
+
+function parseHttpStatus(message: string): number {
+  const m = /HTTP (\d{3})/.exec(message);
+  return m ? Number(m[1]) : 0;
 }
 
 function parseOverpassResult(
@@ -139,19 +216,7 @@ export async function findPetPlaces(
   if (!geo) return null;
 
   const query = buildOverpassQuery(geo.lat, geo.lng);
-  const res = await fetch(OVERPASS_BASE, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      // Overpass API requires an identifying User-Agent; without it the public
-      // endpoint returns HTTP 406.
-      "User-Agent": "Lukluk/1.0 (https://github.com/m4nun/Lukluk)",
-    },
-    body: new URLSearchParams({ data: query }).toString(),
-  });
-  if (!res.ok) throw new Error(`Overpass API failed: HTTP ${res.status}`);
-
-  const data = (await res.json()) as { elements: OverpassElement[] };
+  const data = await fetchOverpassWithFallback(query);
   const places = parseOverpassResult(data.elements ?? [], geo.lat, geo.lng);
 
   const zoom = places.length > 0 ? 13 : 12;
