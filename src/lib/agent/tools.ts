@@ -26,7 +26,11 @@ function createPetPlacesTool() {
       try {
         const result = await findPetPlaces(location);
         if (!result) {
-          return `NO LOCATION FOUND: Could not geocode "${location}" as a place in Thailand. Reply to the user asking for a specific area (city, district, or province in Thailand). Do NOT claim the map system is broken — we just need a recognizable place name.`;
+          // Nominatim has zero fuzzy matching — even one character off
+          // returns nothing. Tell the LLM to stop and ask for correction
+          // rather than firing more tools (web_search will just waste
+          // time searching for a misspelled place name).
+          return `NO LOCATION FOUND: "${location}" is not a recognized place in Thailand. STOP — do NOT call web_search or any other tool. Reply DIRECTLY: "ขอโทษครับ ฉันไม่พบ '${location}' บนแผนที่ — คุณสะกดถูกไหมครับ? หรือกำลังหมายถึง Phitsanulok (พิษณุโลก) หรือที่อื่นในไทยครับ?" Wait for the user to correct the spelling, then retry with the corrected name.`;
         }
 
         // Always return the JSON so the client renders the map (center pin +

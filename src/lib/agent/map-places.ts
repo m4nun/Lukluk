@@ -44,42 +44,40 @@ const OVERPASS_MAX_ATTEMPTS = 2;
 const OVERPASS_BASE_DELAY_MS = 500;
 
 async function geocode(location: string): Promise<{ lat: number; lng: number; displayName: string } | null> {
-  const url = `${NOMINATIM_BASE}/search?q=${encodeURIComponent(location)}&format=json&limit=1&countrycodes=th`;
-  // Nominatim is rate-limited to 1 req/s; retry transient failures with backoff.
-  let lastError: Error | null = null;
-  for (let attempt = 1; attempt <= OVERPASS_MAX_ATTEMPTS; attempt++) {
-    try {
-      const res = await fetch(url, {
-        headers: {
-          "User-Agent": "Lukluk/1.0 (https://github.com/m4nun/Lukluk)",
-          "Accept-Language": "en",
-        },
-      });
-      if (res.ok) {
-        const data = (await res.json()) as NominatimResult[];
-        if (!data.length) return null;
-        return {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon),
-          displayName: data[0].display_name,
-        };
+  // Nominatim has zero fuzzy matching — a single-character typo returns
+  // nothing. Try with country filter first, then a wider net.
+  for (const countryFilter of [`countrycodes=th`, ``]) {
+    const url = `${NOMINATIM_BASE}/search?q=${encodeURIComponent(location)}&format=json&limit=1${countryFilter ? `&${countryFilter}` : ""}`;
+    for (let attempt = 1; attempt <= OVERPASS_MAX_ATTEMPTS; attempt++) {
+      try {
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent": "Lukluk/1.0 (https://github.com/m4nun/Lukluk)",
+            "Accept-Language": "en",
+          },
+        });
+        if (res.ok) {
+          const data = (await res.json()) as NominatimResult[];
+          if (data.length) {
+            return {
+              lat: parseFloat(data[0].lat),
+              lng: parseFloat(data[0].lon),
+              displayName: data[0].display_name,
+            };
+          }
+        }
+        if (!TRANSIENT_HTTP_STATUSES.has(res.status)) break;
+      } catch (e) {
+        const err = e instanceof Error ? e : new Error(String(e));
+        if (!TRANSIENT_HTTP_STATUSES.has(parseHttpStatus(err.message))) break;
       }
-      if (!TRANSIENT_HTTP_STATUSES.has(res.status)) {
-        throw new Error(`Geocoding failed: HTTP ${res.status}`);
+      if (attempt < OVERPASS_MAX_ATTEMPTS) {
+        const delay = OVERPASS_BASE_DELAY_MS * Math.pow(2, attempt - 1) * (0.5 + Math.random());
+        await new Promise((r) => setTimeout(r, delay));
       }
-      lastError = new Error(`Geocoding failed: HTTP ${res.status}`);
-    } catch (e) {
-      lastError = e instanceof Error ? e : new Error(String(e));
-      if (!TRANSIENT_HTTP_STATUSES.has(parseHttpStatus(lastError.message))) {
-        throw lastError;
-      }
-    }
-    if (attempt < OVERPASS_MAX_ATTEMPTS) {
-      const delay = OVERPASS_BASE_DELAY_MS * Math.pow(2, attempt - 1) * (0.5 + Math.random());
-      await new Promise((r) => setTimeout(r, delay));
     }
   }
-  throw lastError ?? new Error("Geocoding failed");
+  return null;
 }
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {

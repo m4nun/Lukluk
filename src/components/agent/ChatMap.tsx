@@ -111,12 +111,12 @@ export default function ChatMap({ places, center, zoom }: ChatMapProps) {
                   </div>
                 )}
                 <a
-                  href={`https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lng}#map=18/${place.lat}/${place.lng}`}
+                  href={`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-block text-xs font-medium text-blue-600 hover:underline"
+                  className="mt-1 inline-block text-xs font-medium text-blue-600 hover:underline"
                 >
-                  Open in OpenStreetMap →
+                  Open in Google Maps →
                 </a>
               </div>
             </Popup>
