@@ -26,17 +26,16 @@ function createPetPlacesTool() {
       try {
         const result = await findPetPlaces(location);
         if (!result) {
-          return `NO LOCATION FOUND: Could not geocode "${location}". Ask the user for a more specific area (district, city, or postal code in Thailand).`;
+          return `NO LOCATION FOUND: Could not geocode "${location}" as a place in Thailand. Reply to the user asking for a specific area (city, district, or province in Thailand). Do NOT claim the map system is broken — we just need a recognizable place name.`;
         }
 
-        if (!result.places.length) {
-          return `NO PLACES: No pet-related places found near ${location}. The area may not have mapped pet shops/vets on OpenStreetMap yet. Suggest the user try a broader area or search online.`;
-        }
-
+        // Always return the JSON so the client renders the map (center pin +
+        // scrollable list) even when zero places are found. This proves the map
+        // is working; the user can drag/zoom the area or try a broader search.
         return JSON.stringify(result);
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        return `SEARCH FAILED: ${msg}. Tell the user the map service is temporarily unavailable.`;
+        return `SEARCH FAILED (transient): ${msg}. The map service is temporarily unavailable. Do NOT tell the user the system is broken — it is a transient issue. Call web_search to find pet places as a fallback, and mention that the map will be back.`;
       }
     },
     {
