@@ -238,7 +238,8 @@ export async function runAiSdkAgent(
     model: getModel(),
     instructions: DECISION_SYSTEM_PROMPT,
     tools: createAiSdkTools(repo, profileId),
-    stopWhen: isStepCount(6),
+    stopWhen: isStepCount(20),
+
   });
 
   const messages = [

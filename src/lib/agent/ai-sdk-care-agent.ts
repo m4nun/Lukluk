@@ -257,7 +257,7 @@ export async function runAiSdkCareAgent(
     model: getModel(),
     instructions: CARE_SYSTEM_PROMPT,
     tools: createCareAISdkTools(repo, profileId),
-    stopWhen: isStepCount(6),
+    stopWhen: isStepCount(20),
   });
 
   const messages = [
