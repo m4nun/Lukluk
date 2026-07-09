@@ -1,6 +1,0 @@
-- generic [ref=e3]:
-  - heading "Empty Map Test (Phitsanulok)" [level=1] [ref=e4]
-  - paragraph [ref=e5]: Testing the ChatMap with 0 places (real geocoding data, no Overpass results).
-  - paragraph [ref=e6]:
-    - text: "Center: 16.9780, 100.3848 · Zoom: 12 ·"
-    - strong [ref=e7]: 0 places

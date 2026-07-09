@@ -1,8 +1,0 @@
-- generic [active] [ref=f3e1]:
-  - generic [ref=f3e3]:
-    - heading "Map E2E Test (real data)" [level=1] [ref=f3e4]
-    - paragraph [ref=f3e5]: Testing the ChatMap component with REAL Nominatim + Overpass data.
-    - paragraph [ref=f3e6]: "Center: 13.7525, 100.4935 · Zoom: 13 · 22 places"
-  - button "Open Next.js Dev Tools" [ref=f3e12] [cursor=pointer]:
-    - img [ref=f3e13]
-  - alert [ref=f3e16]

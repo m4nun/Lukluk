@@ -43,3 +43,10 @@ dev.out.log
 next-env.d.ts
 
 .vercel
+
+# session artifacts
+.omo/
+.playwright-mcp/
+dev-stderr.log
+dev-stdout.log
+dev.log
