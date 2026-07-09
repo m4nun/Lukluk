@@ -141,7 +141,11 @@ export async function findPetPlaces(
   const query = buildOverpassQuery(geo.lat, geo.lng);
   const res = await fetch(OVERPASS_BASE, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": "Lukluk/1.0 (https://github.com/m4nun/Lukluk)",
+      "Accept": "application/json",
+    },
     body: `data=${encodeURIComponent(query)}`,
   });
   if (!res.ok) throw new Error(`Overpass API failed: HTTP ${res.status}`);
