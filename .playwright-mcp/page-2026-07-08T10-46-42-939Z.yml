@@ -1,0 +1,32 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - heading "Empty Map Test (Phitsanulok)" [level=1] [ref=e4]
+    - paragraph [ref=e5]: Testing the ChatMap with 0 places (real geocoding data, no Overpass results).
+    - paragraph [ref=e6]:
+      - text: "Center: 16.9780, 100.3848 · Zoom: 12 ·"
+      - strong [ref=e7]: 0 places
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - img [ref=e10]
+        - generic [ref=e12]: 0 places found near you
+      - generic [ref=e13]:
+        - button [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+        - generic:
+          - generic [ref=e19]:
+            - button "Zoom in" [ref=e20] [cursor=pointer]: +
+            - button "Zoom out" [ref=e21] [cursor=pointer]: −
+          - generic [ref=e22]:
+            - link "Leaflet" [ref=e23] [cursor=pointer]:
+              - /url: https://leafletjs.com
+              - img [ref=e24]
+              - text: Leaflet
+            - text: "| ©"
+            - link "OpenStreetMap" [ref=e28] [cursor=pointer]:
+              - /url: https://www.openstreetmap.org/copyright
+            - text: ©
+            - link "CARTO" [ref=e29] [cursor=pointer]:
+              - /url: https://carto.com/attributions
+  - button "Open Next.js Dev Tools" [ref=e36] [cursor=pointer]:
+    - img [ref=e37]
+  - alert [ref=e40]

@@ -1,0 +1,6 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - heading "Map Render Test" [level=1] [ref=e4]
+    - paragraph [ref=e5]: Testing the ChatMap component with sample Bangkok data.
+  - button "Open Next.js Dev Tools" [ref=e11] [cursor=pointer]:
+    - img [ref=e12]
