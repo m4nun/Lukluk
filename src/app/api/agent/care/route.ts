@@ -1,9 +1,13 @@
+/**
+ * Lukluk Care Agent API — AI SDK v7 ToolLoopAgent
+ *
+ * Migrated from LangGraph to AI SDK v7. Same SSE protocol as the Decision Agent.
+ */
+
 import { createClient } from "@/lib/supabase/server";
 import { isSubscriber } from "@/lib/stripe/guard";
-import { runAgent } from "@/lib/agent/invoke";
 import { SupabasePlanningRepository } from "@/lib/agent/supabase-repo";
-import { createCareTools } from "@/lib/agent/tools";
-import { CARE_SYSTEM_PROMPT } from "@/lib/agent/graph";
+import { runAiSdkCareAgent } from "@/lib/agent/ai-sdk-care-agent";
 import { extractToolResults } from "@/lib/agent/tool-results";
 
 export async function POST(request: Request) {
@@ -22,7 +26,10 @@ export async function POST(request: Request) {
   const { ownedProfileId, message } = body;
 
   if (!ownedProfileId || !message) {
-    return Response.json({ error: "Missing ownedProfileId or message" }, { status: 400 });
+    return Response.json(
+      { error: "Missing ownedProfileId or message" },
+      { status: 400 },
+    );
   }
 
   const { data: profile } = await supabase
@@ -37,37 +44,82 @@ export async function POST(request: Request) {
   }
 
   const repo = new SupabasePlanningRepository();
-  const tools = createCareTools(repo);
+
+  // Load previous messages
+  const { data: thread } = await supabase
+    .from("agent_threads")
+    .select("messages")
+    .eq("owned_pet_profile_id", ownedProfileId)
+    .eq("agent_type", "care")
+    .single();
+
+  const previousMessages: Array<{
+    role: "user" | "assistant";
+    content: string;
+  }> = [];
+  if (thread?.messages) {
+    for (const m of thread.messages as Array<{
+      type: string;
+      content: string;
+    }>) {
+      if (m.type === "human") {
+        previousMessages.push({ role: "user", content: m.content });
+      } else if (m.type === "ai" && m.content) {
+        previousMessages.push({ role: "assistant", content: m.content });
+      }
+    }
+  }
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
       const send = (event: string, data: unknown) => {
-        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+        controller.enqueue(
+          encoder.encode(
+            `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`,
+          ),
+        );
       };
 
       try {
-        const result = await runAgent({
-          profileTable: "owned_pet_profiles",
-          threadField: "owned_pet_profile_id",
-          profileId: ownedProfileId,
-          agentType: "care",
-          systemPrompt: CARE_SYSTEM_PROMPT,
-          tools,
+        const result = await runAiSdkCareAgent(
           repo,
-          idParam: "owned_profile_id",
+          ownedProfileId,
           message,
-          onProgress: (event) => send("progress", event),
-        });
+          previousMessages,
+        );
 
-        if ("error" in result) {
-          send("error", { error: result.error });
-        } else {
-          const toolResults = extractToolResults(result.steps);
-          send("done", { response: result.response, thread_id: result.thread_id, toolResults });
+        // Persist conversation
+        const newMessages = [
+          ...previousMessages.map((m) => ({
+            type: m.role === "user" ? "human" : "ai",
+            content: m.content,
+          })),
+          { type: "human", content: message },
+          { type: "ai", content: result.text },
+        ];
+
+        await supabase
+          .from("agent_threads")
+          .update({ messages: newMessages.slice(-20) })
+          .eq("owned_pet_profile_id", ownedProfileId)
+          .eq("agent_type", "care");
+
+        for (const step of result.steps) {
+          if (step.type === "tool_call") {
+            send("progress", {
+              type: step.toolName === "web_search" ? "searching" : "creating",
+              message: `Calling ${step.toolName}...`,
+            });
+          }
         }
+
+        const toolResults = extractToolResults(result.steps);
+        send("done", { response: result.text, toolResults });
       } catch (e) {
-        send("error", { error: e instanceof Error ? e.message : "Unknown error" });
+        send("error", {
+          error: e instanceof Error ? e.message : "Unknown error",
+        });
       }
 
       controller.close();
