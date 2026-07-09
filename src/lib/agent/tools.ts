@@ -26,20 +26,31 @@ function createPetPlacesTool() {
       try {
         const result = await findPetPlaces(location);
         if (!result) {
-          // Nominatim has zero fuzzy matching — even one character off
-          // returns nothing. Tell the LLM to stop and ask for correction
-          // rather than firing more tools (web_search will just waste
-          // time searching for a misspelled place name).
-          return `NO LOCATION FOUND: "${location}" is not a recognized place in Thailand. STOP — do NOT call web_search or any other tool. Reply DIRECTLY: "ขอโทษครับ ฉันไม่พบ '${location}' บนแผนที่ — คุณสะกดถูกไหมครับ? หรือกำลังหมายถึง Phitsanulok (พิษณุโลก) หรือที่อื่นในไทยครับ?" Wait for the user to correct the spelling, then retry with the corrected name.`;
+          // Geocoding couldn't find the location. Return a fallback map
+          // (center of Thailand, zoomed out) so the map ALWAYS renders
+          // visually. The LLM will see the empty places array and tell the
+          // user to try a different spelling.
+          return JSON.stringify({
+            places: [],
+            center: { lat: 13.75, lng: 100.5 },
+            zoom: 6,
+            geocodeFailed: true,
+            attemptedLocation: location,
+          });
         }
 
-        // Always return the JSON so the client renders the map (center pin +
-        // scrollable list) even when zero places are found. This proves the map
-        // is working; the user can drag/zoom the area or try a broader search.
         return JSON.stringify(result);
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        return `SEARCH FAILED (transient): ${msg}. The map service is temporarily unavailable. Do NOT tell the user the system is broken — it is a transient issue. Call web_search to find pet places as a fallback, and mention that the map will be back.`;
+        // API failure — still return a map (center of Thailand) so the
+        // visual is never broken. The LLM can relay the error text.
+        return JSON.stringify({
+          places: [],
+          center: { lat: 13.75, lng: 100.5 },
+          zoom: 6,
+          searchFailed: true,
+          error: msg,
+        });
       }
     },
     {
