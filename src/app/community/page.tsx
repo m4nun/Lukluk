@@ -173,7 +173,7 @@ export default function CommunityPage() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-[color,background-color,transform] hover:bg-primary/90 hover:-translate-y-0.5"
           >
             <Plus className="h-4 w-4" />
             Share Your Pet
@@ -193,7 +193,7 @@ export default function CommunityPage() {
           {FILTERS.map((f) => (
             <button
               key={f.label}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all ${
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                 f.active
                   ? "border-foreground bg-foreground text-background"
                   : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
@@ -268,7 +268,7 @@ export default function CommunityPage() {
               <div className="flex items-center gap-1 px-5 py-2.5">
                 <button
                   onClick={() => toggleLike(post.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] font-medium transition-all hover:bg-muted ${
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] font-medium transition-colors hover:bg-muted ${
                     post.liked ? "text-destructive" : "text-muted-foreground"
                   }`}
                 >
@@ -281,7 +281,7 @@ export default function CommunityPage() {
                 </button>
                 <button
                   onClick={() => toggleComments(post.id)}
-                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-all hover:bg-muted"
+                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted"
                 >
                   <MessageCircle className="h-[18px] w-[18px]" />
                   <span className="tabular-nums">{post.comments.length}</span>
@@ -449,7 +449,7 @@ export default function CommunityPage() {
                 </button>
                 <button
                   onClick={() => { alert("Post submitted! (POST /api/community/posts)"); setShowModal(false); }}
-                  className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:-translate-y-0.5"
+                  className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-[color,background-color,transform] hover:bg-primary/90 hover:-translate-y-0.5"
                 >
                   Post to Community
                 </button>
@@ -461,7 +461,7 @@ export default function CommunityPage() {
 
       {/* Flag toast */}
       <div
-        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-border bg-card px-4 py-3.5 text-[13px] shadow-lg transition-all duration-300 ${
+        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-border bg-card px-4 py-3.5 text-[13px] shadow-lg transition-[transform,opacity] duration-300 ${
           toast ? "translate-y-0 opacity-100" : "translate-y-[120px] opacity-0 pointer-events-none"
         }`}
       >
