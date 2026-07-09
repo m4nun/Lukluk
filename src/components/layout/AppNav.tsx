@@ -69,6 +69,12 @@ export function AppNav() {
                 Dashboard
               </Link>
               <Link
+                href="/community"
+                className={`text-sm font-medium transition-colors ${isActive("/community") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Community
+              </Link>
+              <Link
                 href="/profile"
                 className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${isActive("/profile") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
               >
@@ -100,6 +106,12 @@ export function AppNav() {
                 Experiences
               </Link>
               <Link
+                href="/community"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Community
+              </Link>
+              <Link
                 href="/auth/google"
                 className="inline-flex items-center gap-2.5 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background shadow-[0_2px_8px_rgba(26,26,46,0.2)] transition-all hover:bg-[#2d2d4a] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(26,26,46,0.3)]"
               >
@@ -116,6 +128,12 @@ export function AppNav() {
 
           {!loading && !user && pathname !== "/" && (
             <div className="hidden sm:flex items-center gap-8">
+              <Link
+                href="/community"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Community
+              </Link>
               <Link
                 href="/auth/google"
                 className="inline-flex items-center gap-2.5 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background shadow-[0_2px_8px_rgba(26,26,46,0.2)] transition-all hover:bg-[#2d2d4a] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(26,26,46,0.3)]"
@@ -188,6 +206,14 @@ export function AppNav() {
                       }`}
                     >
                       Dashboard
+                    </Link>
+                    <Link
+                      href="/community"
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                        isActive("/community") ? "bg-orange-50 text-orange-600" : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      Community
                     </Link>
                     <Link
                       href="/profile"

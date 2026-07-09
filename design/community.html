@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="../public/favicon.ico">
+<link rel="icon" type="image/png" href="../public/assets/logo.png">
+
+<style>
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --fg: #1a1a2e;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --accent-light: #fff7ed;
+  --success: #22c55e;
+  --success-light: #f0fdf4;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --danger-light: #fef2f2;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --max-w: 680px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); color: var(--fg); background: var(--bg); line-height: 1.6; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 20px; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(250,250,250,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.nav-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+.nav-logo svg, .nav-logo img { width: 24px; height: 24px; }
+.nav-links { display: flex; align-items: center; gap: 24px; }
+.nav-links a { font-size: 14px; font-weight: 500; color: var(--muted); transition: color 0.15s; }
+.nav-links a:hover { color: var(--fg); }
+.nav-links a.active { color: var(--fg); font-weight: 600; }
+.nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #f97316, #ea580c); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600; }
+
+/* HEADER */
+.com-header { padding: 32px 0 0; }
+.com-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 12px; }
+.com-header h1 { font-size: clamp(24px, 4vw, 28px); font-weight: 800; letter-spacing: -0.03em; }
+.com-header p { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+
+.btn-create { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--accent); color: #fff; border-radius: 999px; font-size: 13px; font-weight: 600; transition: background 0.15s, transform 0.15s; }
+.btn-create:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.btn-create svg { width: 16px; height: 16px; }
+
+/* DISCLAIMER */
+.disclaimer { font-size: 12px; color: var(--muted); padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin: 16px 0 20px; display: flex; align-items: center; gap: 8px; line-height: 1.4; }
+.disclaimer svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--warning); }
+
+/* FILTER BAR */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-chip { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface); white-space: nowrap; transition: all 0.15s; flex-shrink: 0; }
+.filter-chip:hover { border-color: #cbd5e1; color: var(--fg); }
+.filter-chip.active { background: var(--fg); color: #fff; border-color: var(--fg); }
+.filter-chip-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* FEED */
+.com-feed { display: flex; flex-direction: column; gap: 16px; padding-bottom: 64px; }
+
+/* POST CARD */
+.post-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: box-shadow 0.2s; }
+.post-card:hover { box-shadow: var(--shadow-md); }
+
+/* POST HEADER */
+.post-header { display: flex; align-items: center; gap: 10px; padding: 16px 20px; }
+.post-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; overflow: hidden; background: var(--border); display: flex; align-items: center; justify-content: center; }
+.post-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.post-user-info { flex: 1; min-width: 0; }
+.post-user-name { font-size: 13px; font-weight: 600; line-height: 1.2; }
+.post-meta { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.post-time { display: flex; align-items: center; gap: 3px; }
+.post-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--accent-light); color: var(--accent); border: 1px solid #fed7aa; flex-shrink: 0; }
+
+/* POST PHOTO */
+.post-photo { width: 100%; aspect-ratio: 16/10; overflow: hidden; background: #f1f5f9; position: relative; }
+.post-photo-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 64px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
+.post-photo-badge { position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 5px; padding: 5px 10px; background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); color: #fff; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.post-photo-badge img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
+
+/* POST BODY */
+.post-body { padding: 14px 20px 0; }
+.post-body p { font-size: 14px; line-height: 1.65; color: var(--fg); }
+
+/* POST ACTIONS */
+.post-actions { display: flex; align-items: center; gap: 4px; padding: 10px 20px 14px; }
+.post-action { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px 6px 10px; border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--muted); transition: all 0.15s; }
+.post-action:hover { background: #f8fafc; }
+.post-action.liked { color: var(--danger); }
+.post-action.liked svg { fill: var(--danger); }
+.post-action svg { width: 18px; height: 18px; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.post-action.liked svg { transform: scale(1.15); }
+.post-count { font-variant-numeric: tabular-nums; }
+
+/* COMMENTS SECTION */
+.comments-section { border-top: 1px solid var(--border); background: #fafbfc; }
+.comment-list { padding: 12px 20px; display: flex; flex-direction: column; gap: 10px; }
+.comment { display: flex; gap: 10px; }
+.comment-avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--muted); overflow: hidden; }
+.comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.comment-body { flex: 1; min-width: 0; }
+.comment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.comment-name { font-size: 12px; font-weight: 600; }
+.comment-time { font-size: 11px; color: var(--muted); }
+.comment-text { font-size: 13px; line-height: 1.5; color: var(--fg); }
+.comment-actions { display: flex; gap: 12px; margin-top: 4px; }
+.comment-reply-btn { font-size: 11px; font-weight: 600; color: var(--muted); transition: color 0.15s; padding: 2px 0; }
+.comment-reply-btn:hover { color: var(--fg); }
+
+/* NESTED REPLIES */
+.comment-replies { margin-left: 38px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; padding-left: 10px; border-left: 2px solid var(--border); }
+
+/* COMMENT INPUT */
+.comment-input-row { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-top: 1px solid var(--border); }
+.comment-input-row input { flex: 1; border: none; padding: 8px 0; font-size: 13px; font-family: var(--font); outline: none; background: transparent; }
+.comment-input-row input::placeholder { color: var(--muted); }
+.comment-submit { font-size: 13px; font-weight: 700; color: var(--accent); transition: color 0.15s; }
+.comment-submit:hover { color: var(--accent-hover); }
+
+/* CREATE POST MODAL OVERLAY */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.visible { display: flex; }
+.modal { background: var(--surface); border-radius: var(--radius-lg); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
+.modal-header h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+.modal-close { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: background 0.15s; }
+.modal-close:hover { background: #f1f5f9; }
+.modal-body { padding: 20px 24px 24px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+.form-group label { font-size: 13px; font-weight: 600; }
+.form-group input, .form-group textarea, .form-group select { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font); transition: border-color 0.15s; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+.form-group textarea { resize: vertical; min-height: 100px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.photo-upload { border: 2px dashed var(--border); border-radius: var(--radius); padding: 32px; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.photo-upload:hover { border-color: var(--accent); background: var(--accent-light); }
+.photo-upload svg { width: 32px; height: 32px; color: var(--muted); margin-bottom: 8px; }
+.photo-upload p { font-size: 13px; color: var(--muted); }
+.photo-upload p strong { color: var(--accent); }
+.form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px; }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--accent); color: #fff; border-radius: 999px; font-size: 14px; font-weight: 600; transition: background 0.15s; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: 1px solid var(--border); border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--fg); transition: border-color 0.15s; }
+.btn-secondary:hover { border-color: #cbd5e1; }
+
+/* SKELETON */
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.skeleton { animation: pulse 2s ease-in-out infinite; background: var(--border); border-radius: 4px; }
+.skeleton-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.skeleton-photo { aspect-ratio: 16/10; background: var(--border); animation: pulse 2s ease-in-out infinite; }
+.skeleton-body { padding: 16px 20px; }
+.skeleton-line { height: 13px; margin-bottom: 8px; border-radius: 4px; }
+.skeleton-line.short { width: 60%; }
+.skeleton-line.thin { width: 40%; height: 10px; }
+.skeleton-avatar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.skeleton-avatar { width: 36px; height: 36px; border-radius: 50%; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 64px 24px; }
+.empty-state .empty-icon { width: 72px; height: 72px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.empty-state p { font-size: 14px; color: var(--muted); margin-bottom: 24px; max-width: 360px; margin-left: auto; margin-right: auto; line-height: 1.5; }
+
+/* FLAG TOAST */
+.flag-toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; font-size: 13px; z-index: 300; transform: translateY(120px); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.flag-toast.visible { transform: translateY(0); opacity: 1; }
+.flag-toast svg { width: 16px; height: 16px; color: var(--success); }
+
+/* FOOTER */
+.footer { padding: 32px 0; border-top: 1px solid var(--border); }
+.footer-copy { text-align: center; font-size: 12px; color: var(--muted); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .com-header-top { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">
+      <img src="../public/assets/logo.png" alt="Lukluk" width="24" height="24">
+      Lukluk
+    </a>
+    <div class="nav-links">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/community" class="active">Community</a>
+    </div>
+    <div class="nav-avatar">B</div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="com-header">
+    <div class="com-header-top">
+      <div>
+        <h1>Community</h1>
+        <p>Stories, photos, and tips from real pet owners</p>
+      </div>
+      <button class="btn-create" onclick="openModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Share Your Pet
+      </button>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Community posts are from fellow pet owners — not expert advice. If you see something concerning, tap the <strong>&#8226;&#8226;&#8226;</strong> menu to report it.
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <button class="filter-chip active">All Pets</button>
+    <button class="filter-chip"><span class="filter-chip-dot" style="background:#f97316"></span> Dogs</button>
+    <button class="filter-chip"><span class="filter-chip-dot" style="background:#8b5cf6"></span> Cats</button>
+    <button class="filter-chip"><span class="filter-chip-dot" style="background:#22c55e"></span> Small Pets</button>
+    <button class="filter-chip"><span class="filter-chip-dot" style="background:#06b6d4"></span> Exotic</button>
+  </div>
+
+  <!-- FEED -->
+  <div class="com-feed">
+
+    <!-- POST 1 — with photo, comments open, liked -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:linear-gradient(135deg,#f97316,#ea580c)"><span style="color:#fff;font-size:13px;font-weight:700">JD</span></div>
+        <div class="post-user-info">
+          <div class="post-user-name">James D.</div>
+          <div class="post-meta">
+            <span>Golden Gentleman</span>
+            <span class="post-badge">New Owner</span>
+            <span class="post-time">2 hours ago</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-photo">
+        <img src="../public/assets/PetLogo/golden-retriever/1.png" alt="Golden Gentleman" style="width:100%;height:100%;object-fit:cover">
+        <div class="post-photo-badge">
+          <img src="../public/assets/PetLogo/golden-retriever/1.png" alt="" width="18" height="18" style="border-radius:50%;object-fit:cover"> Golden Gentleman
+        </div>
+      </div>
+
+      <div class="post-body">
+        <p>Meet Kiba! Brought him home last week and he's already claimed the couch as his throne. The kids absolutely adore him — I was worried about the shedding but honestly the vacuum's been fine. Best decision we made all year. 🧡</p>
+      </div>
+
+      <div class="post-actions">
+        <button class="post-action liked" onclick="toggleLike(this)">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="post-count">24</span>
+        </button>
+        <button class="post-action" onclick="toggleComments(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="post-count">5</span>
+        </button>
+        <button class="post-action" onclick="flagPost(this)" style="margin-left:auto;padding:6px 8px" title="Report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
+
+      <!-- COMMENTS (open by default for demo) -->
+      <div class="comments-section">
+        <div class="comment-list">
+          <!-- Top-level -->
+          <div class="comment">
+            <div class="comment-avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><span style="color:#fff">MK</span></div>
+            <div class="comment-body">
+              <div class="comment-header">
+                <span class="comment-name">Mika K.</span>
+                <span class="comment-time">1h ago</span>
+              </div>
+              <div class="comment-text">Kiba is gorgeous! How's the energy level indoors? I'm considering a Golden for my apartment.</div>
+              <div class="comment-actions">
+                <button class="comment-reply-btn" onclick="focusReply(this)">Reply</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nested reply -->
+          <div class="comment-replies">
+            <div class="comment">
+              <div class="comment-avatar" style="background:linear-gradient(135deg,#f97316,#ea580c)"><span style="color:#fff">JD</span></div>
+              <div class="comment-body">
+                <div class="comment-header">
+                  <span class="comment-name">James D.</span>
+                  <span class="comment-time">45m ago</span>
+                </div>
+                <div class="comment-text">Surprisingly chill indoors! Two 20-min walks and he's a couch potato. But I wouldn't do a studio — they need room to stretch.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top-level -->
+          <div class="comment">
+            <div class="comment-avatar" style="background:linear-gradient(135deg,#22c55e,#16a34a)"><span style="color:#fff">SP</span></div>
+            <div class="comment-body">
+              <div class="comment-header">
+                <span class="comment-name">Sarah P.</span>
+                <span class="comment-time">30m ago</span>
+              </div>
+              <div class="comment-text">That face!! What food are you feeding him? Our Golden had skin issues until we switched brands.</div>
+            </div>
+          </div>
+
+          <!-- Top-level -->
+          <div class="comment">
+            <div class="comment-avatar" style="background:linear-gradient(135deg,#06b6d4,#0891b2)"><span style="color:#fff">NT</span></div>
+            <div class="comment-body">
+              <div class="comment-header">
+                <span class="comment-name">Nat T.</span>
+                <span class="comment-time">15m ago</span>
+              </div>
+              <div class="comment-text">Congrats! The first week is the hardest — it only gets better from here 💛</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="comment-input-row">
+          <div class="comment-avatar" style="background:linear-gradient(135deg,#f97316,#ea580c);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:11px;font-weight:700">B</span></div>
+          <input type="text" placeholder="Add a comment..." onkeydown="if(event.key==='Enter')submitComment(this)">
+          <button class="comment-submit" onclick="submitComment(this.previousElementSibling)">Post</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- POST 2 — text only, no photo -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><span style="color:#fff;font-size:13px;font-weight:700">RL</span></div>
+        <div class="post-user-info">
+          <div class="post-user-name">Rin L.</div>
+          <div class="post-meta">
+            <span>Sassy Siamese</span>
+            <span class="post-badge">Experienced Owner</span>
+            <span class="post-time">5 hours ago</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-body">
+        <p>Hot take after 3 years with a Siamese: they're not "difficult" — they're <em>communicative</em>. Once you learn their vocal patterns, you realize they're just telling you exactly what they want. Mine has distinct meows for "food," "play," "clean my litter," and "you're 5 minutes late for lap time." It's honestly easier than a cat that just silently resents you 😂</p>
+        <p style="margin-top:8px;">Anyone else decode their cat's vocabulary?</p>
+      </div>
+
+      <div class="post-actions">
+        <button class="post-action" onclick="toggleLike(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="post-count">47</span>
+        </button>
+        <button class="post-action" onclick="toggleComments(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="post-count">12</span>
+        </button>
+        <button class="post-action" onclick="flagPost(this)" style="margin-left:auto;padding:6px 8px" title="Report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- POST 3 — with photo, multiple photos indicator -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:linear-gradient(135deg,#ec4899,#db2777)"><span style="color:#fff;font-size:13px;font-weight:700">AY</span></div>
+        <div class="post-user-info">
+          <div class="post-user-name">Amina Y.</div>
+          <div class="post-meta">
+            <span>Hop Star</span>
+            <span class="post-badge" style="background:#f0fdf4;color:#16a34a;border-color:#bbf7d0">New Owner</span>
+            <span class="post-time">8 hours ago</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-photo">
+        <img src="../public/assets/PetLogo/rabbit/1.png" alt="Hop Star" style="width:100%;height:100%;object-fit:cover">
+        <div class="post-photo-badge">
+          <img src="../public/assets/PetLogo/rabbit/1.png" alt="" width="18" height="18" style="border-radius:50%;object-fit:cover"> Hop Star &middot; 1/3
+        </div>
+      </div>
+
+      <div class="post-body">
+        <p>Built Mochi a DIY bunny castle from cardboard boxes and he hasn't stopped binkying for 20 minutes straight. Total cost: $0 (okay, $4 for non-toxic glue). If you have a rabbit and haven't tried this — do it tonight. The joy is unreal. 🏰🐰</p>
+      </div>
+
+      <div class="post-actions">
+        <button class="post-action liked" onclick="toggleLike(this)">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="post-count">89</span>
+        </button>
+        <button class="post-action" onclick="toggleComments(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="post-count">16</span>
+        </button>
+        <button class="post-action" onclick="flagPost(this)" style="margin-left:auto;padding:6px 8px" title="Report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- POST 4 — compact, exotic pet -->
+    <div class="post-card">
+      <div class="post-header">
+        <div class="post-avatar" style="background:linear-gradient(135deg,#06b6d4,#0891b2)"><span style="color:#fff;font-size:13px;font-weight:700">KP</span></div>
+        <div class="post-user-info">
+          <div class="post-user-name">Ken P.</div>
+          <div class="post-meta">
+            <span>Axolotl Angel</span>
+            <span class="post-badge">Experienced Owner</span>
+            <span class="post-time">1 day ago</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-body">
+        <p>People always ask if axolotls are "boring" since they mostly sit still. Honestly? That's the appeal. After a stressful day, watching Toothless drift around the tank is better than any meditation app. 10/10 would recommend for anyone who needs a low-maintenance zen buddy. Just don't skip the water chiller — that's the one non-negotiable. 🦎💧</p>
+      </div>
+
+      <div class="post-actions">
+        <button class="post-action" onclick="toggleLike(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="post-count">31</span>
+        </button>
+        <button class="post-action" onclick="toggleComments(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="post-count">8</span>
+        </button>
+        <button class="post-action" onclick="flagPost(this)" style="margin-left:auto;padding:6px 8px" title="Report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-copy">&copy; 2026 Lukluk. All rights reserved.</div>
+  </div>
+</footer>
+
+<!-- CREATE POST MODAL -->
+<div class="modal-overlay" id="createModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Share Your Pet</h2>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Pet Type</label>
+          <select>
+            <option>Select your pet type...</option>
+            <option>Golden Gentleman</option>
+            <option>Sassy Siamese</option>
+            <option>Hop Star</option>
+            <option>Royal Corgi</option>
+            <option>Axolotl Angel</option>
+            <option>Ferret Ninja</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Pet Name</label>
+          <input type="text" placeholder="Your pet's name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" placeholder="A short title for your post">
+      </div>
+      <div class="form-group">
+        <label>Your Story</label>
+        <textarea placeholder="Share your experience, tips, or a fun moment with your pet..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Photos</label>
+        <div class="photo-upload" onclick="alert('Photo upload would open here')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <p><strong>Click to upload</strong> or drag and drop</p>
+          <p style="font-size:11px;margin-top:4px">Up to 5 photos. First photo will be the cover.</p>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" onclick="submitPost()">Post to Community</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLAG TOAST -->
+<div class="flag-toast" id="flagToast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  Reported — we'll review this post. Thank you for keeping the community safe.
+</div>
+
+<script>
+// --- Like toggle ---
+function toggleLike(btn) {
+  btn.classList.toggle('liked');
+  const count = btn.querySelector('.post-count');
+  const current = parseInt(count.textContent);
+  const svg = btn.querySelector('svg');
+
+  if (btn.classList.contains('liked')) {
+    count.textContent = current + 1;
+    svg.setAttribute('fill', 'currentColor');
+  } else {
+    count.textContent = Math.max(0, current - 1);
+    svg.setAttribute('fill', 'none');
+  }
+}
+
+// --- Comment toggle ---
+function toggleComments(btn) {
+  const card = btn.closest('.post-card');
+  let section = card.querySelector('.comments-section');
+  if (section) {
+    section.style.display = section.style.display === 'none' ? '' : 'none';
+  }
+}
+
+// --- Comment submit ---
+function submitComment(input) {
+  const text = input.value.trim();
+  if (!text) return;
+  const card = input.closest('.post-card');
+  const list = card.querySelector('.comment-list');
+
+  const div = document.createElement('div');
+  div.className = 'comment';
+  div.innerHTML = `
+    <div class="comment-avatar" style="background:linear-gradient(135deg,#f97316,#ea580c)"><span style="color:#fff;font-size:11px;font-weight:700">B</span></div>
+    <div class="comment-body">
+      <div class="comment-header">
+        <span class="comment-name">You</span>
+        <span class="comment-time">Just now</span>
+      </div>
+      <div class="comment-text">${text}</div>
+    </div>
+  `;
+  list.appendChild(div);
+
+  // Update comment count
+  const countEl = card.querySelector('.post-action:nth-child(2) .post-count');
+  countEl.textContent = parseInt(countEl.textContent) + 1;
+
+  input.value = '';
+}
+
+// --- Flag post ---
+function flagPost(btn) {
+  const toast = document.getElementById('flagToast');
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+
+// --- Focus reply ---
+function focusReply(btn) {
+  const card = btn.closest('.post-card');
+  const input = card.querySelector('.comment-input-row input');
+  input.focus();
+  input.placeholder = 'Write a reply...';
+}
+
+// --- Modal ---
+function openModal() {
+  document.getElementById('createModal').classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('createModal').classList.remove('visible');
+  document.body.style.overflow = '';
+}
+function submitPost() {
+  alert('Post submitted! (POST /api/community/posts)');
+  closeModal();
+}
+
+// --- Filter chips ---
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>
